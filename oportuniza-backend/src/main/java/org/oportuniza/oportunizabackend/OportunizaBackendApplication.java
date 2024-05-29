@@ -9,5 +9,4 @@ public class OportunizaBackendApplication {
     public static void main(String[] args) {
         SpringApplication.run(OportunizaBackendApplication.class, args);
     }
-
 }
