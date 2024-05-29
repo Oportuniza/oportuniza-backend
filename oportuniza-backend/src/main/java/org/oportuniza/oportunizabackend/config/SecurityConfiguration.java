@@ -10,6 +10,7 @@ import org.springframework.security.authentication.ProviderManager;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -23,19 +24,22 @@ public class SecurityConfiguration {
     private MyUserDetailService userDetailService;
     @Autowired
     private JwtAuthenticationFilter jwtAuthenticationFilter;
+    @Autowired
+    private LoggingFilter loggingFilter;
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                //.csrf(AbstractHttpConfigurer::disable) NOT SAFE
+                .csrf(AbstractHttpConfigurer::disable) // todo: NOT SAFE, ALTHOUGH REMOVING DOESN'T RECEIVE REQUEST
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/home", "/register/**", "/authenticate").permitAll();
+                    registry.requestMatchers("/home", "/users/register", "/users/login").permitAll();
                     registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     registry.requestMatchers("/user/**").hasRole("USER");
                     registry.anyRequest().authenticated();
                 })
                 //.formLogin(AbstractAuthenticationFilterConfigurer::permitAll) VIEW IS IN VUE
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // validate jwt and set securityContext
+                .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 

@@ -21,7 +21,7 @@ public class LoginController {
     @Autowired
     private MyUserDetailService myUserDetailService;
 
-    @PostMapping("/authenticate")
+    @PostMapping("/users/login")
     public String authenticateAndGetToken(@RequestBody LoginForm loginForm) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
                 loginForm.username(), loginForm.password()
