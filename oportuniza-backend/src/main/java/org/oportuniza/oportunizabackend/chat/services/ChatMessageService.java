@@ -15,7 +15,7 @@ import java.util.Optional;
 @Service
 public class ChatMessageService {
     @Autowired private ChatMessageRepository messageRepository;
-    @Autowired private ChatRoomService chatRoomService;
+    //@Autowired private ChatRoomService chatRoomService;
     // @Autowired private MongoOperations mongoOperations;
 
     public ChatMessage save(ChatMessage chatMessage) {
@@ -35,14 +35,15 @@ public class ChatMessageService {
                 sender, receiver, ChatMessage.MessageStatus.RECEIVED);
     }
 
+    // todo: necessary chat room??
     /**
      * Get messages from sender to receiver
      * @param sender who sent the message
      * @param receiver who received the message
-     * @return
+     * @return the list of messages
      */
     public List<ChatMessage> findChatMessages(String sender, String receiver) {
-        var chatId = chatRoomService.getChatId(senderId, recipientId, false);
+        /*var chatId = chatRoomService.getChatId(senderId, recipientId, false);
 
         var messages =
                 chatId.map(cId -> messageRepository.findByChatId(cId)).orElse(new ArrayList<>());
@@ -51,7 +52,8 @@ public class ChatMessageService {
             updateStatuses(senderId, recipientId, MessageStatus.DELIVERED);
         }
 
-        return messages;
+        return messages;*/
+        return new ArrayList<>();
     }
 
     /**
@@ -70,7 +72,7 @@ public class ChatMessageService {
             throw new ResourceNotFoundException("can't find message (" + id + ")");
         }
     }
-
+    /*
     public void updateStatuses(String senderId, String recipientId, MessageStatus status) {
         Query query = new Query(
                 Criteria
@@ -78,6 +80,6 @@ public class ChatMessageService {
                         .and("recipientId").is(recipientId));
         Update update = Update.update("status", status);
         mongoOperations.updateMulti(query, update, ChatMessage.class);
-    }
+    }*/
 }
 

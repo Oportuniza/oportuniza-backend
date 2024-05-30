@@ -1,9 +1,16 @@
 package org.oportuniza.oportunizabackend.chat.api.controllers;
 
 import org.oportuniza.oportunizabackend.chat.api.models.ChatMessage;
+import org.oportuniza.oportunizabackend.chat.api.models.ChatNotification;
+import org.oportuniza.oportunizabackend.chat.services.ChatMessageService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.*;
 import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 /**
  * Controller class for handling chat-related functionality.
@@ -11,29 +18,40 @@ import org.springframework.stereotype.Controller;
 @Controller
 public class ChatController {
 
-    /**
-     * Registers a user for chat.
-     *
-     * param chatMessage The chat message containing the sender's information.
-     * param headerAccessor The SimpMessageHeaderAccessor object used to access session attributes.
-     * return The registered chat message.
-     */
-    @MessageMapping("/chat.register") // Maps messages sent to /app/chat.register to this method.
-    @SendTo("/topic/public")
-    public ChatMessage register(@Payload ChatMessage chatMessage, SimpMessageHeaderAccessor headerAccessor) {
-        headerAccessor.getSessionAttributes().put("username", chatMessage.getSender());
-        return chatMessage;
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+    @Autowired
+    private ChatMessageService chatMessageService;
+
+    @MessageMapping("/chat")
+    public void processMessage(@Payload ChatMessage chatMessage) {
+        ChatMessage saved = chatMessageService.save(chatMessage);
+        messagingTemplate.convertAndSendToUser(
+                chatMessage.getReceiver(),"/queue/messages",
+                new ChatNotification(
+                        saved.getId(),
+                        saved.getSender()));
     }
 
-    /**
-     * Sends a chat message to all connected users.
-     *
-     * param chatMessage The chat message to be sent.
-     * return The sent chat message.
-     */
-    @MessageMapping("/chat.send") // Maps messages sent to /app/chat.send to this method.
-    @SendTo("/topic/public")
-    public ChatMessage sendMessage(@Payload ChatMessage chatMessage) {
-        return chatMessage;
+    @GetMapping("/messages/{senderId}/{recipientId}/count")
+    public ResponseEntity<Long> countNewMessages(
+            @PathVariable String senderId,
+            @PathVariable String recipientId) {
+
+        return ResponseEntity
+                .ok(chatMessageService.countNewMessages(senderId, recipientId));
+    }
+
+    @GetMapping("/messages/{senderId}/{recipientId}")
+    public ResponseEntity<?> findChatMessages ( @PathVariable String senderId,
+                                                @PathVariable String recipientId) {
+        return ResponseEntity
+                .ok(chatMessageService.findChatMessages(senderId, recipientId));
+    }
+
+    @GetMapping("/messages/{id}")
+    public ResponseEntity<?> findMessage ( @PathVariable String id) {
+        return ResponseEntity
+                .ok(chatMessageService.findById(id));
     }
 }
