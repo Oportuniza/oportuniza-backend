@@ -1,5 +1,6 @@
 package org.oportuniza.oportunizabackend.chat.api.models;
 
+import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.*;
 
@@ -9,6 +10,7 @@ import java.util.Date;
 /**
  * Represents a chat message in the chat application.
  */
+@Entity
 @Setter
 @Getter
 @AllArgsConstructor

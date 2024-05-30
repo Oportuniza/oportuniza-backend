@@ -23,6 +23,12 @@ public class ChatController {
     @Autowired
     private ChatMessageService chatMessageService;
 
+    /**
+     * Receive a new chat message from the websocket
+     * Saves the message and
+     * Sends a notification to the receiver
+     * @param chatMessage message received
+     */
     @MessageMapping("/chat")
     public void processMessage(@Payload ChatMessage chatMessage) {
         ChatMessage saved = chatMessageService.save(chatMessage);
@@ -33,24 +39,36 @@ public class ChatController {
                         saved.getSender()));
     }
 
-    @GetMapping("/messages/{senderId}/{recipientId}/count")
+    /**
+     * Get number of new messages from sender to receiver
+     * @param sender who sent the message
+     * @param receiver who is to receive the message
+     * @return ResponseEntity represents the whole HTTP response: status code, headers, and body
+     */
+    @GetMapping("/messages/{sender}/{receiver}/count")
     public ResponseEntity<Long> countNewMessages(
-            @PathVariable String senderId,
-            @PathVariable String recipientId) {
+            @PathVariable String sender,
+            @PathVariable String receiver) {
 
         return ResponseEntity
-                .ok(chatMessageService.countNewMessages(senderId, recipientId));
+                .ok(chatMessageService.countNewMessages(sender, receiver));
     }
 
-    @GetMapping("/messages/{senderId}/{recipientId}")
-    public ResponseEntity<?> findChatMessages ( @PathVariable String senderId,
-                                                @PathVariable String recipientId) {
+    /**
+     * Get chat messages
+     * @param sender who sent the message
+     * @param receiver who is to receive the message
+     * @return ResponseEntity represents the whole HTTP response: status code, headers, and body
+     */
+    @GetMapping("/messages/{sender}/{receiver}")
+    public ResponseEntity<?> findChatMessages (@PathVariable String sender,
+                                               @PathVariable String receiver) {
         return ResponseEntity
-                .ok(chatMessageService.findChatMessages(senderId, recipientId));
+                .ok(chatMessageService.findChatMessages(sender, receiver));
     }
 
     @GetMapping("/messages/{id}")
-    public ResponseEntity<?> findMessage ( @PathVariable String id) {
+    public ResponseEntity<?> findMessage (@PathVariable String id) {
         return ResponseEntity
                 .ok(chatMessageService.findById(id));
     }

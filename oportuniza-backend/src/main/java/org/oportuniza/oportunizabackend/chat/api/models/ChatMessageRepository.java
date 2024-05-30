@@ -8,8 +8,9 @@ public interface ChatMessageRepository
         extends JpaRepository<ChatMessage, String> {
 
     // To get messages number of messages not yet received, or delivered
-    long countBySenderReceiverAndStatus(
+    long countBySenderAndReceiverAndStatus(
             String senderId, String recipientId, ChatMessage.MessageStatus status);
 
-    //List<ChatMessage> findByChatId(String chatId);
+    // To get messages sent from sender to receiver
+    List<ChatMessage> findBySenderAndReceiver(String sender, String receiver);
 }

@@ -1,22 +1,16 @@
 package org.oportuniza.oportunizabackend.chat.services;
 
-import org.oportuniza.oportunizabackend.authentication.api.models.MyUser;
 import org.oportuniza.oportunizabackend.chat.api.models.ChatMessage;
 import org.oportuniza.oportunizabackend.chat.api.models.ChatMessageRepository;
 import org.oportuniza.oportunizabackend.chat.exceptions.ResourceNotFoundException;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ChatMessageService {
     @Autowired private ChatMessageRepository messageRepository;
-    //@Autowired private ChatRoomService chatRoomService;
-    // @Autowired private MongoOperations mongoOperations;
 
     public ChatMessage save(ChatMessage chatMessage) {
         chatMessage.setStatus(ChatMessage.MessageStatus.RECEIVED);
@@ -31,11 +25,10 @@ public class ChatMessageService {
      * @return number of new messages
      */
     public long countNewMessages(String sender, String receiver) {
-        return messageRepository.countBySenderReceiverAndStatus(
+        return messageRepository.countBySenderAndReceiverAndStatus(
                 sender, receiver, ChatMessage.MessageStatus.RECEIVED);
     }
 
-    // todo: necessary chat room??
     /**
      * Get messages from sender to receiver
      * @param sender who sent the message
@@ -43,17 +36,13 @@ public class ChatMessageService {
      * @return the list of messages
      */
     public List<ChatMessage> findChatMessages(String sender, String receiver) {
-        /*var chatId = chatRoomService.getChatId(senderId, recipientId, false);
+        var messages = messageRepository.findBySenderAndReceiver(sender, receiver);
 
-        var messages =
-                chatId.map(cId -> messageRepository.findByChatId(cId)).orElse(new ArrayList<>());
-
-        if(messages.size() > 0) {
-            updateStatuses(senderId, recipientId, MessageStatus.DELIVERED);
+        if(!messages.isEmpty()) {
+            updateStatuses(sender, receiver, ChatMessage.MessageStatus.DELIVERED);
         }
 
-        return messages;*/
-        return new ArrayList<>();
+        return messages;
     }
 
     /**
@@ -72,14 +61,19 @@ public class ChatMessageService {
             throw new ResourceNotFoundException("can't find message (" + id + ")");
         }
     }
-    /*
-    public void updateStatuses(String senderId, String recipientId, MessageStatus status) {
-        Query query = new Query(
-                Criteria
-                        .where("senderId").is(senderId)
-                        .and("recipientId").is(recipientId));
-        Update update = Update.update("status", status);
-        mongoOperations.updateMulti(query, update, ChatMessage.class);
-    }*/
+
+    /**
+     * Updates status of all messages from sender to receiver to a specified status
+     * @param sender who sent the message
+     * @param receiver who is to receive
+     * @param status final state of all that message
+     */
+    public void updateStatuses(String sender, String receiver, ChatMessage.MessageStatus status) {
+        List<ChatMessage> messages = findChatMessages(sender, receiver);
+        for (ChatMessage message : messages) {
+            message.setStatus(status);
+            messageRepository.save(message);
+        }
+    }
 }
 
