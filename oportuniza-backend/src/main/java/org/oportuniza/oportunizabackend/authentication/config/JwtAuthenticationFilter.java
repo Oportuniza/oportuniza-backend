@@ -1,11 +1,11 @@
-package org.oportuniza.oportunizabackend.config;
+package org.oportuniza.oportunizabackend.authentication.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.oportuniza.oportunizabackend.services.MyUserDetailService;
-import org.oportuniza.oportunizabackend.services.webtoken.JwtService;
+import org.oportuniza.oportunizabackend.authentication.services.MyUserDetailService;
+import org.oportuniza.oportunizabackend.authentication.services.webtoken.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;

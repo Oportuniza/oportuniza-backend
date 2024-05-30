@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.services.webtoken;
+package org.oportuniza.oportunizabackend.authentication.services.webtoken;
 
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;

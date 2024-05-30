@@ -1,6 +1,6 @@
-package org.oportuniza.oportunizabackend.config;
+package org.oportuniza.oportunizabackend.authentication.config;
 
-import org.oportuniza.oportunizabackend.services.MyUserDetailService;
+import org.oportuniza.oportunizabackend.authentication.services.MyUserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

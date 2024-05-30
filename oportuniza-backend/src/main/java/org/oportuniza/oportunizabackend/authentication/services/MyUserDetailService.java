@@ -1,7 +1,7 @@
-package org.oportuniza.oportunizabackend.services;
+package org.oportuniza.oportunizabackend.authentication.services;
 
-import org.oportuniza.oportunizabackend.api.models.MyUser;
-import org.oportuniza.oportunizabackend.api.models.MyUserRepository;
+import org.oportuniza.oportunizabackend.authentication.api.models.MyUser;
+import org.oportuniza.oportunizabackend.authentication.api.models.MyUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;

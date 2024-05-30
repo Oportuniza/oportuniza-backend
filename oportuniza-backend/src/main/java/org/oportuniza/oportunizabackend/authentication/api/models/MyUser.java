@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.api.models;
+package org.oportuniza.oportunizabackend.authentication.api.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;

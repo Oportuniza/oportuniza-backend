@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.api.models;
+package org.oportuniza.oportunizabackend.authentication.api.models;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

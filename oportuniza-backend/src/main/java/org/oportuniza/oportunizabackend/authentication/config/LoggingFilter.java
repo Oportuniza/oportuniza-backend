@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.config;
+package org.oportuniza.oportunizabackend.authentication.config;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;

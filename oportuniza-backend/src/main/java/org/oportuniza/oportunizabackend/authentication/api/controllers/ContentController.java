@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.api.controllers;
+package org.oportuniza.oportunizabackend.authentication.api.controllers;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

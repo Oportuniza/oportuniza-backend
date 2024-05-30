@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.services.webtoken;
+package org.oportuniza.oportunizabackend.authentication.services.webtoken;
 
 /*
 Simple record to aggregate login form information
