@@ -1,10 +1,16 @@
 package org.oportuniza.oportunizabackend.authentication.controller;
 
+import jakarta.validation.Valid;
+import org.oportuniza.oportunizabackend.authentication.TokenDTO;
 import org.oportuniza.oportunizabackend.authentication.service.JwtService;
 import org.oportuniza.oportunizabackend.users.dto.LoginDTO;
+import org.oportuniza.oportunizabackend.users.dto.RegisterDTO;
+import org.oportuniza.oportunizabackend.users.model.Role;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
 import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -34,21 +40,37 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
-    public String authenticateAndGetToken(@RequestBody LoginDTO loginForm) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(
-                loginForm.username(), loginForm.password()
-        ));
+    public ResponseEntity<TokenDTO> authenticateAndGetToken(@RequestBody @Valid LoginDTO loginDTO) {
+        var usernamePassword = new UsernamePasswordAuthenticationToken(loginDTO.username(), loginDTO.password());
+        var authentication = authenticationManager.authenticate(usernamePassword);
+
         if (authentication.isAuthenticated()) {
-            return jwtService.generateToken(userService.loadUserByUsername(loginForm.username()));
+            try {
+                var user = userService.loadUserByUsername(loginDTO.username());
+                var token = jwtService.generateToken(user);
+                return ResponseEntity.ok(new TokenDTO(token));
+            } catch (UsernameNotFoundException e) {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            }
         } else {
-            throw new UsernameNotFoundException("Invalid credentials");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
     }
 
     @PostMapping("/register")
-    public User createUser(@RequestBody User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
-        return userRepository.save(user);
+    public ResponseEntity<User> createUser(@RequestBody @Valid RegisterDTO registerDTO) {
+        if (userRepository.findByUsername(registerDTO.username()).isPresent()) {
+            return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
+        }
+
+        String encryptedPassword = passwordEncoder.encode(registerDTO.password());
+        User user = new User();
+        user.setUsername(registerDTO.username());
+        user.setPassword(encryptedPassword);
+        user.setRole(Role.USER);
+        this.userRepository.save(user);
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(user);
     }
 
 }

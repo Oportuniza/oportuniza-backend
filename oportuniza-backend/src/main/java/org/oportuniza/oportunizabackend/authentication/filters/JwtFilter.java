@@ -16,12 +16,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 import java.io.IOException;
 
 @Configuration
-public class JwtAuthenticationFilter extends OncePerRequestFilter {
+public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;  // allows creating and validating tokens
     private final UserService userDetailService;    // user-related methods such as get user from userid
 
-    public JwtAuthenticationFilter(JwtService jwtService, UserService userDetailService) {
+    public JwtFilter(JwtService jwtService, UserService userDetailService) {
         this.jwtService = jwtService;
         this.userDetailService = userDetailService;
     }
@@ -50,7 +50,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             // Check if user exists and token is valid
             if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
-                UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                var authenticationToken = new UsernamePasswordAuthenticationToken(
                         username,
                         userDetails.getPassword(),
                         userDetails.getAuthorities()
