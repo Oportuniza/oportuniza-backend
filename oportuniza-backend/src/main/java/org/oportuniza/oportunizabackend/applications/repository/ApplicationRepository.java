@@ -8,6 +8,6 @@ import java.util.List;
 
 @Repository
 public interface  ApplicationRepository extends JpaRepository<Application, Long> {
-    List<Application> findByApplicantId(Long userId);
+    List<Application> findByUserId(Long userId);
     List<Application> findByOfferId(Long offerId);
 }

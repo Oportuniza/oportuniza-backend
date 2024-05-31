@@ -18,8 +18,8 @@ public class ApplicationService {
         this.applicationRepository = applicationRepository;
     }
 
-    public List<ApplicationDTO> getApplicationsByApplicantId(Long userId) {
-        return applicationRepository.findByApplicantId(userId).stream()
+    public List<ApplicationDTO> getApplicationsByUserId(Long userId) {
+        return applicationRepository.findByUserId(userId).stream()
                 .map(ApplicationMapper.INSTANCE::applicationToApplicationDTO)
                 .collect(Collectors.toList());
     }

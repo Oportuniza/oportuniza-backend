@@ -18,13 +18,13 @@ public class ApplicationController {
         this.applicationService = applicationService;
     }
 
-    // GET applications from a user -> /applications/applicant/:applicantId
-    @GetMapping("/user/{applicantId}")
-    public List<ApplicationDTO> getApplicationsByApplicantId(@PathVariable Long applicantId) {
-        return applicationService.getApplicationsByApplicantId(applicantId);
+    // GET applications from a user -> /applications/applicant/:userId
+    @GetMapping("/user/{userId}")
+    public List<ApplicationDTO> getApplicationsByUserId(@PathVariable Long userId) {
+        return applicationService.getApplicationsByUserId(userId);
     }
 
-    // GET applications from a offer -> /applications/offer/:offerId
+    // GET applications from an offer -> /applications/offer/:offerId
     @GetMapping("/offer/{offerId}")
     public List<ApplicationDTO> getApplicationsByOfferId(@PathVariable Long offerId) {
         return applicationService.getApplicationsByOfferId(offerId);

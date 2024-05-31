@@ -1,7 +1,9 @@
 package org.oportuniza.oportunizabackend.authentication.config;
 
-import org.oportuniza.oportunizabackend.authentication.services.MyUserDetailService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.oportuniza.oportunizabackend.authentication.filters.JwtAuthenticationFilter;
+import org.oportuniza.oportunizabackend.authentication.filters.LoggingFilter;
+import org.oportuniza.oportunizabackend.users.repository.UserRepository;
+import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -11,7 +13,6 @@ import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
@@ -19,22 +20,26 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
-public class SecurityConfiguration {
-    @Autowired
-    private MyUserDetailService userDetailService;
-    @Autowired
-    private JwtAuthenticationFilter jwtAuthenticationFilter;
-    @Autowired
-    private LoggingFilter loggingFilter;
+public class AuthenticationConfiguration {
+    private final UserService userDetailService;
+    private final JwtAuthenticationFilter jwtAuthenticationFilter;
+    private final LoggingFilter loggingFilter;
+
+    public AuthenticationConfiguration(UserService userDetailService,
+                                       JwtAuthenticationFilter jwtAuthenticationFilter, LoggingFilter loggingFilter) {
+        this.userDetailService = userDetailService;
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
+        this.loggingFilter = loggingFilter;
+    }
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable) // todo: NOT SAFE, ALTHOUGH REMOVING DOESN'T RECEIVE REQUEST
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/home", "/users/register", "/users/login").permitAll();
-                    registry.requestMatchers("/admin/**").hasRole("ADMIN");
-                    registry.requestMatchers("/user/**").hasRole("USER");
+                    registry.requestMatchers("/home", "api/auth/register", "api/auth/login").permitAll();
+                    // registry.requestMatchers("/admin/**").hasRole("ADMIN");
+                    // registry.requestMatchers("/user/**").hasRole("USER");
                     registry.anyRequest().authenticated();
                 })
                 //.formLogin(AbstractAuthenticationFilterConfigurer::permitAll) VIEW IS IN VUE
@@ -44,7 +49,7 @@ public class SecurityConfiguration {
     }
 
     @Bean
-    public UserDetailsService userDetailsService() {
+    public org.springframework.security.core.userdetails.UserDetailsService userDetailsService() {
         return userDetailService;
     }
 

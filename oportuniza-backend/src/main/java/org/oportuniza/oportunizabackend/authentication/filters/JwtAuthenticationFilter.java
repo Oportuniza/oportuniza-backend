@@ -1,12 +1,11 @@
-package org.oportuniza.oportunizabackend.authentication.config;
+package org.oportuniza.oportunizabackend.authentication.filters;
 
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.oportuniza.oportunizabackend.authentication.services.MyUserDetailService;
-import org.oportuniza.oportunizabackend.authentication.services.webtoken.JwtService;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.oportuniza.oportunizabackend.authentication.service.JwtService;
+import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,11 +18,13 @@ import java.io.IOException;
 @Configuration
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Autowired
-    private JwtService jwtService;  // allows creating and validating tokens
+    private final JwtService jwtService;  // allows creating and validating tokens
+    private final UserService userDetailService;    // user-related methods such as get user from userid
 
-    @Autowired
-    private MyUserDetailService myUserDetailService;    // user-related methods such as get user from userid
+    public JwtAuthenticationFilter(JwtService jwtService, UserService userDetailService) {
+        this.jwtService = jwtService;
+        this.userDetailService = userDetailService;
+    }
 
     /*
     Filter to validate token
@@ -45,10 +46,10 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         // Checks if the security context is not already authenticated
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Get user from DB
-            UserDetails userDetails = myUserDetailService.loadUserByUsername(username);
+            UserDetails userDetails = userDetailService.loadUserByUsername(username);
 
             // Check if user exists and token is valid
-            if (userDetails != null && jwtService.isTokenValid(jwt)) {
+            if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
                 UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
                         username,
                         userDetails.getPassword(),
