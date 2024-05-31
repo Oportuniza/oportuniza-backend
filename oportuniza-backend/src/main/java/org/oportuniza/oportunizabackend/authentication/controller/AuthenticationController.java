@@ -13,7 +13,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,12 +40,12 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> authenticateAndGetToken(@RequestBody @Valid LoginDTO loginDTO) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(loginDTO.username(), loginDTO.password());
+        var usernamePassword = new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password());
         var authentication = authenticationManager.authenticate(usernamePassword);
 
         if (authentication.isAuthenticated()) {
             try {
-                var user = userService.loadUserByUsername(loginDTO.username());
+                var user = userService.loadUserByUsername(loginDTO.email());
                 var token = jwtService.generateToken(user);
                 return ResponseEntity.ok(new TokenDTO(token));
             } catch (UsernameNotFoundException e) {
@@ -59,13 +58,13 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<User> createUser(@RequestBody @Valid RegisterDTO registerDTO) {
-        if (userRepository.findByUsername(registerDTO.username()).isPresent()) {
+        if (userRepository.findByEmail(registerDTO.email()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
         String encryptedPassword = passwordEncoder.encode(registerDTO.password());
         User user = new User();
-        user.setUsername(registerDTO.username());
+        user.setEmail(registerDTO.email());
         user.setPassword(encryptedPassword);
         user.setRole(Role.USER);
         this.userRepository.save(user);
