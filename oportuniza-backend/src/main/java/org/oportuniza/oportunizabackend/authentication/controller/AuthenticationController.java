@@ -8,7 +8,7 @@ import org.oportuniza.oportunizabackend.users.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.users.model.Role;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
-import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.oportuniza.oportunizabackend.users.service.DetailsUserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -20,18 +20,16 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final UserRepository userRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtService jwtService;
-    private final UserService userService;
+    private final DetailsUserService userService;
     private final PasswordEncoder passwordEncoder;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, JwtService jwtService, UserService userService,
+    public AuthenticationController(AuthenticationManager authenticationManager, JwtService jwtService, DetailsUserService userService,
                                     PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
         this.jwtService = jwtService;

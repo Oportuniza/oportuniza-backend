@@ -5,7 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.oportuniza.oportunizabackend.authentication.service.JwtService;
-import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.oportuniza.oportunizabackend.users.service.DetailsUserService;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -19,9 +19,9 @@ import java.io.IOException;
 public class JwtFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;  // allows creating and validating tokens
-    private final UserService userDetailService;    // user-related methods such as get user from userid
+    private final DetailsUserService userDetailService;    // user-related methods such as get user from userid
 
-    public JwtFilter(JwtService jwtService, UserService userDetailService) {
+    public JwtFilter(JwtService jwtService, DetailsUserService userDetailService) {
         this.jwtService = jwtService;
         this.userDetailService = userDetailService;
     }
