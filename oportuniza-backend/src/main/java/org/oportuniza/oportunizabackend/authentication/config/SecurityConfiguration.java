@@ -33,12 +33,12 @@ public class SecurityConfiguration {
                 .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers(HttpMethod.POST, "api/auth/register").permitAll();
-                    registry.requestMatchers(HttpMethod.POST, "api/auth/login").permitAll();
+                    registry.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
+                    registry.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
                     registry.anyRequest().authenticated();
                 })
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // validate jwt and set securityContext
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
     }
 
