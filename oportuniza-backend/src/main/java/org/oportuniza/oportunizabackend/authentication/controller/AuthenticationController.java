@@ -1,7 +1,7 @@
 package org.oportuniza.oportunizabackend.authentication.controller;
 
 import jakarta.validation.Valid;
-import org.oportuniza.oportunizabackend.authentication.TokenDTO;
+import org.oportuniza.oportunizabackend.authentication.dto.TokenDTO;
 import org.oportuniza.oportunizabackend.authentication.service.JwtService;
 import org.oportuniza.oportunizabackend.users.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.users.dto.RegisterDTO;
@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -66,7 +68,7 @@ public class AuthenticationController {
         User user = new User();
         user.setEmail(registerDTO.email());
         user.setPassword(encryptedPassword);
-        user.setRole(Role.USER);
+        user.addRole(new Role("ROLE_USER"));
         this.userRepository.save(user);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(user);

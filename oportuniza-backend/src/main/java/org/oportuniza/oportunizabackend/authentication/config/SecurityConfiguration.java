@@ -36,8 +36,6 @@ public class SecurityConfiguration {
                     registry.requestMatchers(HttpMethod.POST, "api/auth/register").permitAll();
                     registry.requestMatchers(HttpMethod.POST, "api/auth/login").permitAll();
                     registry.anyRequest().authenticated();
-                    // registry.requestMatchers("/admin/**").hasRole("ADMIN");
-                    // registry.requestMatchers("/user/**").hasRole("USER");
                 })
                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class) // validate jwt and set securityContext
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)

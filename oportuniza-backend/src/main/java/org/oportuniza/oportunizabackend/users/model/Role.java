@@ -1,16 +1,29 @@
 package org.oportuniza.oportunizabackend.users.model;
 
-import lombok.Getter;
 
-@Getter
-public enum Role {
-    USER("user"),
-    ADMIN("admin");
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
-    private final String role;
+@Entity
+@Data
+@NoArgsConstructor
+@Table(name = "roles")
+public class Role {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    private Integer id;
 
-    Role(String role) {
-        this.role = role;
+    @Column(nullable = false, unique = true)
+    private String name;
+
+    public Role(String name) {
+        this.name = name;
     }
 
+    @Override
+    public String toString() {
+        return this.name;
+    }
 }
