@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import org.oportuniza.oportunizabackend.authentication.service.JwtService;
 import org.oportuniza.oportunizabackend.users.service.DetailsUserService;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
     Sets the authentication context if the token is valid
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
         // If token is not present pass to the next filter
