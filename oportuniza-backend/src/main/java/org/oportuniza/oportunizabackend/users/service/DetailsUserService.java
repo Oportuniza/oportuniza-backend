@@ -15,6 +15,8 @@ public class DetailsUserService implements UserDetailsService {
     }
 
 
+    // Gets the user with given username from the database
+    // Can throw an exception if no user found with that name
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByEmail(username)

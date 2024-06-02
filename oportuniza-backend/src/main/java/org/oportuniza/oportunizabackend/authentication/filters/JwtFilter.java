@@ -53,9 +53,11 @@ public class JwtFilter extends OncePerRequestFilter {
             // Check if user exists and token is valid
             if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
                 var authenticationToken = new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
+
+                // builds the authentication details from the current HTTP request, including information like the remote address and session ID
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Marks the user as authenticated in the SecurityContext
+                // Marks the user as authenticated in the SecurityContext for the duration of the request.
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 logger.info("User '{}' authenticated with JWT.", username);
             } else {

@@ -23,12 +23,19 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
+
     private final UserRepository userRepository;
+
+    // handles and verifies user credentials, along with applying authentication rules
     private final AuthenticationManager authenticationManager;
+
+    // provides basic jwt-related features, such as token generation and extraction of fields from jwt
     private final JwtService jwtService;
+
     private final DetailsUserService userService;
     private final PasswordEncoder passwordEncoder;
 
+    // Dep inj by constructor
     public AuthenticationController(AuthenticationManager authenticationManager, JwtService jwtService, DetailsUserService userService,
                                     PasswordEncoder passwordEncoder, UserRepository userRepository) {
         this.authenticationManager = authenticationManager;
@@ -41,9 +48,12 @@ public class AuthenticationController {
     @PostMapping("/login")
     public ResponseEntity<TokenDTO> authenticateAndGetToken(@RequestBody @Valid LoginDTO loginDTO) {
         var usernamePassword = new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password());
+
+        // Use authentication manager to authenticate
         var authentication = authenticationManager.authenticate(usernamePassword);
 
         if (authentication.isAuthenticated()) {
+            // If authentication succeeds, generate the token for the user and provide it in the response
             try {
                 var user = userService.loadUserByUsername(loginDTO.email());
                 var token = jwtService.generateToken(user);
@@ -58,11 +68,14 @@ public class AuthenticationController {
 
     @PostMapping("/register")
     public ResponseEntity<User> createUser(@RequestBody @Valid RegisterDTO registerDTO) {
+        // Cannot register two users with the same email
         if (userRepository.findByEmail(registerDTO.email()).isPresent()) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
 
+        // Encode password, before sending to the database
         String encryptedPassword = passwordEncoder.encode(registerDTO.password());
+
         User user = new User();
         user.setEmail(registerDTO.email());
         user.setPassword(encryptedPassword);
