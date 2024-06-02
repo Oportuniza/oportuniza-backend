@@ -33,6 +33,12 @@ public class User implements UserDetails {
     @Column(name = "phone_number" ,nullable = false)
     private String phoneNumber;
 
+    @Column(nullable = false)
+    private String district;
+
+    @Column(nullable = false)
+    private String county;
+
     @ManyToMany
     @JoinTable(
             name = "users_roles",

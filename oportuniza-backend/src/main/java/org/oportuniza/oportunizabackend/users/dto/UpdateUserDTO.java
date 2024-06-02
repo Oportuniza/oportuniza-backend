@@ -1,12 +1,12 @@
 package org.oportuniza.oportunizabackend.users.dto;
 
-import org.oportuniza.oportunizabackend.users.model.Role;
-
-public record UserDTO (
+public record UpdateUserDTO (
         String email,
+        String password,
+        String oldPassword,
         String name,
         String phoneNumber,
+        String resumeUrl,
         String district,
         String county) {
 }
-

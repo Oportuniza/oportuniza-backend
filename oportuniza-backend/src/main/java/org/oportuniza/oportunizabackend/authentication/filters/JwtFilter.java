@@ -6,12 +6,12 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import org.oportuniza.oportunizabackend.authentication.service.JwtService;
-import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.web.authentication.WebAuthenticationDetailsSource;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -22,9 +22,9 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
     private final JwtService jwtService;  // allows creating and validating tokens
-    private final UserService userService;    // user-related methods such as get user from userid
+    private final UserDetailsService userService;    // user-related methods such as get user from userid
 
-    public JwtFilter(JwtService jwtService, UserService userService) {
+    public JwtFilter(JwtService jwtService, UserDetailsService userService) {
         this.jwtService = jwtService;
         this.userService = userService;
     }

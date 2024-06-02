@@ -1,5 +1,8 @@
 package org.oportuniza.oportunizabackend.users.controller;
 
+import jakarta.validation.Valid;
+import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
+import org.oportuniza.oportunizabackend.users.dto.UserDTO;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.springframework.http.ResponseEntity;
@@ -17,20 +20,17 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/favorites")
-    public ResponseEntity<List<User>> getFavoriteUsers(@PathVariable Long userId) {
-        List<User> favoriteUsers = userService.getFavoriteUsers(userId);
-        return ResponseEntity.ok(favoriteUsers);
+    public ResponseEntity<List<UserDTO>> getFavoriteUsers(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getFavoriteUsers(userId));
     }
 
     @GetMapping("/{userId}")
-    public ResponseEntity<User> getUserById(@PathVariable Long userId) {
-        User user = userService.getUserById(userId);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserDTO> getUserById(@PathVariable Long userId) {
+        return ResponseEntity.ok(userService.getUserById(userId));
     }
 
     @PutMapping("/{userId}")
-    public ResponseEntity<User> updateUser(@PathVariable Long userId, @RequestBody User updatedUser) {
-        User user = userService.updateUser(userId, updatedUser);
-        return ResponseEntity.ok(user);
+    public ResponseEntity<UserDTO> updateUser(@PathVariable Long userId, @RequestBody @Valid UpdateUserDTO updatedUser) {
+        return ResponseEntity.ok(userService.updateUser(userId, updatedUser));
     }
 }
