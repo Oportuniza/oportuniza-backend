@@ -5,7 +5,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.oportuniza.oportunizabackend.authentication.service.JwtService;
-import org.oportuniza.oportunizabackend.users.service.DetailsUserService;
+import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.context.annotation.Configuration;
@@ -21,11 +21,11 @@ public class JwtFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtFilter.class);
     private final JwtService jwtService;  // allows creating and validating tokens
-    private final DetailsUserService userDetailService;    // user-related methods such as get user from userid
+    private final UserService userService;    // user-related methods such as get user from userid
 
-    public JwtFilter(JwtService jwtService, DetailsUserService userDetailService) {
+    public JwtFilter(JwtService jwtService, UserService userService) {
         this.jwtService = jwtService;
-        this.userDetailService = userDetailService;
+        this.userService = userService;
     }
 
     /*
@@ -48,7 +48,7 @@ public class JwtFilter extends OncePerRequestFilter {
         // Checks if the security context is not already authenticated
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
             // Get user from DB
-            var userDetails = userDetailService.loadUserByUsername(username);
+            var userDetails = userService.loadUserByUsername(username);
 
             // Check if user exists and token is valid
             if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
