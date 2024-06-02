@@ -4,6 +4,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.NonNull;
 import org.oportuniza.oportunizabackend.authentication.service.JwtService;
 import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.slf4j.LoggerFactory;
@@ -33,7 +34,7 @@ public class JwtFilter extends OncePerRequestFilter {
     Sets the authentication context if the token is valid
      */
     @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, @NonNull HttpServletResponse response, @NonNull FilterChain filterChain) throws ServletException, IOException {
         String authHeader = request.getHeader("Authorization");
 
         // If token is not present pass to the next filter
@@ -53,9 +54,11 @@ public class JwtFilter extends OncePerRequestFilter {
             // Check if user exists and token is valid
             if (userDetails != null && jwtService.isTokenValid(jwt, userDetails)) {
                 var authenticationToken = new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
+
+                // builds the authentication details from the current HTTP request, including information like the remote address and session ID
                 authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-                // Marks the user as authenticated in the SecurityContext
+                // Marks the user as authenticated in the SecurityContext for the duration of the request.
                 SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 logger.info("User '{}' authenticated with JWT.", username);
             } else {

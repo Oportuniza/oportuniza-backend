@@ -32,7 +32,7 @@ public class JwtService {
     expiration - time at which the token will be invalid
      */
     public String generateToken(UserDetails userDetails) {
-        Map<String, String> claims = new HashMap<>();
+        Map<String, String> claims = new HashMap<>(); // Can pass additional properties to the token if needed
 
         return Jwts.builder()
                 .claims(claims)
@@ -43,20 +43,24 @@ public class JwtService {
                 .compact(); // to JSON representation
     }
 
+    // Generate a SecretKey object from the String secretKey
     private SecretKey generateKey() {
         byte[] decodedKey = Base64.getDecoder().decode(secretKey);
-        return Keys.hmacShaKeyFor(decodedKey);
+        return Keys.hmacShaKeyFor(decodedKey); // Use HMAC-SHA algorithm
     }
 
+    // Extract claims from the token
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getClaims(token);
         return claimsResolver.apply(claims);
     }
 
+    // Extract username from the token
     public String extractUsername(String jwt) {
         return extractClaim(jwt, Claims::getSubject);
     }
 
+    // Extract expiration from the token
     private Date extractExpiration(String jwt) {
         return extractClaim(jwt, Claims::getExpiration);
     }
@@ -73,10 +77,12 @@ public class JwtService {
                 .getPayload();
     }
 
+    // Verify if token is valid (correct username and not expired)
     public boolean isTokenValid(String token, UserDetails userDetails) {
         return (extractUsername(token).equals(userDetails.getUsername())) && !isTokenExpired(token);
     }
 
+    // Verify if token has expired
     private boolean isTokenExpired(String token) {
         return extractExpiration(token).before(new Date());
     }
