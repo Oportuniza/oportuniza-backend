@@ -17,6 +17,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.web.filter.CorsFilter;
 
 @Configuration
 @EnableWebSecurity
@@ -37,14 +40,15 @@ public class AuthenticationConfiguration {
         return httpSecurity
                 .csrf(AbstractHttpConfigurer::disable) // todo: NOT SAFE, ALTHOUGH REMOVING DOESN'T RECEIVE REQUEST
                 .authorizeHttpRequests(registry -> {
-                    registry.requestMatchers("/home", "api/auth/register", "api/auth/login").permitAll();
+                    registry.requestMatchers("/home", "api/auth/register", "api/auth/login", "/websocket/**", "/messages/**").permitAll();
                     // registry.requestMatchers("/admin/**").hasRole("ADMIN");
                     // registry.requestMatchers("/user/**").hasRole("USER");
                     registry.anyRequest().authenticated();
                 })
                 //.formLogin(AbstractAuthenticationFilterConfigurer::permitAll) VIEW IS IN VUE
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // validate jwt and set securityContext
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class) // validate jwt and set securityContext
+
                 .build();
     }
 
@@ -72,4 +76,5 @@ public class AuthenticationConfiguration {
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
+
 }

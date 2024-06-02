@@ -24,9 +24,9 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
      */
     @Override
     public void configureMessageBroker(MessageBrokerRegistry registry) {
-        registry.enableSimpleBroker("/topic");
+        registry.enableSimpleBroker("/user");
         registry.setApplicationDestinationPrefixes("/app"); // All requests to server must start with /app
-        // registry.setUserDestinationPrefix("/user"); // todo: Must understand what this does
+        registry.setUserDestinationPrefix("/user"); // todo: Must understand what this does
     }
 
     /**
@@ -37,6 +37,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     public void registerStompEndpoints(StompEndpointRegistry registry) {
         registry
                 .addEndpoint("/websocket")
+                .setAllowedOrigins("http://127.0.0.1:5500")
                 .withSockJS();
     }
 
@@ -44,7 +45,7 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
     todo: Really necessary??
      */
 
-    /*@Override
+    @Override
     public boolean configureMessageConverters(List<MessageConverter> messageConverters) {
         DefaultContentTypeResolver resolver = new DefaultContentTypeResolver();
         resolver.setDefaultMimeType(MimeTypeUtils.APPLICATION_JSON);
@@ -53,5 +54,6 @@ public class WebSocketConfig implements WebSocketMessageBrokerConfigurer {
         converter.setContentTypeResolver(resolver);
         messageConverters.add(converter);
         return false;
-    }*/
+    }
+
 }
