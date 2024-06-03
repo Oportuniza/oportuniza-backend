@@ -1,32 +1,28 @@
 package org.oportuniza.oportunizabackend.authentication.config;
 
-import org.oportuniza.oportunizabackend.authentication.filters.JwtFilter;
+import org.oportuniza.oportunizabackend.authentication.filters.JwtAuthenticationFilter;
 import org.oportuniza.oportunizabackend.authentication.filters.LoggingFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
-import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
-import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 @Configuration // indicating that an object is a source of bean definitions
-@EnableWebSecurity // to override the default spring security configuration
-public class SecurityConfiguration {
+public class SecurityFilterChainConfig {
 
-    private final JwtFilter jwtFilter; // filter requests based on validation of jwt token
+    private final JwtAuthenticationFilter jwtAuthenticationFilter; // filter requests based on validation of jwt token
     private final LoggingFilter loggingFilter; // log requests that come to the server
+    private final AuthEntryPoint authEntryPoint; // entry point for authentication
 
     // Dep inj by constructor
-    public SecurityConfiguration(JwtFilter jwtFilter, LoggingFilter loggingFilter) {
-        this.jwtFilter = jwtFilter;
+    public SecurityFilterChainConfig(JwtAuthenticationFilter jwtAuthenticationFilter, LoggingFilter loggingFilter, AuthEntryPoint authEntryPoint) {
+        this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.loggingFilter = loggingFilter;
+        this.authEntryPoint = authEntryPoint;
     }
 
     // Basic configuration of the filter
@@ -41,20 +37,7 @@ public class SecurityConfiguration {
                     registry.anyRequest().authenticated();
                 })
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class) // logging filter before jwt to log even invalid requests
-                .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
                 .build();
-    }
-
-    // AuthenticationManager attempts to authenticate the passed Authentication object
-    // AuthenticationConfiguration from the current SecurityConfiguration class
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration authenticationConfiguration) throws Exception {
-        return authenticationConfiguration.getAuthenticationManager();
-    }
-
-    // Can use other encoders such as argon2
-    @Bean
-    public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
     }
 }

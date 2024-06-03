@@ -1,48 +1,56 @@
 package org.oportuniza.oportunizabackend.authentication.controller;
 
 import jakarta.validation.Valid;
-import org.oportuniza.oportunizabackend.authentication.dto.TokenDTO;
-import org.oportuniza.oportunizabackend.authentication.service.JwtService;
-import org.oportuniza.oportunizabackend.users.dto.LoginUserDTO;
+import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
+import org.oportuniza.oportunizabackend.authentication.dto.LoginResponseDTO;
+import org.oportuniza.oportunizabackend.authentication.utils.JwtUtils;
 import org.oportuniza.oportunizabackend.users.dto.RegisterUserDTO;
 import org.oportuniza.oportunizabackend.users.model.User;
-import org.oportuniza.oportunizabackend.users.service.DetailsUserService;
 import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
-    private final JwtService jwtService;
     private final UserService userService;
-    private final DetailsUserService detailsUserService;
 
-    public AuthenticationController(AuthenticationManager authenticationManager,
-                                    JwtService jwtService, UserService userService,
-                                    DetailsUserService detailsUserService) {
+    public AuthenticationController(AuthenticationManager authenticationManager, UserService userService) {
         this.authenticationManager = authenticationManager;
-        this.jwtService = jwtService;
         this.userService = userService;
-        this.detailsUserService = detailsUserService;
     }
 
     @PostMapping("/login")
-    public ResponseEntity<TokenDTO> authenticateAndGetToken(@RequestBody @Valid LoginUserDTO loginUserDTO) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(loginUserDTO.email(), loginUserDTO.password());
+    public ResponseEntity<LoginResponseDTO> authenticateAndGetToken(@RequestBody @Valid LoginDTO loginDTO) {
+        var usernamePassword = new UsernamePasswordAuthenticationToken(loginDTO.username(), loginDTO.password());
         var authentication = authenticationManager.authenticate(usernamePassword);
 
         if (authentication.isAuthenticated()) {
-            var user = detailsUserService.loadUserByUsername(loginUserDTO.email());
-            var token = jwtService.generateToken(user);
-            return ResponseEntity.ok(new TokenDTO(user.getId(), token));
+            SecurityContextHolder.getContext().setAuthentication(authentication);
+
+            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+
+            String jwtToken = JwtUtils.generateToken(userDetails);
+
+            List<String> roles = userDetails.getAuthorities().stream()
+                    .map(GrantedAuthority::getAuthority)
+                    .collect(Collectors.toList());
+
+            var response = new LoginResponseDTO(userDetails.getUsername(), roles, jwtToken);
+            return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }

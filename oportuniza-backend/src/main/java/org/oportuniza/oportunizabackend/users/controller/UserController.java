@@ -3,7 +3,6 @@ package org.oportuniza.oportunizabackend.users.controller;
 import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
 import org.oportuniza.oportunizabackend.users.dto.UserDTO;
-import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

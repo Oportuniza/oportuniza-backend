@@ -7,6 +7,9 @@ import org.oportuniza.oportunizabackend.users.exceptions.*;
 import org.oportuniza.oportunizabackend.users.model.Role;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -14,7 +17,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class UserService {
+public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
@@ -106,4 +109,9 @@ public class UserService {
                 .orElseThrow(() -> new UserWithIdNotFoundException(userId));
     }
 
+    @Override
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        return userRepository.findByEmail(username)
+                .orElseThrow(() -> new UserWithEmailNotFoundException(username));
+    }
 }
