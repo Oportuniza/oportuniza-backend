@@ -6,6 +6,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.NonNull;
 import org.oportuniza.oportunizabackend.authentication.utils.JwtUtils;
+import org.oportuniza.oportunizabackend.users.model.User;
+import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.slf4j.LoggerFactory;
 import org.slf4j.Logger;
 import org.springframework.http.HttpHeaders;
@@ -24,9 +26,9 @@ import java.util.Optional;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtAuthenticationFilter.class);
-    private final UserDetailsService userService;    // user-related methods such as get user from userid
+    private final UserService userService;    // user-related methods such as get user from userid
 
-    public JwtAuthenticationFilter(UserDetailsService userService) {
+    public JwtAuthenticationFilter(UserService userService) {
         this.userService = userService;
     }
 
@@ -45,8 +47,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 var usernameOptional = JwtUtils.extractUsername(jwtToken);
                 if (usernameOptional.isPresent()) {
                     var username = usernameOptional.get();
-                    var userDetails = userService.loadUserByUsername(username);
-                    var authenticationToken = new UsernamePasswordAuthenticationToken(username, null, userDetails.getAuthorities());
+                    User user = userService.loadUserByUsername(username);
+                    var authenticationToken = new UsernamePasswordAuthenticationToken(username, null, user.getAuthorities());
                     authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authenticationToken);
                 }

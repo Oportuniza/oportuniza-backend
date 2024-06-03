@@ -3,8 +3,9 @@ package org.oportuniza.oportunizabackend.authentication.controller;
 import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginResponseDTO;
+import org.oportuniza.oportunizabackend.authentication.dto.RegisterResponseDTO;
 import org.oportuniza.oportunizabackend.authentication.utils.JwtUtils;
-import org.oportuniza.oportunizabackend.users.dto.RegisterUserDTO;
+import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.springframework.http.HttpStatus;
@@ -35,8 +36,8 @@ public class AuthenticationController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponseDTO> authenticateAndGetToken(@RequestBody @Valid LoginDTO loginDTO) {
-        var usernamePassword = new UsernamePasswordAuthenticationToken(loginDTO.username(), loginDTO.password());
-        var authentication = authenticationManager.authenticate(usernamePassword);
+        var emailPassword = new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password());
+        var authentication = authenticationManager.authenticate(emailPassword);
 
         if (authentication.isAuthenticated()) {
             SecurityContextHolder.getContext().setAuthentication(authentication);
@@ -57,12 +58,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<User> createUser(@RequestBody @Valid RegisterUserDTO registerUserDTO) {
-        if (userService.emailExists(registerUserDTO.email())) {
+    public ResponseEntity<RegisterResponseDTO> createUser(@RequestBody @Valid RegisterDTO registerDTO) {
+        if (userService.emailExists(registerDTO.email())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
-        User user = userService.createUser(registerUserDTO); // change this
-        return ResponseEntity.status(HttpStatus.CREATED).body(user);
+        User user = userService.createUser(registerDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponseDTO(user.getEmail(), user.getName(), user.getPhoneNumber()));
     }
 
 }

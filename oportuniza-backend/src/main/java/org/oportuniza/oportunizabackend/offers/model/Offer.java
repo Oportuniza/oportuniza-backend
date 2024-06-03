@@ -3,6 +3,7 @@ package org.oportuniza.oportunizabackend.offers.model;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.oportuniza.oportunizabackend.applications.model.Application;
+import org.oportuniza.oportunizabackend.users.model.User;
 
 import java.util.List;
 
@@ -10,7 +11,7 @@ import java.util.List;
 @Entity
 @Table(name = "offers")
 @Inheritance(strategy = InheritanceType.JOINED)
-public class Offer {
+public abstract class Offer {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
@@ -21,7 +22,7 @@ public class Offer {
     @Column(nullable = false)
     private String description;
 
-    @Column(nullable = false, name = "image_url")
+    @Column(name = "image_url")
     private String imageUrl;
 
     @Column(nullable = false)
@@ -29,4 +30,8 @@ public class Offer {
 
     @OneToMany(mappedBy = "offer")
     private List<Application> applications;
+
+    @ManyToOne
+    @JoinColumn(name = "user_id")
+    private User user;
 }

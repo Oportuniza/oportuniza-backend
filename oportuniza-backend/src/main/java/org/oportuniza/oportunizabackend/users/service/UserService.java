@@ -1,11 +1,12 @@
 package org.oportuniza.oportunizabackend.users.service;
 
-import org.oportuniza.oportunizabackend.users.dto.RegisterUserDTO;
+import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
 import org.oportuniza.oportunizabackend.users.dto.UserDTO;
 import org.oportuniza.oportunizabackend.users.exceptions.*;
 import org.oportuniza.oportunizabackend.users.model.Role;
 import org.oportuniza.oportunizabackend.users.model.User;
+import org.oportuniza.oportunizabackend.users.repository.RoleRepository;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -19,22 +20,23 @@ import java.util.stream.Collectors;
 @Service
 public class UserService implements UserDetailsService {
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(final UserRepository userRepository, final PasswordEncoder passwordEncoder) {
+    public UserService(final UserRepository userRepository, RoleRepository roleRepository, final PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserDTO getUserById(Long userId) throws UserWithIdNotFoundException {
-        User user = getUser(userId);
+    public UserDTO getUser(String userEmail) throws UserWithEmailNotFoundException {
+        User user = getUserByEmail(userEmail);
         return convertToUserDTO(user);
     }
 
-    public UserDTO updateUser(Long userId, UpdateUserDTO updatedUser)
+    public UserDTO updateUser(String userEmail, UpdateUserDTO updatedUser)
             throws UserWithIdNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided{
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new UserWithIdNotFoundException(userId));
+        User user = getUserByEmail(userEmail);
 
         if (updatedUser.name() != null) {
             user.setName(updatedUser.name());
@@ -75,23 +77,43 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public List<UserDTO> getFavoriteUsers(Long userId) throws UserWithIdNotFoundException {
-        User user = getUser(userId);
-        return user.getFavoriteUsers().stream().map(this::convertToUserDTO).collect(Collectors.toList());
+    public List<UserDTO> getFavoriteUsers(String userEmail) throws UserWithIdNotFoundException {
+        User user = getUserByEmail(userEmail);
+        return user.getFavoriteUsers().stream().map(this::convertToUserDTO).toList();
+    }
+
+    public void addFavoriteUser(String userEmail, long id) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
+        User user = getUserByEmail(userEmail);
+        User favoriteUser = getUserById(id);
+        user.addFavoriteUser(favoriteUser);
+        userRepository.save(user);
+    }
+
+    public void removeFavoriteUser(String userEmail, long id) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
+        User user = getUserByEmail(userEmail);
+        User favoriteUser = getUserById(id);
+        user.removeFavoriteUser(favoriteUser);
+        userRepository.save(user);
     }
 
     public boolean emailExists(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
 
-    public User createUser(RegisterUserDTO registerUserDTO) {
-        String encryptedPassword = passwordEncoder.encode(registerUserDTO.password());
+    public User createUser(RegisterDTO registerDTO) {
+        String encryptedPassword = passwordEncoder.encode(registerDTO.password());
         User user = new User();
-        user.setEmail(registerUserDTO.email());
+        user.setEmail(registerDTO.email());
         user.setPassword(encryptedPassword);
-        user.addRole(new Role("ROLE_USER"));
-        user.setPhoneNumber(registerUserDTO.phoneNumber());
-        user.setName(registerUserDTO.name());
+        user.setPhoneNumber(registerDTO.phoneNumber());
+        user.setName(registerDTO.name());
+
+        Role role = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
+            Role newRole = new Role("ROLE_USER");
+            return roleRepository.save(newRole);
+        });
+        user.addRole(role);
+
         return userRepository.save(user);
     }
 
@@ -104,13 +126,18 @@ public class UserService implements UserDetailsService {
                 user.getCounty());
     }
 
-    private User getUser(Long userId) throws UserWithIdNotFoundException {
-        return userRepository.findById(userId)
-                .orElseThrow(() -> new UserWithIdNotFoundException(userId));
+    private User getUserByEmail(String userEmail) throws UserWithEmailNotFoundException {
+        return userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new UserWithEmailNotFoundException(userEmail));
+    }
+
+    private User getUserById(long id) throws UserWithIdNotFoundException {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserWithIdNotFoundException(id));
     }
 
     @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+    public User loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findByEmail(username)
                 .orElseThrow(() -> new UserWithEmailNotFoundException(username));
     }

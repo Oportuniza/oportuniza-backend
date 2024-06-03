@@ -33,13 +33,11 @@ public class User implements UserDetails {
     @Column(name = "phone_number" ,nullable = false)
     private String phoneNumber;
 
-    @Column(nullable = false)
     private String district;
 
-    @Column(nullable = false)
     private String county;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     @JoinTable(
             name = "users_roles",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -49,6 +47,9 @@ public class User implements UserDetails {
 
     @OneToMany(mappedBy = "user")
     private List<Application> applications;
+
+    @OneToMany(mappedBy = "user")
+    private List<Offer> offers;
 
     @ManyToMany
     @JoinTable(
@@ -77,6 +78,14 @@ public class User implements UserDetails {
 
     public void addRole(Role role) {
         this.roles.add(role);
+    }
+
+    public void addFavoriteUser(User user) {
+        this.favoriteUsers.add(user);
+    }
+
+    public void removeFavoriteUser(User user) {
+        this.favoriteUsers.remove(user);
     }
 
     @Override

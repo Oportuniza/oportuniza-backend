@@ -2,22 +2,36 @@ package org.oportuniza.oportunizabackend.authentication.utils;
 
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Configuration;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.stereotype.Component;
 
 import javax.crypto.SecretKey;
 import java.time.Instant;
 import java.util.*;
 
 @Slf4j
+@Component
+@Configuration
 public class JwtUtils {
 
-    @Value("${jwt.secret}")
     private static String secretKey;
-    @Value("${jwt.expiration-time}")
     private static long expirationTime;
 
+    @Value("${jwt.secret}")
+    private String configSecretKey;
+
+    @Value("${jwt.expiration-time}")
+    private long configExpirationTime;
+
+    @PostConstruct
+    public void init() {
+        JwtUtils.secretKey = this.configSecretKey;
+        JwtUtils.expirationTime = this.configExpirationTime;
+    }
     /*
     Generates a token from the user details
     Token contains:
