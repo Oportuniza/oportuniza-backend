@@ -34,4 +34,12 @@ public abstract class Offer {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    public void addApplication(Application application) {
+        applications.add(application);
+    }
+
+    public void removeApplication(Application application) {
+        applications.remove(application);
+    }
 }

@@ -1,5 +1,6 @@
 package org.oportuniza.oportunizabackend.users.service;
 
+import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
@@ -126,6 +127,17 @@ public class UserService implements UserDetailsService {
         });
     }
 
+    public void addApplication(User user, Application application) {
+        user.addApplication(application);
+        userRepository.save(user);
+    }
+
+    public void removeApplication(Application application) {
+        var user = application.getUser();
+        user.removeApplication(application);
+        userRepository.save(user);
+    }
+
     public boolean emailExists(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
@@ -161,7 +173,7 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UserWithEmailNotFoundException(userEmail));
     }
 
-    private User getUserById(long id) throws UserWithIdNotFoundException {
+    public User getUserById(long id) throws UserWithIdNotFoundException {
         return userRepository.findById(id)
                 .orElseThrow(() -> new UserWithIdNotFoundException(id));
     }

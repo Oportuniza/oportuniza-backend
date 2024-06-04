@@ -104,6 +104,14 @@ public class User implements UserDetails {
         this.favoritesOffers.remove(offer);
     }
 
+    public void addApplication(Application application) {
+        this.applications.add(application);
+    }
+
+    public void removeApplication(Application application) {
+        this.applications.remove(application);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();

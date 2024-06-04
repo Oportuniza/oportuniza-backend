@@ -1,8 +1,12 @@
 package org.oportuniza.oportunizabackend.applications.controller;
 
 
-import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
+import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
+import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
+import org.oportuniza.oportunizabackend.offers.service.OfferService;
+import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,67 +17,65 @@ import java.util.List;
 public class ApplicationController {
 
     private final ApplicationService applicationService;
+    private final UserService userService;
+    private final OfferService offerService;
 
-    public ApplicationController(final ApplicationService applicationService) {
+    public ApplicationController(final ApplicationService applicationService, UserService userService, OfferService offerService) {
         this.applicationService = applicationService;
+        this.userService = userService;
+        this.offerService = offerService;
     }
 
     // GET applications from a user -> /applications/applicant/:userId
     @GetMapping("/user/{userId}")
-    public List<ApplicationDTO> getApplicationsByUserId(@PathVariable Long userId) {
-        return applicationService.getApplicationsByUserId(userId);
+    public ResponseEntity<List<Application>> getApplicationsByUserId(@PathVariable Long userId) {
+        return ResponseEntity.ok(applicationService.getApplicationsByUserId(userId));
     }
 
     // GET applications from an offer -> /applications/offer/:offerId
     @GetMapping("/offer/{offerId}")
-    public List<ApplicationDTO> getApplicationsByOfferId(@PathVariable Long offerId) {
-        return applicationService.getApplicationsByOfferId(offerId);
+    public ResponseEntity<List<Application>> getApplicationsByOfferId(@PathVariable Long offerId) {
+        return ResponseEntity.ok(applicationService.getApplicationsByOfferId(offerId));
     }
 
     // GET application -> /applications/:id
     @GetMapping("/{id}")
-    public ResponseEntity<ApplicationDTO> getApplicationById(@PathVariable Long id) {
-        ApplicationDTO applicationDTO = applicationService.getApplicationById(id);
-        if (applicationDTO == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(applicationDTO);
+    public ResponseEntity<Application> getApplicationById(@PathVariable Long id) {
+        return ResponseEntity.ok(applicationService.getApplicationById(id));
     }
 
     // POST application -> /applications
-    @PostMapping
-    public ResponseEntity<ApplicationDTO> createApplication(@RequestBody ApplicationDTO applicationDTO) {
-        ApplicationDTO createdApplication = applicationService.createApplication(applicationDTO);
-        return ResponseEntity.ok(createdApplication);
-    }
-
-    // PATCH schedule an interview -> /applications/:id/schedule
-    @PatchMapping("/{id}/schedule")
-    public ResponseEntity<ApplicationDTO> scheduleInterview(@PathVariable Long id) {
-        ApplicationDTO applicationDTO = applicationService.scheduleInterview(id);
-        if (applicationDTO == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(applicationDTO);
+    @PostMapping("/users/{userId}/offers/{offerId}")
+    public ResponseEntity<Application> createApplication(@PathVariable long userId, @PathVariable long offerId,@RequestBody CreateApplicationDTO applicationDTO) {
+        var user = userService.getUserById(userId);
+        var offer = offerService.getOffer(offerId);
+        Application createdApplication = applicationService.createApplication(applicationDTO, offer, user);
+        userService.addApplication(user, createdApplication);
+        offerService.addApplication(offer, createdApplication);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdApplication);
     }
 
     // PATCH accept application -> /applications/:id/accept
     @PatchMapping("/{id}/accept")
-    public ResponseEntity<ApplicationDTO> acceptApplication(@PathVariable Long id) {
-        ApplicationDTO applicationDTO = applicationService.acceptApplication(id);
-        if (applicationDTO == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(applicationDTO);
+    public ResponseEntity<Application> acceptApplication(@PathVariable Long id) {
+        return ResponseEntity.ok(applicationService.acceptApplication(id));
     }
 
     // PATCH reject application -> /applications/:id/reject
     @PatchMapping("/{id}/reject")
-    public ResponseEntity<ApplicationDTO> rejectApplication(@PathVariable Long id) {
-        ApplicationDTO applicationDTO = applicationService.rejectApplication(id);
-        if (applicationDTO == null) {
-            return ResponseEntity.notFound().build();
-        }
-        return ResponseEntity.ok(applicationDTO);
+    public ResponseEntity<Application> rejectApplication(@PathVariable Long id) {
+        return ResponseEntity.ok(applicationService.rejectApplication(id));
     }
+
+    // DELETE application -> /applications/:id
+    @DeleteMapping("/{id}")
+    public ResponseEntity<String> deleteApplication(@PathVariable Long id) {
+        // remove offers and users connections
+        var app = applicationService.getApplicationById(id);
+        userService.removeApplication(app);
+        offerService.removeApplication(app);
+        applicationService.deleteApplication(id);
+        return ResponseEntity.ok("Application deleted successfully.");
+    }
+
 }
