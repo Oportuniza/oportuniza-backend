@@ -1,15 +1,10 @@
 package org.oportuniza.oportunizabackend.offers.repository;
 
-import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
-import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
-import java.util.List;
-
+@Repository
 public interface OfferRepository extends JpaRepository<Offer, Long> {
-    List<Service> findAllServices();
-    List<Job> findAllJobs();
-    List<Service> findServicesByUserId(long userId);
-    List<Job> findJobsByUserId(long userId);
+
 }

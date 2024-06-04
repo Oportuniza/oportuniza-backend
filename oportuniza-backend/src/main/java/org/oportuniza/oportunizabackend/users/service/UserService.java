@@ -1,6 +1,7 @@
 package org.oportuniza.oportunizabackend.users.service;
 
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
+import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
 import org.oportuniza.oportunizabackend.users.dto.UserDTO;
 import org.oportuniza.oportunizabackend.users.exceptions.*;
@@ -8,14 +9,12 @@ import org.oportuniza.oportunizabackend.users.model.Role;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.repository.RoleRepository;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -94,6 +93,37 @@ public class UserService implements UserDetailsService {
         User favoriteUser = getUserById(id);
         user.removeFavoriteUser(favoriteUser);
         userRepository.save(user);
+    }
+
+    public void addOffer(long id, Offer offer) throws UserWithIdNotFoundException {
+        User user = getUserById(id);
+        user.addOffer(offer);
+        userRepository.save(user);
+    }
+
+    public void removeOffer(Offer offer) {
+        var user = offer.getUser();
+        user.removeOffer(offer);
+        userRepository.save(user);
+    }
+
+    public void addFavoriteOffer(String userEmail, Offer offer) throws UserWithEmailNotFoundException {
+        User user = getUserByEmail(userEmail);
+        user.addFavoriteOffer(offer);
+        userRepository.save(user);
+    }
+
+    public void removeFavoriteOffer(String userEmail, Offer offer) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
+        User user = getUserByEmail(userEmail);
+        user.removeFavoriteOffer(offer);
+        userRepository.save(user);
+    }
+
+    public void removeOfferFromFavorites(Offer offer) {
+        userRepository.findAll().forEach(user -> {
+            user.removeFavoriteOffer(offer);
+            userRepository.save(user);
+        });
     }
 
     public boolean emailExists(String email) {

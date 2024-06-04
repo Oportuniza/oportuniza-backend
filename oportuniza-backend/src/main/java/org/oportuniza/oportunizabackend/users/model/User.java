@@ -88,6 +88,22 @@ public class User implements UserDetails {
         this.favoriteUsers.remove(user);
     }
 
+    public void addOffer(Offer offer) {
+        this.offers.add(offer);
+    }
+
+    public void removeOffer(Offer offer) {
+        this.offers.remove(offer);
+    }
+
+    public void addFavoriteOffer(Offer offer) {
+        this.favoritesOffers.add(offer);
+    }
+
+    public void removeFavoriteOffer(Offer offer) {
+        this.favoritesOffers.remove(offer);
+    }
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         List<SimpleGrantedAuthority> authorities = new ArrayList<>();

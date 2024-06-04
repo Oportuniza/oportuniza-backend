@@ -1,8 +1,11 @@
 package org.oportuniza.oportunizabackend.offers.controller;
 
 import jakarta.validation.Valid;
+import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
-import org.oportuniza.oportunizabackend.offers.service.OfferService;
+import org.oportuniza.oportunizabackend.offers.model.Service;
+import org.oportuniza.oportunizabackend.offers.service.ServiceService;
+import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -12,40 +15,47 @@ import java.util.List;
 @RestController
 @RequestMapping("/api/services")
 public class ServiceController {
-    private final OfferService offerService;
+    private final ServiceService serviceService;
+    private final UserService userService;
 
-    public ServiceController(OfferService offerService) {
-        this.offerService = offerService;
+    public ServiceController(ServiceService serviceService, UserService userService) {
+        this.serviceService = serviceService;
+        this.userService = userService;
     }
 
     @GetMapping
     public ResponseEntity<List<ServiceDTO>> getAllServices() {
-        return ResponseEntity.ok(offerService.getAllServices());
+        return ResponseEntity.ok(serviceService.getAllServices());
     }
 
     @GetMapping("/{serviceId}")
     public ResponseEntity<ServiceDTO> getService(@PathVariable long serviceId) {
-        return ResponseEntity.ok(offerService.getService(serviceId));
+        return ResponseEntity.ok(serviceService.getService(serviceId));
     }
 
     @GetMapping("/users/{userId}")
     public ResponseEntity<List<ServiceDTO>> getUserServices(@PathVariable long userId) {
-        return ResponseEntity.ok(offerService.getUserServices(userId));
+        return ResponseEntity.ok(serviceService.getUserServices(userId));
     }
 
     @PutMapping("/{serviceId}")
     public ResponseEntity<ServiceDTO> updateService(@PathVariable long serviceId, @RequestBody @Valid ServiceDTO updatedService) {
-        return ResponseEntity.ok(offerService.updateService(serviceId, updatedService));
+        return ResponseEntity.ok(serviceService.updateService(serviceId, updatedService));
     }
 
-    @PostMapping("/users/{userId}")  // change this to insert a service for a specific user
-    public ResponseEntity<ServiceDTO> createService(@RequestBody @Valid ServiceDTO service) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(offerService.createService(service));
+    @PostMapping("/users/{userId}")
+    public ResponseEntity<ServiceDTO> createService(@PathVariable long userId, @RequestBody @Valid CreateServiceDTO serviceDTO) {
+        var service = serviceService.createService(serviceDTO);
+        userService.addOffer(userId, service);
+        return ResponseEntity.status(HttpStatus.CREATED).body(serviceService.convertServiceToServiceDTO(service));
     }
 
-    @DeleteMapping("/{serviceId}")
+    @DeleteMapping("/{serviceId}") // remove service from user's offers and users' favorites
     public ResponseEntity<String> deleteService(@PathVariable long serviceId) {
-        offerService.deleteService(serviceId);
+        Service service = serviceService.getServiceById(serviceId);
+        userService.removeOffer(service);
+        userService.removeOfferFromFavorites(service);
+        serviceService.deleteService(serviceId);
         return ResponseEntity.ok("Service deleted successfully.");
     }
 }

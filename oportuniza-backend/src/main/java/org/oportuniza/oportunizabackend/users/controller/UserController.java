@@ -1,6 +1,8 @@
 package org.oportuniza.oportunizabackend.users.controller;
 
 import jakarta.validation.Valid;
+import org.oportuniza.oportunizabackend.offers.model.Offer;
+import org.oportuniza.oportunizabackend.offers.service.OfferService;
 import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
 import org.oportuniza.oportunizabackend.users.dto.UserDTO;
 import org.oportuniza.oportunizabackend.users.service.UserService;
@@ -13,9 +15,11 @@ import java.util.List;
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
+    private final OfferService offerService;
 
-    public UserController(final UserService userService) {
+    public UserController(final UserService userService, OfferService offerService) {
         this.userService = userService;
+        this.offerService = offerService;
     }
 
     @GetMapping("/{userEmail}/favorites")
@@ -33,6 +37,20 @@ public class UserController {
     public ResponseEntity<String> removeFavoriteUser(@PathVariable String userEmail, @RequestBody @Valid long id) {
         userService.removeFavoriteUser(userEmail, id);
         return ResponseEntity.ok("Favorite user removed successfully.");
+    }
+
+    @PatchMapping("/{userEmail}/favorites/offers/add")
+    public ResponseEntity<String> addFavoriteOffer(@PathVariable String userEmail, @RequestBody @Valid long offerId) {
+        Offer offer = offerService.getOffer(offerId);
+        userService.addFavoriteOffer(userEmail, offer);
+        return ResponseEntity.ok("Favorite offer added successfully.");
+    }
+
+    @PatchMapping("/{userEmail}/favorites/offers/remove")
+    public ResponseEntity<String> removeFavoriteOffer(@PathVariable String userEmail, @RequestBody @Valid long offerId) {
+        Offer offer = offerService.getOffer(offerId);
+        userService.removeFavoriteOffer(userEmail, offer);
+        return ResponseEntity.ok("Favorite offer removed successfully.");
     }
 
     @GetMapping("/{userEmail}")
