@@ -72,7 +72,7 @@ public class UserService implements UserDetailsService {
             user.setPassword(passwordEncoder.encode(newPassword));
         } else if (oldPassword != null) {
             throw new NewPasswordNotProvided();
-        } else {
+        } else if (newPassword != null) {
             throw new OldPasswordNotProvided();
         }
     }
@@ -161,6 +161,7 @@ public class UserService implements UserDetailsService {
 
     private UserDTO convertToUserDTO(User user) {
         return new UserDTO(
+                user.getId(),
                 user.getEmail(),
                 user.getName(),
                 user.getPhoneNumber(),

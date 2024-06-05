@@ -1,8 +1,7 @@
 package org.oportuniza.oportunizabackend.users.dto;
 
-import org.oportuniza.oportunizabackend.users.model.Role;
-
 public record UserDTO (
+        long id,
         String email,
         String name,
         String phoneNumber,
