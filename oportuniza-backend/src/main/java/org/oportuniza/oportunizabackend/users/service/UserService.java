@@ -29,14 +29,14 @@ public class UserService implements UserDetailsService {
         this.passwordEncoder = passwordEncoder;
     }
 
-    public UserDTO getUser(String userEmail) throws UserWithEmailNotFoundException {
-        User user = getUserByEmail(userEmail);
+    public UserDTO getUser(long userId) throws UserWithIdNotFoundException {
+        User user = getUserById(userId);
         return convertToUserDTO(user);
     }
 
-    public UserDTO updateUser(String userEmail, UpdateUserDTO updatedUser)
+    public UserDTO updateUser(long userId, UpdateUserDTO updatedUser)
             throws UserWithIdNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided{
-        User user = getUserByEmail(userEmail);
+        User user = getUserById(userId);
 
         if (updatedUser.name() != null) {
             user.setName(updatedUser.name());
@@ -77,20 +77,20 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public List<UserDTO> getFavoriteUsers(String userEmail) throws UserWithIdNotFoundException {
-        User user = getUserByEmail(userEmail);
+    public List<UserDTO> getFavoriteUsers(long userId) throws UserWithIdNotFoundException {
+        User user = getUserById(userId);
         return user.getFavoriteUsers().stream().map(this::convertToUserDTO).toList();
     }
 
-    public void addFavoriteUser(String userEmail, long id) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
-        User user = getUserByEmail(userEmail);
+    public void addFavoriteUser(long userId, long id) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
+        User user = getUserById(userId);
         User favoriteUser = getUserById(id);
         user.addFavoriteUser(favoriteUser);
         userRepository.save(user);
     }
 
-    public void removeFavoriteUser(String userEmail, long id) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
-        User user = getUserByEmail(userEmail);
+    public void removeFavoriteUser(long userId, long id) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
+        User user = getUserById(userId);
         User favoriteUser = getUserById(id);
         user.removeFavoriteUser(favoriteUser);
         userRepository.save(user);
@@ -108,14 +108,14 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void addFavoriteOffer(String userEmail, Offer offer) throws UserWithEmailNotFoundException {
-        User user = getUserByEmail(userEmail);
+    public void addFavoriteOffer(long userId, Offer offer) throws UserWithEmailNotFoundException {
+        User user = getUserById(userId);
         user.addFavoriteOffer(offer);
         userRepository.save(user);
     }
 
-    public void removeFavoriteOffer(String userEmail, Offer offer) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
-        User user = getUserByEmail(userEmail);
+    public void removeFavoriteOffer(long userId, Offer offer) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
+        User user = getUserById(userId);
         user.removeFavoriteOffer(offer);
         userRepository.save(user);
     }

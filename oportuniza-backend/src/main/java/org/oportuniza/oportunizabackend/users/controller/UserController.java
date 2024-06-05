@@ -22,44 +22,44 @@ public class UserController {
         this.offerService = offerService;
     }
 
-    @GetMapping("/{userEmail}/favorites")
-    public ResponseEntity<List<UserDTO>> getFavoriteUsers(@PathVariable String userEmail) {
-        return ResponseEntity.ok(userService.getFavoriteUsers(userEmail));
+    @GetMapping("/{userId}/favorites")
+    public ResponseEntity<List<UserDTO>> getFavoriteUsers(@PathVariable long userId) {
+        return ResponseEntity.ok(userService.getFavoriteUsers(userId));
     }
 
-    @PatchMapping("/{userEmail}/favorites/add")
-    public ResponseEntity<String> addFavoriteUser(@PathVariable String userEmail, @RequestBody @Valid long id) {
-        userService.addFavoriteUser(userEmail, id);
+    @PatchMapping("/{userId}/favorites/add")
+    public ResponseEntity<String> addFavoriteUser(@PathVariable long userId, @RequestBody @Valid long id) {
+        userService.addFavoriteUser(userId, id);
         return ResponseEntity.ok("Favorite user added successfully.");
     }
 
-    @PatchMapping("/{userEmail}/favorites/remove")
-    public ResponseEntity<String> removeFavoriteUser(@PathVariable String userEmail, @RequestBody @Valid long id) {
-        userService.removeFavoriteUser(userEmail, id);
+    @PatchMapping("/{userId}/favorites/remove")
+    public ResponseEntity<String> removeFavoriteUser(@PathVariable long userId, @RequestBody @Valid long id) {
+        userService.removeFavoriteUser(userId, id);
         return ResponseEntity.ok("Favorite user removed successfully.");
     }
 
-    @PatchMapping("/{userEmail}/favorites/offers/add")
-    public ResponseEntity<String> addFavoriteOffer(@PathVariable String userEmail, @RequestBody @Valid long offerId) {
+    @PatchMapping("/{userId}/favorites/offers/add")
+    public ResponseEntity<String> addFavoriteOffer(@PathVariable long userId, @RequestBody @Valid long offerId) {
         Offer offer = offerService.getOffer(offerId);
-        userService.addFavoriteOffer(userEmail, offer);
+        userService.addFavoriteOffer(userId, offer);
         return ResponseEntity.ok("Favorite offer added successfully.");
     }
 
-    @PatchMapping("/{userEmail}/favorites/offers/remove")
-    public ResponseEntity<String> removeFavoriteOffer(@PathVariable String userEmail, @RequestBody @Valid long offerId) {
+    @PatchMapping("/{userId}/favorites/offers/remove")
+    public ResponseEntity<String> removeFavoriteOffer(@PathVariable long userId, @RequestBody @Valid long offerId) {
         Offer offer = offerService.getOffer(offerId);
-        userService.removeFavoriteOffer(userEmail, offer);
+        userService.removeFavoriteOffer(userId, offer);
         return ResponseEntity.ok("Favorite offer removed successfully.");
     }
 
-    @GetMapping("/{userEmail}")
-    public ResponseEntity<UserDTO> getUserById(@PathVariable String userEmail) {
-        return ResponseEntity.ok(userService.getUser(userEmail));
+    @GetMapping("/{userId}")
+    public ResponseEntity<UserDTO> getUserById(@PathVariable long userId) {
+        return ResponseEntity.ok(userService.getUser(userId));
     }
 
-    @PutMapping("/{userEmail}")
-    public ResponseEntity<UserDTO> updateUser(@PathVariable String userEmail, @RequestBody @Valid UpdateUserDTO updatedUser) {
-        return ResponseEntity.ok(userService.updateUser(userEmail, updatedUser));
+    @PutMapping("/{userId}")
+    public ResponseEntity<UserDTO> updateUser(@PathVariable long userId, @RequestBody @Valid UpdateUserDTO updatedUser) {
+        return ResponseEntity.ok(userService.updateUser(userId, updatedUser));
     }
 }

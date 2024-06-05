@@ -16,13 +16,11 @@ public class SecurityFilterChainConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter; // filter requests based on validation of jwt token
     private final LoggingFilter loggingFilter; // log requests that come to the server
-    private final AuthEntryPoint authEntryPoint; // entry point for authentication
 
     // Dep inj by constructor
-    public SecurityFilterChainConfig(JwtAuthenticationFilter jwtAuthenticationFilter, LoggingFilter loggingFilter, AuthEntryPoint authEntryPoint) {
+    public SecurityFilterChainConfig(JwtAuthenticationFilter jwtAuthenticationFilter, LoggingFilter loggingFilter) {
         this.jwtAuthenticationFilter = jwtAuthenticationFilter;
         this.loggingFilter = loggingFilter;
-        this.authEntryPoint = authEntryPoint;
     }
 
     // Basic configuration of the filter

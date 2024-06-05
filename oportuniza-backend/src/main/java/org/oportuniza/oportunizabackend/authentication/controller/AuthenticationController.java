@@ -43,6 +43,7 @@ public class AuthenticationController {
             SecurityContextHolder.getContext().setAuthentication(authentication);
 
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+            User user = userService.loadUserByUsername(userDetails.getUsername());
 
             String jwtToken = JwtUtils.generateToken(userDetails);
 
@@ -50,7 +51,7 @@ public class AuthenticationController {
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
 
-            var response = new LoginResponseDTO(userDetails.getUsername(), roles, jwtToken);
+            var response = new LoginResponseDTO(user.getId(), userDetails.getUsername(), roles, jwtToken);
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
@@ -63,7 +64,7 @@ public class AuthenticationController {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);
         }
         User user = userService.createUser(registerDTO);
-        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponseDTO(user.getEmail(), user.getName(), user.getPhoneNumber()));
+        return ResponseEntity.status(HttpStatus.CREATED).body(new RegisterResponseDTO(user.getId(), user.getEmail(), user.getName(), user.getPhoneNumber()));
     }
 
 }
