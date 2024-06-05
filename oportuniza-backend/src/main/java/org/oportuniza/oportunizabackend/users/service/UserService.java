@@ -2,7 +2,12 @@ package org.oportuniza.oportunizabackend.users.service;
 
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
+import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
+import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
+import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
+import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
+import org.oportuniza.oportunizabackend.offers.repository.JobRepository;
 import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
 import org.oportuniza.oportunizabackend.users.dto.UserDTO;
 import org.oportuniza.oportunizabackend.users.exceptions.*;
@@ -15,6 +20,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -23,7 +29,7 @@ public class UserService implements UserDetailsService {
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
 
-    public UserService(final UserRepository userRepository, RoleRepository roleRepository, final PasswordEncoder passwordEncoder) {
+    public UserService(final UserRepository userRepository, RoleRepository roleRepository, final PasswordEncoder passwordEncoder, JobRepository jobRepository) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -80,6 +86,11 @@ public class UserService implements UserDetailsService {
     public List<UserDTO> getFavoriteUsers(long userId) throws UserWithIdNotFoundException {
         User user = getUserById(userId);
         return user.getFavoriteUsers().stream().map(this::convertToUserDTO).toList();
+    }
+
+    public List<Offer> getFavoriteOffers(long userId) throws UserWithIdNotFoundException {
+        User user = getUserById(userId);
+        return user.getFavoritesOffers();
     }
 
     public void addFavoriteUser(long userId, long id) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {

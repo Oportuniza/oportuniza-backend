@@ -40,13 +40,13 @@ public class JobService {
 
     public JobDTO updateJob(long jobId, JobDTO updatedJob) throws JobNotFoundException {
         Job job = jobRepository.findById(jobId).orElseThrow(() -> new JobNotFoundException(jobId));
-        job.setTitle(updatedJob.title());
-        job.setDescription(updatedJob.description());
-        job.setNegotiable(updatedJob.negotiable());
-        job.setSalary(updatedJob.salary());
-        job.setLocalization(updatedJob.localization());
-        job.setWorkingModel(updatedJob.workingModel());
-        job.setWorkingRegime(updatedJob.workingRegime());
+        job.setTitle(updatedJob.getTitle());
+        job.setDescription(updatedJob.getDescription());
+        job.setNegotiable(updatedJob.isNegotiable());
+        job.setSalary(updatedJob.getSalary());
+        job.setLocalization(updatedJob.getLocalization());
+        job.setWorkingModel(updatedJob.getWorkingModel());
+        job.setWorkingRegime(updatedJob.getWorkingRegime());
         jobRepository.save(job);
         return updatedJob;
     }

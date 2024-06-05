@@ -6,6 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.oportuniza.oportunizabackend.TestUtils;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
+import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
+import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
+import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
+import org.oportuniza.oportunizabackend.users.dto.RequestDTO;
 import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
 import org.oportuniza.oportunizabackend.users.dto.UserDTO;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,10 +20,11 @@ import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
+import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -52,7 +57,7 @@ public class UserTests {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        String content = result.getResponse().getContentAsString();
         UserDTO response = objectMapper.readValue(content, UserDTO.class);
 
         assertNotNull(response);
@@ -87,7 +92,7 @@ public class UserTests {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String content = result.getResponse().getContentAsString(StandardCharsets.UTF_8);
+        String content = result.getResponse().getContentAsString();
         UserDTO response = objectMapper.readValue(content, UserDTO.class);
 
         assertNotNull(response);
@@ -99,7 +104,7 @@ public class UserTests {
     }
 
     @Test
-    public void getFavoriteUsersTest() throws Exception {
+    public void favoriteUsersTest() throws Exception {
         // Create Users
         var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "123456789", "João da Silva"));
         var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "123456789", "José da Silva"));
@@ -110,13 +115,15 @@ public class UserTests {
 
         // Add favorite users
         mockMvc.perform(patch(String.format("/api/users/%d/favorites/add", loginResponseDTO.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user2.id())))
+                        .content(objectMapper.writeValueAsString(new RequestDTO(user2.id()))))
                 .andExpect(status().isOk());
 
         mockMvc.perform(patch(String.format("/api/users/%d/favorites/add", loginResponseDTO.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user3.id())))
+                        .content(objectMapper.writeValueAsString(new RequestDTO(user3.id()))))
                 .andExpect(status().isOk());
 
         // Get favorite users
@@ -127,7 +134,7 @@ public class UserTests {
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
-        List<UserDTO> response = objectMapper.readValue(content, new TypeReference<List<UserDTO>>() {});
+        List<UserDTO> response = objectMapper.readValue(content, new TypeReference<>() {});
 
         assertNotNull(response);
         assertEquals(2, response.size());
@@ -148,50 +155,113 @@ public class UserTests {
                 assertEquals(user.phoneNumber(), user3.phoneNumber());
             }
         }
-    }
 
-
-    /*
-    @Test
-    public void shouldRemoveFavoriteUser() throws Exception {
-        User user = new User();
-        user.setUsername("removablefavoriteuser");
-        userService.saveUser(user);  // Assuming you have a saveUser method
-
-        mockMvc.perform(patch("/api/users/1/favorites/add")
+        // Remove favorite user
+        mockMvc.perform(patch(String.format("/api/users/%d/favorites/remove", loginResponseDTO.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user.getId())))
+                        .content(objectMapper.writeValueAsString(new RequestDTO(user2.id()))))
                 .andExpect(status().isOk());
 
-        mockMvc.perform(patch("/api/users/1/favorites/remove")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(user.getId())))
+        // Get favorite users
+        result = mockMvc.perform(get(String.format("/api/users/%d/favorites", loginResponseDTO.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
+
+        content = result.getResponse().getContentAsString();
+        out.println(content);
+        response = objectMapper.readValue(content, new TypeReference<List<UserDTO>>() {});
+        out.println(response);
+
+        assertNotNull(response);
+        assertEquals(1, response.size());
+        for (UserDTO user : response) {
+            assertNotNull(user);
+            assertNotNull(user.email());
+            assertNotNull(user.name());
+            assertNotNull(user.phoneNumber());
+            assertNull(user.county());
+            assertNull(user.district());
+            assertEquals(user.id(), user3.id());
+            assertEquals(user.email(), user3.email());
+            assertEquals(user.name(), user3.name());
+            assertEquals(user.phoneNumber(), user3.phoneNumber());
+        }
+
     }
 
     @Test
-    public void shouldAddFavoriteOffer() throws Exception {
-        mockMvc.perform(patch("/api/users/1/favorites/offers/add")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(offer.getId())))
-                .andExpect(status().isOk())
-                .andReturn();
-    }
+    public void favoriteOffersTest() throws Exception {
+        // Create Users
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "123456789", "João da Silva"));
+        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "123456789", "José da Silva"));
 
-    @Test
-    public void shouldRemoveFavoriteOffer() throws Exception {
-        mockMvc.perform(patch("/api/users/1/favorites/offers/add")
+        // Login User 1
+        var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
+
+        // Create Offer
+        var createServiceDTO = new CreateServiceDTO("Limpador de Carros",
+                "Limpo carros de luxo por dentro e por fora!",
+                false, 200);
+
+        mockMvc.perform(post(String.format("/api/services/users/%d", loginResponseDTO.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
                         .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(offer.getId())))
+                        .content(objectMapper.writeValueAsString(createServiceDTO)))
+                .andExpect(status().isCreated());
+
+        // Login User 2
+        var loginResponseDTO2 = testUtils.loginUser(new LoginDTO("jose@gmail.com", "123456"));
+
+        // Add favorite offer
+        mockMvc.perform(patch(String.format("/api/users/%d/favorites/offers/add", loginResponseDTO2.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RequestDTO(loginResponseDTO.id())))
+                )
                 .andExpect(status().isOk());
 
-        mockMvc.perform(patch("/api/users/1/favorites/offers/remove")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(offer.getId())))
+        // Get favorite offers
+        MvcResult result = mockMvc.perform(get(String.format("/api/users/%d/favorites/offers", loginResponseDTO2.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
+                        .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk())
                 .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        List<OfferDTO> response = objectMapper.readValue(content, new TypeReference<>() {});
+
+        assertNotNull(response);
+        assertEquals(1, response.size());
+        ServiceDTO offerDTO = (ServiceDTO) response.getFirst();
+        assertNotNull(offerDTO);
+        assertEquals(createServiceDTO.title(), offerDTO.getTitle());
+        assertEquals(createServiceDTO.description(), offerDTO.getDescription());
+        assertEquals(createServiceDTO.price(), offerDTO.getPrice());
+        assertEquals(createServiceDTO.negotiable(), offerDTO.isNegotiable());
+
+        // Remove favorite offer
+        mockMvc.perform(patch(String.format("/api/users/%d/favorites/offers/remove", loginResponseDTO2.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(new RequestDTO(loginResponseDTO.id())))
+                )
+                .andExpect(status().isOk());
+
+        // Get favorite offers
+        result = mockMvc.perform(get(String.format("/api/users/%d/favorites/offers", loginResponseDTO2.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
+                        .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        content = result.getResponse().getContentAsString();
+        response = objectMapper.readValue(content, new TypeReference<>() {});
+
+        assertNotNull(response);
+        assertEquals(0, response.size());
     }
 
-    */
 }

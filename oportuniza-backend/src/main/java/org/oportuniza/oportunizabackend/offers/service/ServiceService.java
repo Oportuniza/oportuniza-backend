@@ -30,10 +30,10 @@ public class ServiceService {
 
     public ServiceDTO updateService(long serviceId, ServiceDTO updatedService) throws ServiceNotFoundException {
         Service service = serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
-        service.setTitle(updatedService.title());
-        service.setDescription(updatedService.description());
-        service.setNegotiable(updatedService.negotiable());
-        service.setPrice(updatedService.price());
+        service.setTitle(updatedService.getTitle());
+        service.setDescription(updatedService.getDescription());
+        service.setNegotiable(updatedService.isNegotiable());
+        service.setPrice(updatedService.getPrice());
         serviceRepository.save(service);
         return updatedService;
     }
