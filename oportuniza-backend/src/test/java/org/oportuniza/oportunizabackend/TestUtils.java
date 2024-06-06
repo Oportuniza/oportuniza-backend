@@ -11,6 +11,8 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.nio.charset.StandardCharsets;
+
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -24,7 +26,7 @@ public class TestUtils {
 
     public RegisterResponseDTO registerUser(RegisterDTO registerDTO) throws Exception {
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(registerDTO)))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -36,7 +38,7 @@ public class TestUtils {
 
     public LoginResponseDTO loginUser(LoginDTO loginDTO) throws Exception {
         MvcResult loginResult = mockMvc.perform(post("/api/auth/login")
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(loginDTO)))
                 .andExpect(status().isOk())
                 .andReturn();

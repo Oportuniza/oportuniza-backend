@@ -58,7 +58,7 @@ public class UserTests {
         // Get user
         MvcResult result = mockMvc.perform(get(String.format("/api/users/%d", loginResponseDTO.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -87,7 +87,7 @@ public class UserTests {
                 "joao@gmail.com",
                 null,
                 null,
-                "Joao Candido",
+                "João Candido",
                 "987654321",
                 null,
                 "Viana do Castelo",
@@ -125,20 +125,20 @@ public class UserTests {
         // Add favorite users
         mockMvc.perform(patch(String.format("/api/users/%d/favorites/add", loginResponseDTO.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(new RequestDTO(user2.id()))))
                 .andExpect(status().isOk());
 
         mockMvc.perform(patch(String.format("/api/users/%d/favorites/add", loginResponseDTO.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(new RequestDTO(user3.id()))))
                 .andExpect(status().isOk());
 
         // Get favorite users
         MvcResult result = mockMvc.perform(get(String.format("/api/users/%d/favorites", loginResponseDTO.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -168,14 +168,14 @@ public class UserTests {
         // Remove favorite user
         mockMvc.perform(patch(String.format("/api/users/%d/favorites/remove", loginResponseDTO.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(new RequestDTO(user2.id()))))
                 .andExpect(status().isOk());
 
         // Get favorite users
         result = mockMvc.perform(get(String.format("/api/users/%d/favorites", loginResponseDTO.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -220,7 +220,7 @@ public class UserTests {
 
         MvcResult result = mockMvc.perform(post(String.format("/api/services/users/%d", loginResponseDTO.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(createServiceDTO)))
                 .andExpect(status().isCreated())
                 .andReturn();
@@ -234,7 +234,7 @@ public class UserTests {
         // Add favorite offer
         mockMvc.perform(patch(String.format("/api/users/%d/favorites/offers/add", loginResponseDTO2.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(new RequestDTO(serviceDTO.getId())))
                 )
                 .andExpect(status().isOk());
@@ -242,7 +242,7 @@ public class UserTests {
         // Get favorite offers
         result = mockMvc.perform(get(String.format("/api/users/%d/favorites/offers", loginResponseDTO2.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
                 .andExpect(status().isOk())
                 .andReturn();
 
@@ -261,7 +261,7 @@ public class UserTests {
         // Remove favorite offer
         mockMvc.perform(patch(String.format("/api/users/%d/favorites/offers/remove", loginResponseDTO2.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON)
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(new RequestDTO(serviceDTO.getId())))
                 )
                 .andExpect(status().isOk());
@@ -269,7 +269,7 @@ public class UserTests {
         // Get favorite offers
         result = mockMvc.perform(get(String.format("/api/users/%d/favorites/offers", loginResponseDTO2.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
-                        .contentType(MediaType.APPLICATION_JSON))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
                 .andExpect(status().isOk())
                 .andReturn();
 
