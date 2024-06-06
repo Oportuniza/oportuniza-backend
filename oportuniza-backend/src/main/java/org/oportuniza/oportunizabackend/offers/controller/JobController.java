@@ -45,13 +45,14 @@ public class JobController {
 
     @PostMapping("/users/{userId}")
     public ResponseEntity<JobDTO> createJob(@PathVariable long userId, @RequestBody @Valid CreateJobDTO jobDTO) {
-        var job = jobService.createJob(jobDTO);
+        var user = userService.getUserById(userId);
+        var job = jobService.createJob(jobDTO, user);
         userService.addOffer(userId, job);
         return ResponseEntity.status(HttpStatus.CREATED).body(jobService.convertJobToJobDTO(job));
     }
 
     @DeleteMapping("/{jobId}") // remove job from user's offers and users' favorites
-    public ResponseEntity<String> deleteJob(@PathVariable long jobId) {
+    public ResponseEntity<String> deleteJob(@PathVariable long jobId) throws Exception {
         Job job = jobService.getJobById(jobId);
         userService.removeOffer(job);
         userService.removeOfferFromFavorites(job);

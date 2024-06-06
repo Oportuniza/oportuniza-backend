@@ -5,6 +5,7 @@ import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.ServiceNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.repository.ServiceRepository;
+import org.oportuniza.oportunizabackend.users.model.User;
 
 import java.util.List;
 
@@ -44,8 +45,9 @@ public class ServiceService {
     }
 
 
-    public Service createService(CreateServiceDTO service) {
+    public Service createService(CreateServiceDTO service, User user) {
         Service newService = new Service();
+        newService.setUser(user);
         newService.setTitle(service.title());
         newService.setDescription(service.description());
         newService.setNegotiable(service.negotiable());

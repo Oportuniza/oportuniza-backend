@@ -45,13 +45,14 @@ public class ServiceController {
 
     @PostMapping("/users/{userId}")
     public ResponseEntity<ServiceDTO> createService(@PathVariable long userId, @RequestBody @Valid CreateServiceDTO serviceDTO) {
-        var service = serviceService.createService(serviceDTO);
+        var user = userService.getUserById(userId);
+        var service = serviceService.createService(serviceDTO, user);
         userService.addOffer(userId, service);
         return ResponseEntity.status(HttpStatus.CREATED).body(serviceService.convertServiceToServiceDTO(service));
     }
 
     @DeleteMapping("/{serviceId}") // remove service from user's offers and users' favorites
-    public ResponseEntity<String> deleteService(@PathVariable long serviceId) {
+    public ResponseEntity<String> deleteService(@PathVariable long serviceId) throws Exception {
         Service service = serviceService.getServiceById(serviceId);
         userService.removeOffer(service);
         userService.removeOfferFromFavorites(service);

@@ -114,9 +114,9 @@ public class UserService implements UserDetailsService {
     }
 
     public void removeOffer(Offer offer) {
-        var user = offer.getUser();
-        user.removeOffer(offer);
-        userRepository.save(user);
+            var user = offer.getUser();
+            user.removeOffer(offer);
+            userRepository.save(user);
     }
 
     public void addFavoriteOffer(long userId, Offer offer) throws UserWithEmailNotFoundException {

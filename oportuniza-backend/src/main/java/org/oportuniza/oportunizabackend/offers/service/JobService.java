@@ -5,6 +5,7 @@ import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.JobNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.repository.JobRepository;
+import org.oportuniza.oportunizabackend.users.model.User;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -51,8 +52,9 @@ public class JobService {
         return updatedJob;
     }
 
-    public Job createJob(CreateJobDTO job) {
+    public Job createJob(CreateJobDTO job, User user) {
         Job newJob = new Job();
+        newJob.setUser(user);
         newJob.setTitle(job.title());
         newJob.setDescription(job.description());
         newJob.setNegotiable(job.negotiable());

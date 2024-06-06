@@ -1,10 +1,13 @@
 package org.oportuniza.oportunizabackend;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginResponseDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterResponseDTO;
+import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
+import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.stereotype.Component;
@@ -44,5 +47,16 @@ public class TestUtils {
         // Capture and parse the login response
         String loginResponseContent = loginResult.getResponse().getContentAsString();
         return objectMapper.readValue(loginResponseContent, LoginResponseDTO.class);
+    }
+
+    public JobDTO createJob(CreateJobDTO createJobDTO) throws Exception {
+        MvcResult jobResult = mockMvc.perform(post("/api/jobs/users/1")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(objectMapper.writeValueAsString(createJobDTO)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String jobResponseContent = jobResult.getResponse().getContentAsString();
+        return objectMapper.readValue(jobResponseContent, JobDTO.class);
     }
 }
