@@ -149,6 +149,13 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
+    public void updateUserRating(long userId, double averageRating) throws UserWithIdNotFoundException {
+        User user = getUserById(userId);
+        user.setAverageRating(averageRating);
+        user.incrementReviewCount();
+        userRepository.save(user);
+    }
+
     public boolean emailExists(String email) {
         return userRepository.findByEmail(email).isPresent();
     }
@@ -177,7 +184,10 @@ public class UserService implements UserDetailsService {
                 user.getName(),
                 user.getPhoneNumber(),
                 user.getDistrict(),
-                user.getCounty());
+                user.getCounty(),
+                user.getResumeUrl(),
+                user.getAverageRating(),
+                user.getReviewCount());
     }
 
     private User getUserByEmail(String userEmail) throws UserWithEmailNotFoundException {

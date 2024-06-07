@@ -51,17 +51,4 @@ public class TestUtils {
         String loginResponseContent = loginResult.getResponse().getContentAsString();
         return objectMapper.readValue(loginResponseContent, LoginResponseDTO.class);
     }
-
-    public Long getJobId(MvcResult jobResult) {
-        try {
-            String jobResponseContent = jobResult.getResponse().getContentAsString();
-            JobDTO jobDTO = objectMapper.readValue(jobResponseContent, JobDTO.class);
-            return jobDTO.getId();
-        } catch (JsonProcessingException e) {
-            e.printStackTrace();
-            return null;
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(e);
-        }
-    }
 }

@@ -19,7 +19,7 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(nullable = false)
-    private Long id;
+    private long id;
 
     @Column(nullable = false, unique = true)
     private String email;
@@ -32,6 +32,15 @@ public class User implements UserDetails {
 
     @Column(name = "phone_number" ,nullable = false)
     private String phoneNumber;
+
+    @Column(name = "resume_url")
+    private String resumeUrl;
+
+    @Column(name = "average_rating")
+    private double averageRating;
+
+    @Column(name = "review_count", nullable = false)
+    private int reviewCount = 0;
 
     private String district;
 
@@ -73,9 +82,6 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
-    @Column(name = "resume_url")
-    private String resumeUrl;
-
     public void addRole(Role role) {
         this.roles.add(role);
     }
@@ -110,6 +116,14 @@ public class User implements UserDetails {
 
     public void removeApplication(Application application) {
         this.applications.remove(application);
+    }
+
+    public void incrementReviewCount() {
+        this.reviewCount++;
+    }
+
+    public void decrementReviewCount() {
+        this.reviewCount--;
     }
 
     @Override

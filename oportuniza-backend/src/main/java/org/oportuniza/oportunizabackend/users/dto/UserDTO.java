@@ -6,6 +6,9 @@ public record UserDTO (
         String name,
         String phoneNumber,
         String district,
-        String county) {
+        String county,
+        String resumeUrl,
+        Double rating,
+        int reviewsCount) {
 }
 

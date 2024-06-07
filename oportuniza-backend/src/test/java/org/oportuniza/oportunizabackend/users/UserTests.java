@@ -10,9 +10,8 @@ import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
 import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
 import org.oportuniza.oportunizabackend.offers.repository.OfferRepository;
-import org.oportuniza.oportunizabackend.users.dto.RequestDTO;
-import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
-import org.oportuniza.oportunizabackend.users.dto.UserDTO;
+import org.oportuniza.oportunizabackend.users.dto.*;
+import org.oportuniza.oportunizabackend.users.repository.ReviewRepository;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -47,6 +46,8 @@ public class UserTests {
     private UserRepository userRepository;
     @Autowired
     private OfferRepository offerRepository;
+    @Autowired
+    private ReviewRepository reviewRepository;
 
     @Test
     public void getUserTest() throws Exception {
@@ -279,9 +280,54 @@ public class UserTests {
         assertNotNull(response);
         assertEquals(0, response.size());
 
+        offerRepository.deleteById(serviceDTO.getId());
         userRepository.deleteById(user1.id());
         userRepository.deleteById(user2.id());
-        offerRepository.deleteById(serviceDTO.getId());
+    }
+
+    @Test
+    public void reviewsTest() throws Exception {
+        // Create user
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva"));
+        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "123456789", "Jose da Silva"));
+
+        // Login user 1
+        var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
+
+        // Create review - user 1 to user 2
+        CreateReviewDTO createReviewDTO = new CreateReviewDTO(user1.id(), user2.id(), 3);
+        MvcResult result = mockMvc.perform(post("/api/reviews")
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
+                        .content(objectMapper.writeValueAsString(createReviewDTO)))
+                .andExpect(status().isCreated())
+                .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        ReviewDTO reviewDTO = objectMapper.readValue(content, ReviewDTO.class);
+
+        assertNotNull(reviewDTO);
+        assertEquals(createReviewDTO.reviewerId(), reviewDTO.reviewerId());
+        assertEquals(createReviewDTO.reviewedId(), reviewDTO.reviewedId());
+        assertEquals(createReviewDTO.rating(), reviewDTO.rating());
+
+        // Get user 2
+        result = mockMvc.perform(get(String.format("/api/users/%d", user2.id()))
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
+                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        content = result.getResponse().getContentAsString();
+        UserDTO user2DTO = objectMapper.readValue(content, UserDTO.class);
+
+        assertNotNull(user2DTO);
+        assertEquals(3, user2DTO.rating());
+        assertEquals(1, user2DTO.reviewsCount());
+
+        reviewRepository.deleteById(reviewDTO.id());
+        userRepository.deleteById(user1.id());
+        userRepository.deleteById(user2.id());
     }
 
 }
