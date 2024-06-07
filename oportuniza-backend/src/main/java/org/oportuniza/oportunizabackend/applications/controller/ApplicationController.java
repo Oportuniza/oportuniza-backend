@@ -1,6 +1,7 @@
 package org.oportuniza.oportunizabackend.applications.controller;
 
 
+import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
@@ -28,36 +29,36 @@ public class ApplicationController {
 
     // GET applications from a user -> /applications/applicant/:userId
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Application>> getApplicationsByUserId(@PathVariable Long userId) {
+    public ResponseEntity<List<ApplicationDTO>> getApplicationsByUserId(@PathVariable Long userId) {
         return ResponseEntity.ok(applicationService.getApplicationsByUserId(userId));
     }
 
     // GET applications from an offer -> /applications/offer/:offerId
     @GetMapping("/offer/{offerId}")
-    public ResponseEntity<List<Application>> getApplicationsByOfferId(@PathVariable Long offerId) {
+    public ResponseEntity<List<ApplicationDTO>> getApplicationsByOfferId(@PathVariable Long offerId) {
         return ResponseEntity.ok(applicationService.getApplicationsByOfferId(offerId));
     }
 
     // GET application -> /applications/:id
     @GetMapping("/{id}")
-    public ResponseEntity<Application> getApplicationById(@PathVariable Long id) {
+    public ResponseEntity<ApplicationDTO> getApplicationById(@PathVariable Long id) {
         return ResponseEntity.ok(applicationService.getApplicationById(id));
     }
 
     // POST application -> /applications
     @PostMapping("/users/{userId}/offers/{offerId}")
-    public ResponseEntity<Application> createApplication(@PathVariable long userId, @PathVariable long offerId,@RequestBody CreateApplicationDTO applicationDTO) {
+    public ResponseEntity<ApplicationDTO> createApplication(@PathVariable long userId, @PathVariable long offerId,@RequestBody CreateApplicationDTO applicationDTO) {
         var user = userService.getUserById(userId);
         var offer = offerService.getOffer(offerId);
         Application createdApplication = applicationService.createApplication(applicationDTO, offer, user);
         userService.addApplication(user, createdApplication);
         offerService.addApplication(offer, createdApplication);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdApplication);
+        return ResponseEntity.status(HttpStatus.CREATED).body(applicationService.convertToDTO(createdApplication));
     }
 
     // PATCH accept application -> /applications/:id/accept
     @PatchMapping("/{id}/accept")
-    public ResponseEntity<Application> acceptApplication(@PathVariable Long id) {
+    public ResponseEntity<ApplicationDTO> acceptApplication(@PathVariable Long id) {
         return ResponseEntity.ok(applicationService.acceptApplication(id));
     }
 
@@ -71,7 +72,7 @@ public class ApplicationController {
     @DeleteMapping("/{id}")
     public ResponseEntity<String> deleteApplication(@PathVariable Long id) {
         // remove offers and users connections
-        var app = applicationService.getApplicationById(id);
+        var app = applicationService.getApplication(id);
         userService.removeApplication(app);
         offerService.removeApplication(app);
         applicationService.deleteApplication(id);

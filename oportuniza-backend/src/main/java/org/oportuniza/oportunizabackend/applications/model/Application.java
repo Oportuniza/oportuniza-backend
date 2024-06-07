@@ -5,7 +5,8 @@ import lombok.Data;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.model.User;
 
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Data
 @Entity
@@ -13,7 +14,7 @@ import java.util.List;
 public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private Long id;
+    private long id;
 
     @ManyToOne
     @JoinColumn(name = "offer_id")
@@ -36,8 +37,8 @@ public class Application {
     @Column(name = "resume_url")
     private String resumeUrl;
 
-    @OneToMany(mappedBy = "application", fetch = FetchType.EAGER)
-    private List<Document> documents;
+    @OneToMany(mappedBy = "application", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
+    private Set<Document> documents = new HashSet<>();
 
     private String status;
 
