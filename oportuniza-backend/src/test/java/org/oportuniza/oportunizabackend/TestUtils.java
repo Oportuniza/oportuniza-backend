@@ -14,6 +14,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
+import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -51,14 +52,16 @@ public class TestUtils {
         return objectMapper.readValue(loginResponseContent, LoginResponseDTO.class);
     }
 
-    public JobDTO createJob(CreateJobDTO createJobDTO) throws Exception {
-        MvcResult jobResult = mockMvc.perform(post("/api/jobs/users/1")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(createJobDTO)))
-                .andExpect(status().isCreated())
-                .andReturn();
-
-        String jobResponseContent = jobResult.getResponse().getContentAsString();
-        return objectMapper.readValue(jobResponseContent, JobDTO.class);
+    public Long getJobId(MvcResult jobResult) {
+        try {
+            String jobResponseContent = jobResult.getResponse().getContentAsString();
+            JobDTO jobDTO = objectMapper.readValue(jobResponseContent, JobDTO.class);
+            return jobDTO.getId();
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+            return null;
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(e);
+        }
     }
 }
