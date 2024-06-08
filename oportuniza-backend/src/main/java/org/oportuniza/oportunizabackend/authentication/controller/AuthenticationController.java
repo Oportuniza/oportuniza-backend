@@ -51,7 +51,18 @@ public class AuthenticationController {
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
 
-            var response = new LoginResponseDTO(user.getId(), userDetails.getUsername(), roles, jwtToken);
+            var response = new LoginResponseDTO(
+                    user.getId(),
+                    userDetails.getUsername(),
+                    roles,
+                    user.getName(),
+                    user.getPhoneNumber(),
+                    user.getResumeUrl(),
+                    user.getAverageRating(),
+                    user.getReviewCount(),
+                    user.getDistrict(),
+                    user.getCounty(),
+                    jwtToken);
             return ResponseEntity.ok(response);
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
