@@ -1,136 +1,78 @@
-DELETE FROM chat_message;
-DELETE FROM applications;
-DELETE FROM favorites_offers;
-DELETE FROM favorite_users;
+-- Limpeza dos dados das tabelas
 DELETE FROM users_roles;
 DELETE FROM service;
 DELETE FROM job;
+DELETE FROM favorites_offers;
+DELETE FROM documents;
+DELETE FROM applications;
 DELETE FROM offers;
+DELETE FROM favorite_users;
 DELETE FROM users;
 DELETE FROM roles;
+DELETE FROM chat_message;
 
--- Populating roles table
-INSERT INTO roles (id, name) VALUES
-                                 (1, 'Admin'),
-                                 (2, 'User');
+INSERT INTO chat_message (status, id, timestamp, content, receiver, sender)
+VALUES
+    (1, 1, '2024-06-08 12:00:00', 'Olá! Como posso ajudar?', 'user123', 'user456'),
+    (0, 2, '2024-06-08 12:01:00', 'Preciso de ajuda com um pedido.', 'user456', 'user123');
 
--- Populating users table with 1000 users
-DO $$
-    DECLARE
-        i INT;
-    BEGIN
-        FOR i IN 1..1000 LOOP
-                INSERT INTO users (id, created_at, updated_at, county, district, email, name, password, phone_number, resume_url)
-                VALUES
-                    (i, NOW(), NOW(), 'County' || i, 'District' || i, 'user' || i || '@example.com', 'User ' || i, 'password' || i, '123456' || i, 'http://example.com/resume' || i);
-            END LOOP;
-    END $$;
+INSERT INTO roles (id, name)
+VALUES
+    (1, 'Admin'),
+    (2, 'User');
 
--- Populating users_roles table
-DO $$
-    DECLARE
-        i INT;
-    BEGIN
-        FOR i IN 1..1000 LOOP
-                INSERT INTO users_roles (role_id, user_id)
-                VALUES
-                    (CASE WHEN i % 2 = 0 THEN 1 ELSE 2 END, i);
-            END LOOP;
-    END $$;
+INSERT INTO users (created_at, updated_at, id, county, district, email, name, password, phone_number, resume_url)
+VALUES
+    ('2024-01-01 00:00:00', '2024-06-01 00:00:00', 1, 'São Paulo', 'SP', 'email@example.com', 'João Silva', 'senha123', '11987654321', 'http://resumeurl.com/resume.pdf'),
+    ('2024-01-01 00:00:00', '2024-06-01 00:00:00', 2, 'Braga', 'Braga', 'email2@example.com', 'Gui Silva', 'senha123', '999999999999', 'http://resumeurl.com/resume2.pdf'),
+    ('2024-06-07 00:00:00', '2024-06-07 12:00:00', 3, 'Porto', 'Porto', 'email3@example.com', 'Ana Pereira', 'senha456', '22123456789', 'http://resumeurl.com/resume3.pdf'),
+    ('2024-06-07 00:00:00', '2024-06-07 12:00:00', 4, 'Lisboa', 'Lisboa', 'email4@example.com', 'Miguel Costa', 'senha789', '21198765432', 'http://resumeurl.com/resume4.pdf');
 
--- Populating offers table with 5000 offers
-DO $$
-    DECLARE
-        i INT;
-    BEGIN
-        FOR i IN 1..5000 LOOP
-                INSERT INTO offers (id, negotiable, description, image_url, title)
-                VALUES
-                    (i, (i % 2 = 0), 'Description of offer ' || i, 'http://example.com/image' || i, 'Offer ' || i);
-            END LOOP;
-    END $$;
+INSERT INTO favorite_users (favorite_user_id, user_id)
+VALUES
+    (1, 1),
+    (3, 2),
+    (4, 1);
 
--- Populating job table with 2000 jobs
-DO $$
-    DECLARE
-        i INT;
-    BEGIN
-        FOR i IN 1..2000 LOOP
-                INSERT INTO job (id, salary, localization)
-                VALUES
-                    (i, 30000 + i * 10, 'Location' || i);
-            END LOOP;
-    END $$;
+INSERT INTO offers (negotiable, id, user_id, description, image_url, title)
+VALUES
+    (TRUE, 1, 1, 'Excelente oportunidade de emprego.', 'http://imageurl.com/image.jpg', 'Oferta de Trabalho'),
+    (TRUE, 2, 1, 'Serviço', 'http://imageurl.com/image.jpg', 'Oferta de Serviço'),
+    (FALSE, 3, 2, 'Oportunidade de emprego em TI.', 'http://imageurl.com/image2.jpg', 'Vaga TI Senior'),
+    (FALSE, 4, 3, 'Consultoria Financeira.', 'http://imageurl.com/image3.jpg', 'Consultor Financeiro');
 
--- Populating service table with 3000 services
-DO $$
-    DECLARE
-        i INT;
-    BEGIN
-        FOR i IN 1..3000 LOOP
-                INSERT INTO service (id, price)
-                VALUES
-                    (2000 + i, 50 + i * 5);
-            END LOOP;
-    END $$;
 
--- Populating applications table with 10000 applications
-DO $$
-    DECLARE
-        i INT;
-    BEGIN
-        FOR i IN 1..10000 LOOP
-                INSERT INTO applications (id, offer_id, user_id)
-                VALUES
-                    (i, (i % 5000) + 1, (i % 1000) + 1);
-            END LOOP;
-    END $$;
+INSERT INTO applications (id, offer_id, user_id, email, first_name, last_name, message, resume_url, status)
+VALUES
+    (1, 1, 1, 'email@example.com', 'João', 'Silva', 'Estou muito interessado na vaga.', 'http://resumeurl.com/resume.pdf', 'Pending'),
+    (2, 3, 4, 'email4@example.com', 'Miguel', 'Costa', 'Interesse na vaga de TI.', 'http://resumeurl.com/resume4.pdf', 'Pending'),
+    (3, 4, 3, 'email3@example.com', 'Ana', 'Pereira', 'Gostaria de aplicar para consultor.', 'http://resumeurl.com/resume3.pdf', 'Pending');
 
--- Populating favorite_users table
-DO $$
-    DECLARE
-        i INT;
-    BEGIN
-        FOR i IN 1..2000 LOOP
-                INSERT INTO favorite_users (user_id, favorite_user_id)
-                VALUES
-                    ((i % 1000) + 1, ((i + 1) % 1000) + 1);
-            END LOOP;
-    END $$;
+INSERT INTO documents (application_id, id, url)
+VALUES
+    (1, 1, 'http://documenturl.com/document.pdf'),
+    (2, 2, 'http://documenturl.com/document2.pdf'),
+    (3, 3, 'http://documenturl.com/document3.pdf');
 
--- Populating favorites_offers table
-DO $$
-    DECLARE
-        i INT;
-    BEGIN
-        FOR i IN 1..5000 LOOP
-                INSERT INTO favorites_offers (user_id, offer_id)
-                VALUES
-                    ((i % 1000) + 1, (i % 5000) + 1);
-            END LOOP;
-    END $$;
+INSERT INTO favorites_offers (offer_id, user_id)
+VALUES
+    (1, 1),
+    (3, 1),
+    (4, 2);
 
--- Populating chat_message table with 10000 messages
-DO $$
-    DECLARE
-        i INT;
-    BEGIN
-        FOR i IN 1..10000 LOOP
-                INSERT INTO chat_message (id, status, timestamp, content, receiver, sender)
-                VALUES
-                    (i, i % 2, NOW(), 'Message content ' || i, 'user' || ((i % 1000) + 1) || '@example.com', 'user' || (((i + 1) % 1000) + 1) || '@example.com');
-            END LOOP;
-    END $$;
+INSERT INTO job (salary, id, localization, working_model, working_regime)
+VALUES
+    (5000.00, 1, 'Remote', 'Full-Time', 'Flexible Hours'),
+    (3500.00, 3, 'Office', 'Part-Time', 'Fixed Hours');
 
--- Ensure that all sequences (if any) are set to correct values
-SELECT setval(pg_get_serial_sequence('roles', 'id'), max(id)) FROM roles;
-SELECT setval(pg_get_serial_sequence('users', 'id'), max(id)) FROM users;
-SELECT setval(pg_get_serial_sequence('offers', 'id'), max(id)) FROM offers;
-SELECT setval(pg_get_serial_sequence('job', 'id'), max(id)) FROM job;
-SELECT setval(pg_get_serial_sequence('service', 'id'), max(id)) FROM service;
-SELECT setval(pg_get_serial_sequence('applications', 'id'), max(id)) FROM applications;
-SELECT setval(pg_get_serial_sequence('favorite_users', 'user_id'), max(user_id)) FROM favorite_users;
-SELECT setval(pg_get_serial_sequence('favorite_users', 'favorite_user_id'), max(favorite_user_id)) FROM favorite_users;
-SELECT setval(pg_get_serial_sequence('favorites_offers', 'user_id'), max(user_id)) FROM favorites_offers;
-SELECT setval(pg_get_serial_sequence('favorites_offers', 'offer_id'), max(offer_id)) FROM favorites_offers;
-SELECT setval(pg_get_serial_sequence('chat_message', 'id'), max(id)) FROM chat_message;
+INSERT INTO service (price, id)
+VALUES
+    (100.00, 2),
+    (250.00, 4);
+
+INSERT INTO users_roles (role_id, user_id)
+VALUES
+    (1, 1),
+    (2, 2),
+    (1, 3),
+    (2, 4);
