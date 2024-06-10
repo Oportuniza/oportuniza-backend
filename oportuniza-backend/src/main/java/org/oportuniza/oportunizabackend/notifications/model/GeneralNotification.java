@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.chat.api.models;
+package org.oportuniza.oportunizabackend.notifications.model;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -14,9 +14,15 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ChatNotification {
+public class GeneralNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String sender;
+    private String message;
+    private String targetUser;
+
+    public GeneralNotification(String message, String targetUser) {
+        this.message = message;
+        this.targetUser = targetUser;
+    }
 }

@@ -3,10 +3,8 @@ package org.oportuniza.oportunizabackend.chat.api.controllers;
 import org.oportuniza.oportunizabackend.chat.api.models.ChatMessage;
 import org.oportuniza.oportunizabackend.chat.api.models.ChatNotification;
 import org.oportuniza.oportunizabackend.chat.services.ChatMessageService;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.messaging.handler.annotation.*;
-import org.springframework.messaging.simp.SimpMessageHeaderAccessor;
 import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -18,10 +16,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class ChatController {
 
-    @Autowired
-    private SimpMessagingTemplate messagingTemplate;
-    @Autowired
-    private ChatMessageService chatMessageService;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final ChatMessageService chatMessageService;
+
+    public ChatController(SimpMessagingTemplate messagingTemplate, ChatMessageService chatMessageService) {
+        this.messagingTemplate = messagingTemplate;
+        this.chatMessageService = chatMessageService;
+    }
 
     /**
      * Receive a new chat message from the websocket

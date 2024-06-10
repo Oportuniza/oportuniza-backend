@@ -3,14 +3,17 @@ package org.oportuniza.oportunizabackend.chat.services;
 import org.oportuniza.oportunizabackend.chat.api.models.ChatMessage;
 import org.oportuniza.oportunizabackend.chat.api.models.ChatMessageRepository;
 import org.oportuniza.oportunizabackend.chat.exceptions.ResourceNotFoundException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.util.List;
 import java.util.Optional;
 
 @Service
 public class ChatMessageService {
-    @Autowired private ChatMessageRepository messageRepository;
+    private final ChatMessageRepository messageRepository;
+
+    public ChatMessageService(ChatMessageRepository messageRepository) {
+        this.messageRepository = messageRepository;
+    }
 
     public ChatMessage save(ChatMessage chatMessage) {
         chatMessage.setStatus(ChatMessage.MessageStatus.RECEIVED);
