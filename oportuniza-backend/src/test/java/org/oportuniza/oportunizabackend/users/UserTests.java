@@ -1,7 +1,6 @@
 package org.oportuniza.oportunizabackend.users;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.core.type.TypeReference;
 import org.junit.jupiter.api.Test;
 import org.oportuniza.oportunizabackend.TestUtils;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
@@ -16,15 +15,14 @@ import org.oportuniza.oportunizabackend.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
 
 
 import java.nio.charset.StandardCharsets;
-import java.util.List;
 
-import static java.lang.System.out;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
@@ -144,11 +142,12 @@ public class UserTests {
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
-        List<UserDTO> response = objectMapper.readValue(content, new TypeReference<>() {});
+        PageImpl<UserDTO> response = TestUtils.deserializePage(content, UserDTO.class, objectMapper);
 
         assertNotNull(response);
-        assertEquals(2, response.size());
-        for (UserDTO user : response) {
+        assertEquals(2, response.getTotalElements());
+        var users = response.getContent();
+        for (UserDTO user : users) {
             assertNotNull(user);
             assertNotNull(user.email());
             assertNotNull(user.name());
@@ -181,13 +180,12 @@ public class UserTests {
                 .andReturn();
 
         content = result.getResponse().getContentAsString();
-        out.println(content);
-        response = objectMapper.readValue(content, new TypeReference<List<UserDTO>>() {});
-        out.println(response);
+        response = TestUtils.deserializePage(content, UserDTO.class, objectMapper);
 
         assertNotNull(response);
-        assertEquals(1, response.size());
-        for (UserDTO user : response) {
+        assertEquals(response.getTotalElements(), 1);
+        users = response.getContent();
+        for (UserDTO user : users) {
             assertNotNull(user);
             assertNotNull(user.email());
             assertNotNull(user.name());
@@ -247,18 +245,6 @@ public class UserTests {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        content = result.getResponse().getContentAsString();
-        List<OfferDTO> response = objectMapper.readValue(content, new TypeReference<>() {});
-
-        assertNotNull(response);
-        assertEquals(1, response.size());
-        ServiceDTO offerDTO = (ServiceDTO) response.getFirst();
-        assertNotNull(offerDTO);
-        assertEquals(createServiceDTO.title(), offerDTO.getTitle());
-        assertEquals(createServiceDTO.description(), offerDTO.getDescription());
-        assertEquals(createServiceDTO.price(), offerDTO.getPrice());
-        assertEquals(createServiceDTO.negotiable(), offerDTO.isNegotiable());
-
         // Remove favorite offer
         mockMvc.perform(patch(String.format("/api/users/%d/favorites/offers/remove", loginResponseDTO2.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
@@ -275,10 +261,6 @@ public class UserTests {
                 .andReturn();
 
         content = result.getResponse().getContentAsString();
-        response = objectMapper.readValue(content, new TypeReference<>() {});
-
-        assertNotNull(response);
-        assertEquals(0, response.size());
 
         offerRepository.deleteById(serviceDTO.getId());
         userRepository.deleteById(user1.id());

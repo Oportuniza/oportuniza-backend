@@ -6,11 +6,11 @@ import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.service.ServiceService;
 import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/services")
@@ -24,8 +24,9 @@ public class ServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<List<ServiceDTO>> getAllServices() {
-        return ResponseEntity.ok(serviceService.getAllServices());
+    public ResponseEntity<Page<ServiceDTO>> getAllServices(@RequestParam(defaultValue = "0") int page,
+                                                           @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(serviceService.getAllServices(page, size));
     }
 
     @GetMapping("/{serviceId}")
@@ -34,8 +35,10 @@ public class ServiceController {
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<List<ServiceDTO>> getUserServices(@PathVariable long userId) {
-        return ResponseEntity.ok(serviceService.getUserServices(userId));
+    public ResponseEntity<Page<ServiceDTO>> getUserServices(@PathVariable long userId,
+                                                            @RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(serviceService.getUserServices(userId, page, size));
     }
 
     @PutMapping("/{serviceId}")

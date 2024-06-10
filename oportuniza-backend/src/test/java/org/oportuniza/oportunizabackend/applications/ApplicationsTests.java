@@ -1,11 +1,9 @@
 package org.oportuniza.oportunizabackend.applications;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.oportuniza.oportunizabackend.TestUtils;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
-import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
@@ -14,6 +12,7 @@ import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
@@ -94,13 +93,10 @@ public class ApplicationsTests {
                 .andReturn();
 
         String applicationsByUserIdContent = applicationsByUserId.getResponse().getContentAsString();
-        List<ApplicationDTO> applicationsByUser = objectMapper.readValue(applicationsByUserIdContent, new TypeReference<>() {});
+        PageImpl<ApplicationDTO> applicationsByUser = TestUtils.deserializePage(applicationsByUserIdContent, ApplicationDTO.class, objectMapper);
 
-        // Find the application in the list of applications by user that matches the created application
-        ApplicationDTO foundApplication = applicationsByUser.stream()
-                .filter(application -> application.id() == newCreatedApplication.id())
-                .findFirst()
-                .orElse(null);
+        assertEquals(1, applicationsByUser.getTotalElements());
+        var foundApplication = applicationsByUser.getContent().getFirst();
 
         // Assert that the found application is not null and its fields match the created application
         assertNotNull(foundApplication);

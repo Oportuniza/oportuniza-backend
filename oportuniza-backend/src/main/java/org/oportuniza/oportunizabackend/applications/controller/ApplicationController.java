@@ -7,11 +7,11 @@ import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
 import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/applications")
@@ -29,14 +29,18 @@ public class ApplicationController {
 
     // GET applications from a user -> /applications/applicant/:userId
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<ApplicationDTO>> getApplicationsByUserId(@PathVariable Long userId) {
-        return ResponseEntity.ok(applicationService.getApplicationsByUserId(userId));
+    public ResponseEntity<Page<ApplicationDTO>> getApplicationsByUserId(@PathVariable Long userId,
+                                                                        @RequestParam(defaultValue = "0") int page,
+                                                                        @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(applicationService.getApplicationsByUserId(userId, page, size));
     }
 
     // GET applications from an offer -> /applications/offer/:offerId
     @GetMapping("/offer/{offerId}")
-    public ResponseEntity<List<ApplicationDTO>> getApplicationsByOfferId(@PathVariable Long offerId) {
-        return ResponseEntity.ok(applicationService.getApplicationsByOfferId(offerId));
+    public ResponseEntity<Page<ApplicationDTO>> getApplicationsByOfferId(@PathVariable Long offerId,
+                                                                         @RequestParam(defaultValue = "0") int page,
+                                                                         @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(applicationService.getApplicationsByOfferId(offerId, page, size));
     }
 
     // GET application -> /applications/:id
@@ -47,7 +51,7 @@ public class ApplicationController {
 
     // POST application -> /applications
     @PostMapping("/users/{userId}/offers/{offerId}")
-    public ResponseEntity<ApplicationDTO> createApplication(@PathVariable long userId, @PathVariable long offerId,@RequestBody CreateApplicationDTO applicationDTO) {
+    public ResponseEntity<ApplicationDTO> createApplication(@PathVariable Long userId, @PathVariable Long offerId,@RequestBody CreateApplicationDTO applicationDTO) {
         var user = userService.getUserById(userId);
         var offer = offerService.getOffer(offerId);
         Application createdApplication = applicationService.createApplication(applicationDTO, offer, user);

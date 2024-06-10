@@ -1,6 +1,5 @@
 package org.oportuniza.oportunizabackend.offers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.oportuniza.oportunizabackend.TestUtils;
@@ -8,17 +7,15 @@ import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
-import org.oportuniza.oportunizabackend.offers.model.Job;
+import org.oportuniza.oportunizabackend.offers.repository.JobRepository;
+import org.oportuniza.oportunizabackend.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.lang.reflect.Type;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -37,9 +34,12 @@ public class JobsTests {
 
     @Autowired
     private TestUtils testUtils;
+    @Autowired
+    private JobRepository jobRepository;
+    @Autowired
+    private UserRepository userRepository;
 
     @Test
-    //@WithMockUser(username = "admin", roles = {"ADMIN"})
     public void getAllJobsTest() throws Exception {
 
         //Create user
@@ -65,21 +65,24 @@ public class JobsTests {
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
-        List<JobDTO> contentObject = objectMapper.readValue(content, new TypeReference<>() {} );
+        PageImpl<JobDTO> contentObject = TestUtils.deserializePage(content, JobDTO.class, objectMapper);
 
         assertNotNull(contentObject);
-        assertEquals(contentObject.getFirst().getTitle(), CreateJobDTO.title());
-        assertEquals(contentObject.getFirst().getDescription(), CreateJobDTO.description());
-        assertEquals(contentObject.getFirst().isNegotiable(), CreateJobDTO.negotiable());
-        assertEquals(contentObject.getFirst().getSalary(), CreateJobDTO.salary());
-        assertEquals(contentObject.getFirst().getLocalization(), CreateJobDTO.localization());
-        assertEquals(contentObject.getFirst().getWorkingModel(), CreateJobDTO.workingModel());
-        assertEquals(contentObject.getFirst().getWorkingRegime(), CreateJobDTO.workingRegime());
+        assertEquals(contentObject.getTotalElements(), 1);
+        var job = contentObject.getContent().getFirst();
+        assertEquals(job.getTitle(), CreateJobDTO.title());
+        assertEquals(job.getDescription(), CreateJobDTO.description());
+        assertEquals(job.isNegotiable(), CreateJobDTO.negotiable());
+        assertEquals(job.getSalary(), CreateJobDTO.salary());
+        assertEquals(job.getLocalization(), CreateJobDTO.localization());
+        assertEquals(job.getWorkingModel(), CreateJobDTO.workingModel());
+        assertEquals(job.getWorkingRegime(), CreateJobDTO.workingRegime());
 
+        jobRepository.deleteById(job.getId());
+        userRepository.deleteById(user1.id());
     }
 
     @Test
-    //@WithMockUser(username = "admin", roles = {"ADMIN"})
     public void getUserJobs() throws Exception {
         // Create user
         var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva");
@@ -103,18 +106,21 @@ public class JobsTests {
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
-        List<JobDTO> contentObject = objectMapper.readValue(content, new TypeReference<>() {} );
+        PageImpl<JobDTO> contentObject = TestUtils.deserializePage(content, JobDTO.class, objectMapper);
 
         assertNotNull(contentObject);
-        assertEquals(contentObject.getFirst().getTitle(), CreateJobDTO.title());
-        assertEquals(contentObject.getFirst().getDescription(), CreateJobDTO.description());
-        assertEquals(contentObject.getFirst().isNegotiable(), CreateJobDTO.negotiable());
-        assertEquals(contentObject.getFirst().getSalary(), CreateJobDTO.salary());
-        assertEquals(contentObject.getFirst().getLocalization(), CreateJobDTO.localization());
-        assertEquals(contentObject.getFirst().getWorkingModel(), CreateJobDTO.workingModel());
-        assertEquals(contentObject.getFirst().getWorkingRegime(), CreateJobDTO.workingRegime());
+        assertEquals(contentObject.getTotalElements(), 1);
+        var job = contentObject.getContent().getFirst();
+        assertEquals(job.getDescription(), CreateJobDTO.description());
+        assertEquals(job.getTitle(), CreateJobDTO.title());
+        assertEquals(job.isNegotiable(), CreateJobDTO.negotiable());
+        assertEquals(job.getSalary(), CreateJobDTO.salary());
+        assertEquals(job.getLocalization(), CreateJobDTO.localization());
+        assertEquals(job.getWorkingModel(), CreateJobDTO.workingModel());
+        assertEquals(job.getWorkingRegime(), CreateJobDTO.workingRegime());
 
-
+        jobRepository.deleteById(job.getId());
+        userRepository.deleteById(user1.id());
     }
 
     @Test
@@ -148,6 +154,8 @@ public class JobsTests {
         assertEquals(job.getWorkingModel(), CreateJobDTO.workingModel());
         assertEquals(job.getWorkingRegime(), CreateJobDTO.workingRegime());
 
+        jobRepository.deleteById(job.getId());
+        userRepository.deleteById(user1.id());
     }
 
     @Test
@@ -217,6 +225,8 @@ public class JobsTests {
         String deleteContent = deleteResult.getResponse().getContentAsString();
 
         assertEquals(deleteContent, "Job deleted successfully.");
+
+        userRepository.deleteById(user1.id());
     }
 
 

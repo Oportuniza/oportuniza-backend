@@ -6,6 +6,7 @@ import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.service.JobService;
 import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -24,8 +25,9 @@ public class JobController {
     }
 
     @GetMapping
-    public ResponseEntity<List<JobDTO>> getAllJobs() {
-        return ResponseEntity.ok(jobService.getAllJobs()); // ADD SUPPORT FOR PAGINATION AND FILTERING
+    public ResponseEntity<Page<JobDTO>> getAllJobs(@RequestParam(defaultValue = "0") int page,
+                                                   @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(jobService.getAllJobs(page, size)); // ADD SUPPORT FOR PAGINATION AND FILTERING
     }
 
     @GetMapping("/{jobId}")
@@ -34,8 +36,10 @@ public class JobController {
     }
 
     @GetMapping("/users/{userId}")
-    public ResponseEntity<List<JobDTO>> getUserJobs(@PathVariable long userId) {
-        return ResponseEntity.ok(jobService.getUserJobs(userId));
+    public ResponseEntity<Page<JobDTO>> getUserJobs(@PathVariable long userId,
+                                                    @RequestParam(defaultValue = "0") int page,
+                                                    @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(jobService.getUserJobs(userId, page, size));
     }
 
     @PutMapping("/{jobId}")
