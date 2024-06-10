@@ -1,12 +1,16 @@
 package org.oportuniza.oportunizabackend.offers.service;
 
 import org.oportuniza.oportunizabackend.applications.model.Application;
+import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
+import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
+import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.OfferNotFoundException;
+import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
+import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.repository.OfferRepository;
-import org.springframework.stereotype.Service;
 
-@Service
+@org.springframework.stereotype.Service
 public class OfferService {
     private final OfferRepository offerRepository;
 
@@ -28,6 +32,30 @@ public class OfferService {
         var offer = application.getOffer();
         offer.removeApplication(application);
         offerRepository.save(offer);
+    }
+
+    public static OfferDTO convertToDTO(Offer offer) {
+        if (offer instanceof Service service) {
+            return new ServiceDTO(
+                    service.getId(),
+                    service.getTitle(),
+                    service.getDescription(),
+                    service.isNegotiable(),
+                    service.getPrice()
+            );
+        } else {
+            var job = (Job) offer;
+            return new JobDTO(
+                    job.getId(),
+                    job.getTitle(),
+                    job.getDescription(),
+                    job.isNegotiable(),
+                    job.getSalary(),
+                    job.getLocalization(),
+                    job.getWorkingModel(),
+                    job.getWorkingRegime()
+            );
+        }
     }
 
 }

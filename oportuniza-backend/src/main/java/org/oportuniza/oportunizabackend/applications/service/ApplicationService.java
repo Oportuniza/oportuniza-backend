@@ -6,30 +6,31 @@ import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFo
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.applications.model.Document;
 import org.oportuniza.oportunizabackend.applications.repository.ApplicationRepository;
-import org.oportuniza.oportunizabackend.applications.repository.DocumentRepository;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
-    private final DocumentRepository documentRepository;
 
-    public ApplicationService(final ApplicationRepository applicationRepository, DocumentRepository documentRepository) {
+    public ApplicationService(final ApplicationRepository applicationRepository) {
         this.applicationRepository = applicationRepository;
-        this.documentRepository = documentRepository;
     }
 
-    public List<ApplicationDTO> getApplicationsByUserId(Long userId) {
-        return applicationRepository.findByUserId(userId).stream().map(this::convertToDTO).toList();
+    public Page<ApplicationDTO> getApplicationsByUserId(Long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return applicationRepository.findByUserId(userId,pageable).map(this::convertToDTO);
     }
 
-    public List<ApplicationDTO> getApplicationsByOfferId(Long offerId) {
-        return applicationRepository.findByOfferId(offerId).stream().map(this::convertToDTO).toList();
+    public Page<ApplicationDTO> getApplicationsByOfferId(Long offerId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return applicationRepository.findByOfferId(offerId, pageable).map(this::convertToDTO);
     }
 
     public ApplicationDTO getApplicationById(Long id) throws ApplicationNotFoundException {

@@ -1,6 +1,5 @@
 package org.oportuniza.oportunizabackend.offers;
 
-import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.oportuniza.oportunizabackend.TestUtils;
@@ -8,21 +7,27 @@ import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
+import org.oportuniza.oportunizabackend.offers.repository.ServiceRepository;
+import org.oportuniza.oportunizabackend.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
-import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
-
-import java.util.List;
+import org.testcontainers.containers.PostgreSQLContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
+@Testcontainers
 @SpringBootTest
 @AutoConfigureMockMvc
 public class ServicesTests {
@@ -35,9 +40,25 @@ public class ServicesTests {
 
     @Autowired
     private TestUtils testUtils;
+    @Autowired
+    private ServiceRepository serviceRepository;
+    @Autowired
+    private UserRepository userRepository;
+
+    @Container
+    public static PostgreSQLContainer<?> postgreSQLContainer = new PostgreSQLContainer<>("postgres:16.1")
+            .withDatabaseName("testdb")
+            .withUsername("test")
+            .withPassword("test");
+
+    @DynamicPropertySource
+    static void configureProperties(DynamicPropertyRegistry registry) {
+        registry.add("spring.datasource.url", postgreSQLContainer::getJdbcUrl);
+        registry.add("spring.datasource.username", postgreSQLContainer::getUsername);
+        registry.add("spring.datasource.password", postgreSQLContainer::getPassword);
+    }
 
     @Test
-    //@WithMockUser(username = "admin", roles = {"ADMIN"})
     public void getAllServicesTest() throws Exception {
 
         // Create user
@@ -63,13 +84,19 @@ public class ServicesTests {
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
-        List<ServiceDTO> contentObject = objectMapper.readValue(content, new TypeReference<>() {} );
+        PageImpl<ServiceDTO> contentObject = TestUtils.deserializePage(content, ServiceDTO.class, objectMapper);
 
         assertNotNull(contentObject);
-        assertEquals(contentObject.getFirst().getPrice(), createServiceDTO.price());
-        assertEquals(contentObject.getFirst().getDescription(), createServiceDTO.description());
-        assertEquals(contentObject.getFirst().getTitle(), createServiceDTO.title());
-        assertEquals(contentObject.getFirst().isNegotiable(), createServiceDTO.negotiable());
+        assertEquals(contentObject.getTotalElements(), 1);
+        var service = contentObject.getContent().getFirst();
+
+        assertEquals(service.getPrice(), createServiceDTO.price());
+        assertEquals(service.getDescription(), createServiceDTO.description());
+        assertEquals(service.getTitle(), createServiceDTO.title());
+        assertEquals(service.isNegotiable(), createServiceDTO.negotiable());
+
+        serviceRepository.deleteById(service.getId());
+        userRepository.deleteById(user1.id());
     }
 
     @Test
@@ -96,13 +123,19 @@ public class ServicesTests {
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
-        List<ServiceDTO> contentObject = objectMapper.readValue(content, new TypeReference<>() {} );
+        PageImpl<ServiceDTO> contentObject = TestUtils.deserializePage(content, ServiceDTO.class, objectMapper);
 
         assertNotNull(contentObject);
-        assertEquals(contentObject.getFirst().getPrice(), createServiceDTO.price());
-        assertEquals(contentObject.getFirst().getDescription(), createServiceDTO.description());
-        assertEquals(contentObject.getFirst().getTitle(), createServiceDTO.title());
-        assertEquals(contentObject.getFirst().isNegotiable(), createServiceDTO.negotiable());
+        assertEquals(contentObject.getTotalElements(), 1);
+        var service = contentObject.getContent().getFirst();
+
+        assertEquals(service.getPrice(), createServiceDTO.price());
+        assertEquals(service.getDescription(), createServiceDTO.description());
+        assertEquals(service.getTitle(), createServiceDTO.title());
+        assertEquals(service.isNegotiable(), createServiceDTO.negotiable());
+
+        serviceRepository.deleteById(service.getId());
+        userRepository.deleteById(user1.id());
     }
 
     @Test
@@ -131,6 +164,9 @@ public class ServicesTests {
         assertEquals(service.getDescription(), createServiceDTO.description());
         assertEquals(service.isNegotiable(), createServiceDTO.negotiable());
         assertEquals(service.getPrice(), createServiceDTO.price());
+
+        serviceRepository.deleteById(service.getId());
+        userRepository.deleteById(user1.id());
     }
 
     @Test
@@ -193,5 +229,7 @@ public class ServicesTests {
         String deleteContent = deleteResult.getResponse().getContentAsString();
 
         assertEquals(deleteContent, "Service deleted successfully.");
+
+        userRepository.deleteById(user1.id());
     }
 }

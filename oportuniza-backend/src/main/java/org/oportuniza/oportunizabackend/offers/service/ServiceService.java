@@ -6,6 +6,9 @@ import org.oportuniza.oportunizabackend.offers.exceptions.ServiceNotFoundExcepti
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.repository.ServiceRepository;
 import org.oportuniza.oportunizabackend.users.model.User;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
 
 import java.util.List;
 
@@ -17,12 +20,11 @@ public class ServiceService {
         this.serviceRepository = serviceRepository;
     }
 
-    public List<ServiceDTO> getAllServices() {
-        List<Service> services = serviceRepository.findAll();
-        return services.stream().map(this::convertServiceToServiceDTO).toList();
+    public Page<ServiceDTO> getAllServices(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Service> services = serviceRepository.findAll(pageable);
+        return services.map(this::convertServiceToServiceDTO);
     }
-
-
 
     public ServiceDTO getService(long serviceId) {
         return convertServiceToServiceDTO(serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId)));
@@ -64,8 +66,9 @@ public class ServiceService {
         serviceRepository.deleteById(serviceId);
     }
 
-    public List<ServiceDTO> getUserServices(long userId) {
-        List<Service> services = serviceRepository.findServicesByUserId(userId);
-        return services.stream().map(this::convertServiceToServiceDTO).toList();
+    public Page<ServiceDTO> getUserServices(long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Service> services = serviceRepository.findServicesByUserId(userId, pageable);
+        return services.map(this::convertServiceToServiceDTO);
     }
 }

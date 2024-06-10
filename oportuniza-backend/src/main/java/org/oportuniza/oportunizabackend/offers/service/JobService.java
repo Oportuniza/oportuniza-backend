@@ -6,6 +6,9 @@ import org.oportuniza.oportunizabackend.offers.exceptions.JobNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.repository.JobRepository;
 import org.oportuniza.oportunizabackend.users.model.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -18,9 +21,10 @@ public class JobService {
         this.jobRepository = jobRepository;
     }
 
-    public List<JobDTO> getAllJobs() {
-        List<Job> jobs = jobRepository.findAll();
-        return jobs.stream().map(this::convertJobToJobDTO).toList();
+    public Page<JobDTO> getAllJobs(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Job> jobs = jobRepository.findAll(pageable);
+        return jobs.map(this::convertJobToJobDTO);
     }
 
     public JobDTO convertJobToJobDTO(Job job) {
@@ -74,9 +78,10 @@ public class JobService {
         return jobRepository.findById(jobId).orElseThrow(() -> new JobNotFoundException(jobId));
     }
 
-    public List<JobDTO> getUserJobs(long userId) {
-        List<Job> jobs = jobRepository.findJobsByUserId(userId);
-        return jobs.stream().map(this::convertJobToJobDTO).toList();
+    public Page<JobDTO> getUserJobs(long userId, int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        Page<Job> jobs = jobRepository.findJobsByUserId(userId, pageable);
+        return jobs.map(this::convertJobToJobDTO);
     }
 
 }

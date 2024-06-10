@@ -1,43 +1,40 @@
 package org.oportuniza.oportunizabackend.users.controller;
 
 import jakarta.validation.Valid;
-import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
-import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
-import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
-import org.oportuniza.oportunizabackend.offers.model.Service;
-import org.oportuniza.oportunizabackend.offers.service.JobService;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
-import org.oportuniza.oportunizabackend.offers.service.ServiceService;
 import org.oportuniza.oportunizabackend.users.dto.RequestDTO;
 import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
 import org.oportuniza.oportunizabackend.users.dto.UserDTO;
 import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @RestController
 @RequestMapping("/api/users")
 public class UserController {
     private final UserService userService;
     private final OfferService offerService;
-    private final JobService jobService;
-    private final ServiceService serviceService;
 
-    public UserController(final UserService userService, OfferService offerService, JobService jobService, ServiceService serviceService) {
+    public UserController(final UserService userService, OfferService offerService) {
         this.userService = userService;
         this.offerService = offerService;
-        this.jobService = jobService;
-        this.serviceService = serviceService;
     }
 
     @GetMapping("/{userId}/favorites")
-    public ResponseEntity<List<UserDTO>> getFavoriteUsers(@PathVariable long userId) {
-        return ResponseEntity.ok(userService.getFavoriteUsers(userId));
+    public ResponseEntity<Page<UserDTO>> getFavoriteUsers(@PathVariable long userId,
+                                                          @RequestParam(defaultValue = "0") int page,
+                                                          @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.getFavoriteUsers(userId, page, size));
+    }
+
+    @GetMapping("/{userId}/favorites/offers")
+    public ResponseEntity<Page<OfferDTO>> getFavoriteOffers(@PathVariable long userId,
+                                                            @RequestParam(defaultValue = "0") int page,
+                                                            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.getFavoriteOffers(userId, page, size));
     }
 
     @PatchMapping("/{userId}/favorites/add")
@@ -50,22 +47,6 @@ public class UserController {
     public ResponseEntity<String> removeFavoriteUser(@PathVariable long userId, @RequestBody @Valid RequestDTO requestDTO) {
         userService.removeFavoriteUser(userId, requestDTO.id());
         return ResponseEntity.ok("Favorite user removed successfully.");
-    }
-
-    @GetMapping("/{userId}/favorites/offers")
-    public ResponseEntity<List<OfferDTO>> getFavoriteOffers(@PathVariable long userId) {
-        var offers = userService.getFavoriteOffers(userId);
-        var offerDTOs = new ArrayList<OfferDTO>();
-        for (Offer offer : offers) {
-            if (offer instanceof Job job) {
-                JobDTO jobDTO = jobService.convertJobToJobDTO(job);
-                offerDTOs.add(jobDTO);
-            } else if (offer instanceof Service service) {
-                ServiceDTO serviceDTO = serviceService.convertServiceToServiceDTO(service);
-                offerDTOs.add(serviceDTO);
-            }
-        }
-        return ResponseEntity.ok(offerDTOs);
     }
 
     @PatchMapping("/{userId}/favorites/offers/add")
