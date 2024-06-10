@@ -5,12 +5,14 @@ import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.ServiceNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.repository.ServiceRepository;
+import org.oportuniza.oportunizabackend.offers.service.specifications.OfferSpecifications;
+import org.oportuniza.oportunizabackend.offers.service.specifications.ServiceSpecifications;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 
-import java.util.List;
 
 @org.springframework.stereotype.Service
 public class ServiceService {
@@ -20,9 +22,23 @@ public class ServiceService {
         this.serviceRepository = serviceRepository;
     }
 
-    public Page<ServiceDTO> getAllServices(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Service> services = serviceRepository.findAll(pageable);
+    public Page<ServiceDTO> getAllServices(String title, Double minPrice, Double maxPrice, Boolean negotiable, int page, int size) {
+        Specification<Service> spec = Specification.where(null);
+
+        if (title != null && !title.isEmpty()) {
+            spec = spec.and(ServiceSpecifications.titleContains(title));
+        }
+        if (minPrice != null) {
+            spec = spec.and(ServiceSpecifications.priceGreaterThanOrEqual(minPrice));
+        }
+        if (maxPrice != null) {
+            spec = spec.and(ServiceSpecifications.priceLessThanOrEqual(maxPrice));
+        }
+        if (negotiable != null) {
+            spec = spec.and(ServiceSpecifications.negotiableEquals(negotiable));;
+        }
+
+        Page<Service> services = serviceRepository.findAll(spec, PageRequest.of(page, size));
         return services.map(this::convertServiceToServiceDTO);
     }
 

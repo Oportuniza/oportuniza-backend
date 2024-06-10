@@ -24,9 +24,14 @@ public class ServiceController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<ServiceDTO>> getAllServices(@RequestParam(defaultValue = "0") int page,
-                                                           @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(serviceService.getAllServices(page, size));
+    public ResponseEntity<Page<ServiceDTO>> getAllServices(
+            @RequestParam String title,
+            @RequestParam Double minPrice,
+            @RequestParam Double maxPrice,
+            @RequestParam Boolean negotiable,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(serviceService.getAllServices(title, minPrice, maxPrice, negotiable, page, size));
     }
 
     @GetMapping("/{serviceId}")

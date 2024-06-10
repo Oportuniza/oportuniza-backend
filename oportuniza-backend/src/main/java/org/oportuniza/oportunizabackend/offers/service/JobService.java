@@ -5,13 +5,14 @@ import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.JobNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.repository.JobRepository;
+import org.oportuniza.oportunizabackend.offers.service.specifications.JobSpecifications;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 
 @Service
 public class JobService {
@@ -21,9 +22,29 @@ public class JobService {
         this.jobRepository = jobRepository;
     }
 
-    public Page<JobDTO> getAllJobs(int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        Page<Job> jobs = jobRepository.findAll(pageable);
+    public Page<JobDTO> getAllJobs(String title, Double minSalary, Double maxSalary, String workingModel, String workingRegime, Boolean negotiable, int page, int size) {
+        Specification<Job> spec = Specification.where(null);
+
+        if (title != null && !title.isEmpty()) {
+            spec = spec.and(JobSpecifications.titleContains(title));
+        }
+        if (minSalary != null) {
+            spec = spec.and(JobSpecifications.minSalaryGreaterThanOrEqual(minSalary));
+        }
+        if (maxSalary != null) {
+            spec = spec.and(JobSpecifications.maxSalaryLessThanOrEqual(maxSalary));
+        }
+        if (workingModel != null && !workingModel.isEmpty()) {
+            spec = spec.and(JobSpecifications.workingModelEquals(workingModel));
+        }
+        if (workingRegime != null && !workingRegime.isEmpty()) {
+            spec = spec.and(JobSpecifications.workingRegimeEquals(workingRegime));
+        }
+        if (negotiable != null) {
+            spec = spec.and(JobSpecifications.negotiableEquals(negotiable));
+        }
+
+        Page<Job> jobs = jobRepository.findAll(spec, PageRequest.of(page, size));
         return jobs.map(this::convertJobToJobDTO);
     }
 

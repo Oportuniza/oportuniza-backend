@@ -9,6 +9,10 @@ import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.repository.OfferRepository;
+import org.oportuniza.oportunizabackend.offers.service.specifications.OfferSpecifications;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.jpa.domain.Specification;
 
 @org.springframework.stereotype.Service
 public class OfferService {
@@ -17,6 +21,15 @@ public class OfferService {
 
     public OfferService(OfferRepository offerRepository) {
         this.offerRepository = offerRepository;
+    }
+
+    public Page<OfferDTO> getAllOffers(String title, int page, int size) {
+        Specification<Offer> spec = Specification.where(null);
+        if (title != null && !title.isEmpty()) {
+            spec = spec.and(OfferSpecifications.titleContains(title));
+        }
+
+        return offerRepository.findAll(spec,PageRequest.of(page, size)).map(OfferService::convertToDTO);
     }
 
     public Offer getOffer(long offerId) {

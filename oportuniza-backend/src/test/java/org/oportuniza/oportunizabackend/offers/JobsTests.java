@@ -7,6 +7,7 @@ import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
+import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.repository.JobRepository;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,6 +22,9 @@ import org.springframework.test.web.servlet.MvcResult;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -245,6 +249,61 @@ public class JobsTests {
         assertEquals(deleteContent, "Job deleted successfully.");
 
         userRepository.deleteById(user1.id());
+    }
+
+    @Test
+    public void testFilters() throws Exception {
+        List<Job> jobs = new ArrayList<>();
+        var job1 = new Job();
+        job1.setTitle("Job 1");
+        job1.setDescription("Description 1");
+        job1.setNegotiable(true);
+        job1.setSalary(1000.0);
+        job1.setLocalization("Braga");
+        job1.setWorkingModel("Remote");
+        job1.setWorkingRegime("Full-Time");
+        jobs.add(job1);
+
+        var job2 = new Job();
+        job2.setTitle("Job 2");
+        job2.setDescription("Description 2");
+        job2.setNegotiable(false);
+        job2.setSalary(2000.0);
+        job2.setLocalization("Porto");
+        job2.setWorkingModel("Presential");
+        job2.setWorkingRegime("Part-Time");
+        jobs.add(job2);
+
+        var job3 = new Job();
+        job3.setTitle("Job 3");
+        job3.setDescription("Description 3");
+        job3.setNegotiable(true);
+        job3.setSalary(3000.0);
+        job3.setLocalization("Lisboa");
+        job3.setWorkingModel("Remote");
+        job3.setWorkingRegime("Full-Time");
+        jobs.add(job3);
+
+        jobRepository.saveAll(jobs);
+
+        //Create User
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva"));
+        // Login user
+        var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
+
+        MvcResult result = mockMvc.perform(get("/api/jobs?minSalary=1000&maxSalary=2000&workingModel=Remote&workingRegime=Full-Time&negotiable=true")
+                .contentType(MediaType.APPLICATION_JSON)
+                .header("Authorization", "Bearer " + loginResponseDTO.jwtToken()))
+                .andExpect(status().isOk())
+                .andReturn();
+
+        String content = result.getResponse().getContentAsString();
+        PageImpl<JobDTO> contentObject = TestUtils.deserializePage(content, JobDTO.class, objectMapper);
+
+        assertNotNull(contentObject);
+        assertEquals(contentObject.getTotalElements(), 1);
+
+        jobRepository.deleteAll(jobs);
     }
 
 

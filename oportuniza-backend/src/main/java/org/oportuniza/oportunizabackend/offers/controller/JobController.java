@@ -11,8 +11,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
-
 @RestController
 @RequestMapping("/api/jobs")
 public class JobController {
@@ -25,9 +23,16 @@ public class JobController {
     }
 
     @GetMapping
-    public ResponseEntity<Page<JobDTO>> getAllJobs(@RequestParam(defaultValue = "0") int page,
-                                                   @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(jobService.getAllJobs(page, size)); // ADD SUPPORT FOR PAGINATION AND FILTERING
+    public ResponseEntity<Page<JobDTO>> getAllJobs(
+            @RequestParam String title,
+            @RequestParam Double minSalary,
+            @RequestParam Double maxSalary,
+            @RequestParam String workingModel,
+            @RequestParam String workingRegime,
+            @RequestParam Boolean negotiable,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(jobService.getAllJobs(title, minSalary, maxSalary, workingModel, workingRegime, negotiable, page, size)); // ADD SUPPORT FOR PAGINATION AND FILTERING
     }
 
     @GetMapping("/{jobId}")
