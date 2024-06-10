@@ -53,7 +53,7 @@ public class AuthenticationController {
 
             var response = new LoginResponseDTO(
                     user.getId(),
-                    userDetails.getUsername(),
+                    user.getEmail(),
                     roles,
                     user.getName(),
                     user.getPhoneNumber(),

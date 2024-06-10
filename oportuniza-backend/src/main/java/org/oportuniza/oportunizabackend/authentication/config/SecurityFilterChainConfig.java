@@ -49,7 +49,7 @@ public class SecurityFilterChainConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
-        configuration.addAllowedOrigin("*"); // Allow all origins
+        configuration.addAllowedOriginPattern("*"); // Allow all origins
         configuration.addAllowedHeader("*"); // Allow all headers
         configuration.addAllowedMethod("*"); // Allow all methods
 
