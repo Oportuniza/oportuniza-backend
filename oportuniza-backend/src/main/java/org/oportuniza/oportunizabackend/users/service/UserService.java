@@ -40,7 +40,7 @@ public class UserService implements UserDetailsService {
     }
 
     public UserDTO updateUser(long userId, UpdateUserDTO updatedUser)
-            throws UserNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided{
+            throws UserNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided, PasswordMismatchException {
         User user = getUserById(userId);
 
         if (updatedUser.name() != null) {
@@ -66,7 +66,7 @@ public class UserService implements UserDetailsService {
     }
 
     private void updatePasswordIfProvided(User user, UpdateUserDTO updatedUser)
-            throws NewPasswordNotProvided, OldPasswordNotProvided {
+            throws NewPasswordNotProvided, OldPasswordNotProvided, PasswordMismatchException {
         String oldPassword = updatedUser.oldPassword();
         String newPassword = updatedUser.password();
 
@@ -82,11 +82,11 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public Page<UserDTO> getFavoriteUsers(long userId, int page, int size) throws UserNotFoundException {
+    public Page<UserDTO> getFavoriteUsers(long userId, int page, int size) {
         return userRepository.findFavoriteUsersByUserId(userId, PageRequest.of(page, size)).map(this::convertToUserDTO);
     }
 
-    public Page<OfferDTO> getFavoriteOffers(long userId, int page, int size) throws UserNotFoundException {
+    public Page<OfferDTO> getFavoriteOffers(long userId, int page, int size) {
         return favoriteOffersRepository.findFavoriteOffersByUserId(userId, PageRequest.of(page, size)).map(OfferService::convertToDTO);
     }
 

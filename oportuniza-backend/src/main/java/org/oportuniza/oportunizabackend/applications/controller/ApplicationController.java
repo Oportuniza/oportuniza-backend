@@ -73,9 +73,13 @@ public class ApplicationController {
             @ApiResponse(responseCode = "200", description = "Application found", content = {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ApplicationDTO.class))
             }),
-            @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Application not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
     })
-    public ApplicationDTO getApplicationById(@Parameter(description = "The ID of the application to be retrieved") @PathVariable long id) throws ApplicationNotFoundException {
+    public ApplicationDTO getApplicationById(
+            @Parameter(description = "The ID of the application to be retrieved") @PathVariable long id)
+            throws ApplicationNotFoundException {
         return applicationService.getApplicationById(id);
     }
 
@@ -86,7 +90,9 @@ public class ApplicationController {
             @ApiResponse(responseCode = "201", description = "Application created", content = {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ApplicationDTO.class))
             }),
-            @ApiResponse(responseCode = "404", description = "User or offer not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "User or offer not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
     })
     public ApplicationDTO createApplication(
             @Parameter(description = "The ID of the user who wants to create the application") @PathVariable long userId,
@@ -107,9 +113,13 @@ public class ApplicationController {
             @ApiResponse(responseCode = "200", description = "State of application updated to accepted", content = {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ApplicationDTO.class))
             }),
-            @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Application not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
     })
-    public ApplicationDTO acceptApplication(@Parameter(description = "The ID of the application to be updated") @PathVariable long id) throws ApplicationNotFoundException {
+    public ApplicationDTO acceptApplication(
+            @Parameter(description = "The ID of the application to be updated") @PathVariable long id)
+            throws ApplicationNotFoundException {
         return applicationService.acceptApplication(id);
     }
 
@@ -120,9 +130,13 @@ public class ApplicationController {
             @ApiResponse(responseCode = "200", description = "State of application updated to rejected", content = {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ApplicationDTO.class))
             }),
-            @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Application not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
     })
-    public ApplicationDTO rejectApplication(@Parameter(description = "The ID of the application to be updated") @PathVariable long id) throws ApplicationNotFoundException {
+    public ApplicationDTO rejectApplication(
+            @Parameter(description = "The ID of the application to be updated") @PathVariable long id)
+            throws ApplicationNotFoundException {
         return applicationService.rejectApplication(id);
     }
 
@@ -133,9 +147,13 @@ public class ApplicationController {
             @ApiResponse(responseCode = "200", description = "Application deleted successfully", content = {
                     @Content(mediaType = "application/json;charset=UTF-8")
             }),
-            @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+            @ApiResponse(responseCode = "404", description = "Application not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
     })
-    public void deleteApplication(@Parameter(description = "The ID of the application to be deleted") @PathVariable long id) {
+    public void deleteApplication(
+            @Parameter(description = "The ID of the application to be deleted") @PathVariable long id)
+            throws ApplicationNotFoundException {
         // remove offers and users connections
         var app = applicationService.getApplication(id);
         userService.removeApplication(app);
