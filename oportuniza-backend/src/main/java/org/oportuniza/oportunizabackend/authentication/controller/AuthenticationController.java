@@ -1,5 +1,10 @@
 package org.oportuniza.oportunizabackend.authentication.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginResponseDTO;
@@ -35,6 +40,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/login")
+    @Operation(summary = "Login a user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User logged in", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = LoginResponseDTO.class))
+            })
+    })
     public ResponseEntity<LoginResponseDTO> authenticateAndGetToken(@RequestBody @Valid LoginDTO loginDTO) {
         var emailPassword = new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password());
         var authentication = authenticationManager.authenticate(emailPassword);
@@ -70,6 +81,12 @@ public class AuthenticationController {
     }
 
     @PostMapping("/register")
+    @Operation(summary = "Register a new user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "User registered", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = RegisterResponseDTO.class))
+            })
+    })
     public ResponseEntity<RegisterResponseDTO> createUser(@RequestBody @Valid RegisterDTO registerDTO) {
         if (userService.emailExists(registerDTO.email())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(null);

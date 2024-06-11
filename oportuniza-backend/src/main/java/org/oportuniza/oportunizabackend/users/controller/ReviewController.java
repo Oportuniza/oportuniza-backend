@@ -1,6 +1,11 @@
 package org.oportuniza.oportunizabackend.users.controller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.oportuniza.oportunizabackend.users.dto.CreateReviewDTO;
 import org.oportuniza.oportunizabackend.users.dto.ReviewDTO;
 import org.oportuniza.oportunizabackend.users.service.ReviewService;
@@ -26,6 +31,12 @@ public class ReviewController {
     }
 
     @PostMapping
+    @Operation(summary = "Create review")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Review created", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ReviewDTO.class))
+            })
+    })
     public ResponseEntity<ReviewDTO> createReview(@RequestBody CreateReviewDTO createReviewDTO) {
         var reviewer = userService.getUserById(createReviewDTO.reviewerId());
         var reviewed = userService.getUserById(createReviewDTO.reviewedId());

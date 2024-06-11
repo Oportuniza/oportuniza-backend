@@ -1,12 +1,22 @@
 package org.oportuniza.oportunizabackend.applications.controller;
 
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
+import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFoundException;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
+import org.oportuniza.oportunizabackend.offers.exceptions.OfferNotFoundException;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
+import org.oportuniza.oportunizabackend.users.exceptions.UserNotFoundException;
 import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.oportuniza.oportunizabackend.utils.ErrorResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -27,60 +37,110 @@ public class ApplicationController {
         this.offerService = offerService;
     }
 
-    // GET applications from a user -> /applications/applicant/:userId
     @GetMapping("/user/{userId}")
-    public ResponseEntity<Page<ApplicationDTO>> getApplicationsByUserId(@PathVariable Long userId,
-                                                                        @RequestParam(defaultValue = "0") int page,
-                                                                        @RequestParam(defaultValue = "10") int size) {
+    @Operation(summary = "Get applications by user id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User applications found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
+    public ResponseEntity<Page<ApplicationDTO>> getApplicationsByUserId(
+            @Parameter(description = "The ID of the user for which applications are to be retrieved") @PathVariable long userId,
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
         return ResponseEntity.ok(applicationService.getApplicationsByUserId(userId, page, size));
     }
 
-    // GET applications from an offer -> /applications/offer/:offerId
     @GetMapping("/offer/{offerId}")
-    public ResponseEntity<Page<ApplicationDTO>> getApplicationsByOfferId(@PathVariable Long offerId,
-                                                                         @RequestParam(defaultValue = "0") int page,
-                                                                         @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(applicationService.getApplicationsByOfferId(offerId, page, size));
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get applications by offer id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Offer applications found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
+    public Page<ApplicationDTO> getApplicationsByOfferId(
+            @Parameter(description = "The ID of the offer for which applications are to be retrieved") @PathVariable long offerId,
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
+        return applicationService.getApplicationsByOfferId(offerId, page, size);
     }
 
-    // GET application -> /applications/:id
     @GetMapping("/{id}")
-    public ResponseEntity<ApplicationDTO> getApplicationById(@PathVariable Long id) {
-        return ResponseEntity.ok(applicationService.getApplicationById(id));
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get application by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Application found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ApplicationDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+    })
+    public ApplicationDTO getApplicationById(@Parameter(description = "The ID of the application to be retrieved") @PathVariable long id) throws ApplicationNotFoundException {
+        return applicationService.getApplicationById(id);
     }
 
-    // POST application -> /applications
     @PostMapping("/users/{userId}/offers/{offerId}")
-    public ResponseEntity<ApplicationDTO> createApplication(@PathVariable Long userId, @PathVariable Long offerId,@RequestBody CreateApplicationDTO applicationDTO) {
+    @ResponseStatus(HttpStatus.CREATED)
+    @Operation(summary = "Create application")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Application created", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ApplicationDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "User or offer not found", content = @Content)
+    })
+    public ApplicationDTO createApplication(
+            @Parameter(description = "The ID of the user who wants to create the application") @PathVariable long userId,
+            @Parameter(description = "The ID of the offer for which the application is being created") @PathVariable long offerId,
+            @RequestBody CreateApplicationDTO applicationDTO) throws UserNotFoundException, OfferNotFoundException {
         var user = userService.getUserById(userId);
         var offer = offerService.getOffer(offerId);
         Application createdApplication = applicationService.createApplication(applicationDTO, offer, user);
         userService.addApplication(user, createdApplication);
         offerService.addApplication(offer, createdApplication);
-        return ResponseEntity.status(HttpStatus.CREATED).body(applicationService.convertToDTO(createdApplication));
+        return applicationService.convertToDTO(createdApplication);
     }
 
-    // PATCH accept application -> /applications/:id/accept
     @PatchMapping("/{id}/accept")
-    public ResponseEntity<ApplicationDTO> acceptApplication(@PathVariable Long id) {
-        return ResponseEntity.ok(applicationService.acceptApplication(id));
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Accept application")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "State of application updated to accepted", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ApplicationDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+    })
+    public ApplicationDTO acceptApplication(@Parameter(description = "The ID of the application to be updated") @PathVariable long id) throws ApplicationNotFoundException {
+        return applicationService.acceptApplication(id);
     }
 
-    // PATCH reject application -> /applications/:id/reject
     @PatchMapping("/{id}/reject")
-    public ResponseEntity<Application> rejectApplication(@PathVariable Long id) {
-        return ResponseEntity.ok(applicationService.rejectApplication(id));
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Reject application")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "State of application updated to rejected", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ApplicationDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+    })
+    public ApplicationDTO rejectApplication(@Parameter(description = "The ID of the application to be updated") @PathVariable long id) throws ApplicationNotFoundException {
+        return applicationService.rejectApplication(id);
     }
 
-    // DELETE application -> /applications/:id
     @DeleteMapping("/{id}")
-    public ResponseEntity<String> deleteApplication(@PathVariable Long id) {
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Delete application by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Application deleted successfully", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            }),
+            @ApiResponse(responseCode = "404", description = "Application not found", content = @Content)
+    })
+    public void deleteApplication(@Parameter(description = "The ID of the application to be deleted") @PathVariable long id) {
         // remove offers and users connections
         var app = applicationService.getApplication(id);
         userService.removeApplication(app);
         offerService.removeApplication(app);
         applicationService.deleteApplication(id);
-        return ResponseEntity.ok("Application deleted successfully.");
     }
 
 }

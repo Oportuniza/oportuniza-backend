@@ -23,17 +23,17 @@ public class ApplicationService {
         this.applicationRepository = applicationRepository;
     }
 
-    public Page<ApplicationDTO> getApplicationsByUserId(Long userId, int page, int size) {
+    public Page<ApplicationDTO> getApplicationsByUserId(long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
-        return applicationRepository.findByUserId(userId,pageable).map(this::convertToDTO);
+        return applicationRepository.findByUserId(userId, pageable).map(this::convertToDTO);
     }
 
-    public Page<ApplicationDTO> getApplicationsByOfferId(Long offerId, int page, int size) {
+    public Page<ApplicationDTO> getApplicationsByOfferId(long offerId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         return applicationRepository.findByOfferId(offerId, pageable).map(this::convertToDTO);
     }
 
-    public ApplicationDTO getApplicationById(Long id) throws ApplicationNotFoundException {
+    public ApplicationDTO getApplicationById(long id) throws ApplicationNotFoundException {
         return convertToDTO(applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id)));
     }
 
@@ -66,11 +66,11 @@ public class ApplicationService {
         return convertToDTO(app);
     }
 
-    public Application rejectApplication(long id) {
+    public ApplicationDTO rejectApplication(long id) {
         var app = getApplication(id);
         app.setStatus("Rejected");
         applicationRepository.save(app);
-        return app;
+        return convertToDTO(app);
     }
 
     public void deleteApplication(long id) throws ApplicationNotFoundException {

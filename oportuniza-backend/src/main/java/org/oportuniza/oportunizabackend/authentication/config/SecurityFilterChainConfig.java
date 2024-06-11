@@ -36,6 +36,15 @@ public class SecurityFilterChainConfig {
                 .csrf(AbstractHttpConfigurer::disable) // Cross-Site Request Forgery (why to disable this?)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(registry -> {
+                    registry.requestMatchers(
+                            "/swagger-ui.html",
+                            "/swagger-ui/**",
+                            "/swagger-resources",
+                            "/swagger-resources/**",
+                            "/v3/api-docs",
+                            "/v3/api-docs/**",
+                            "/webjars/**"
+                            ).permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
                     registry.anyRequest().authenticated();

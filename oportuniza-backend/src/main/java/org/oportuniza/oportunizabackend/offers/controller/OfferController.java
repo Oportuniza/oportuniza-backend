@@ -1,5 +1,9 @@
 package org.oportuniza.oportunizabackend.offers.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
 import org.springframework.data.domain.Page;
@@ -20,6 +24,12 @@ public class OfferController {
     }
 
     @GetMapping
+    @Operation(summary = "Get all offers")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All offers obtained", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
     public ResponseEntity<Page<OfferDTO>> getAllOffers(
             @RequestParam String title,
             @RequestParam(defaultValue = "0") int page,

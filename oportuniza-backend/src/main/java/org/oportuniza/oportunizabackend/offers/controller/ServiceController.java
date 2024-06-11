@@ -1,5 +1,10 @@
 package org.oportuniza.oportunizabackend.offers.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
@@ -24,6 +29,12 @@ public class ServiceController {
     }
 
     @GetMapping
+    @Operation(summary = "Get all services")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All services obtained", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
     public ResponseEntity<Page<ServiceDTO>> getAllServices(
             @RequestParam String title,
             @RequestParam Double minPrice,
@@ -35,11 +46,23 @@ public class ServiceController {
     }
 
     @GetMapping("/{serviceId}")
+    @Operation(summary = "Get service by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Service obtained", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ServiceDTO.class))
+            })
+    })
     public ResponseEntity<ServiceDTO> getService(@PathVariable long serviceId) {
         return ResponseEntity.ok(serviceService.getService(serviceId));
     }
 
     @GetMapping("/users/{userId}")
+    @Operation(summary = "Get services by user id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User services found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
     public ResponseEntity<Page<ServiceDTO>> getUserServices(@PathVariable long userId,
                                                             @RequestParam(defaultValue = "0") int page,
                                                             @RequestParam(defaultValue = "10") int size) {
@@ -47,11 +70,23 @@ public class ServiceController {
     }
 
     @PutMapping("/{serviceId}")
+    @Operation(summary = "Update service")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Service updated", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ServiceDTO.class))
+            })
+    })
     public ResponseEntity<ServiceDTO> updateService(@PathVariable long serviceId, @RequestBody @Valid ServiceDTO updatedService) {
         return ResponseEntity.ok(serviceService.updateService(serviceId, updatedService));
     }
 
     @PostMapping("/users/{userId}")
+    @Operation(summary = "Create service")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Service created", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ServiceDTO.class))
+            })
+    })
     public ResponseEntity<ServiceDTO> createService(@PathVariable long userId, @RequestBody @Valid CreateServiceDTO serviceDTO) {
         var user = userService.getUserById(userId);
         var service = serviceService.createService(serviceDTO, user);
@@ -60,6 +95,12 @@ public class ServiceController {
     }
 
     @DeleteMapping("/{serviceId}") // remove service from user's offers and users' favorites
+    @Operation(summary = "Delete service")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Service deleted", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
     public ResponseEntity<String> deleteService(@PathVariable long serviceId) throws Exception {
         Service service = serviceService.getServiceById(serviceId);
         userService.removeOffer(service);

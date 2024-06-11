@@ -17,7 +17,6 @@ import org.oportuniza.oportunizabackend.users.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -35,13 +34,13 @@ public class UserService implements UserDetailsService {
         this.favoriteOffersRepository = favoriteOffersRepository;
     }
 
-    public UserDTO getUser(long userId) throws UserWithIdNotFoundException {
+    public UserDTO getUser(long userId) throws UserNotFoundException {
         User user = getUserById(userId);
         return convertToUserDTO(user);
     }
 
     public UserDTO updateUser(long userId, UpdateUserDTO updatedUser)
-            throws UserWithIdNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided{
+            throws UserNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided{
         User user = getUserById(userId);
 
         if (updatedUser.name() != null) {
@@ -83,29 +82,29 @@ public class UserService implements UserDetailsService {
         }
     }
 
-    public Page<UserDTO> getFavoriteUsers(long userId, int page, int size) throws UserWithIdNotFoundException {
+    public Page<UserDTO> getFavoriteUsers(long userId, int page, int size) throws UserNotFoundException {
         return userRepository.findFavoriteUsersByUserId(userId, PageRequest.of(page, size)).map(this::convertToUserDTO);
     }
 
-    public Page<OfferDTO> getFavoriteOffers(long userId, int page, int size) throws UserWithIdNotFoundException {
+    public Page<OfferDTO> getFavoriteOffers(long userId, int page, int size) throws UserNotFoundException {
         return favoriteOffersRepository.findFavoriteOffersByUserId(userId, PageRequest.of(page, size)).map(OfferService::convertToDTO);
     }
 
-    public void addFavoriteUser(long userId, long id) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
+    public void addFavoriteUser(long userId, long id) throws UserNotFoundException {
         User user = getUserById(userId);
         User favoriteUser = getUserById(id);
         user.addFavoriteUser(favoriteUser);
         userRepository.save(user);
     }
 
-    public void removeFavoriteUser(long userId, long id) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
+    public void removeFavoriteUser(long userId, long id) throws UserNotFoundException {
         User user = getUserById(userId);
         User favoriteUser = getUserById(id);
         user.removeFavoriteUser(favoriteUser);
         userRepository.save(user);
     }
 
-    public void addOffer(long id, Offer offer) throws UserWithIdNotFoundException {
+    public void addOffer(long id, Offer offer) throws UserNotFoundException {
         User user = getUserById(id);
         user.addOffer(offer);
         userRepository.save(user);
@@ -117,13 +116,13 @@ public class UserService implements UserDetailsService {
             userRepository.save(user);
     }
 
-    public void addFavoriteOffer(long userId, Offer offer) throws UserWithEmailNotFoundException {
+    public void addFavoriteOffer(long userId, Offer offer) throws UserNotFoundException {
         User user = getUserById(userId);
         user.addFavoriteOffer(offer);
         userRepository.save(user);
     }
 
-    public void removeFavoriteOffer(long userId, Offer offer) throws UserWithIdNotFoundException, UserWithEmailNotFoundException {
+    public void removeFavoriteOffer(long userId, Offer offer) throws UserNotFoundException {
         User user = getUserById(userId);
         user.removeFavoriteOffer(offer);
         userRepository.save(user);
@@ -147,7 +146,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void updateUserRating(long userId, double averageRating) throws UserWithIdNotFoundException {
+    public void updateUserRating(long userId, double averageRating) throws UserNotFoundException {
         User user = getUserById(userId);
         user.setAverageRating(averageRating);
         user.incrementReviewCount();
@@ -188,14 +187,14 @@ public class UserService implements UserDetailsService {
                 user.getReviewCount());
     }
 
-    public User getUserById(long id) throws UserWithIdNotFoundException {
+    public User getUserById(long id) throws UserNotFoundException {
         return userRepository.findById(id)
-                .orElseThrow(() -> new UserWithIdNotFoundException(id));
+                .orElseThrow(() -> new UserNotFoundException(id));
     }
 
     @Override
-    public User loadUserByUsername(String username) throws UsernameNotFoundException {
-        return userRepository.findByEmail(username)
-                .orElseThrow(() -> new UserWithEmailNotFoundException(username));
+    public User loadUserByUsername(String email) throws UserNotFoundException {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserNotFoundException(email));
     }
 }

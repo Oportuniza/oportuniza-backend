@@ -32,7 +32,7 @@ public class OfferService {
         return offerRepository.findAll(spec,PageRequest.of(page, size)).map(OfferService::convertToDTO);
     }
 
-    public Offer getOffer(long offerId) {
+    public Offer getOffer(long offerId) throws OfferNotFoundException {
         return offerRepository.findById(offerId).orElseThrow(() -> new OfferNotFoundException(offerId));
     }
 

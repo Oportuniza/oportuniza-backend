@@ -1,5 +1,10 @@
 package org.oportuniza.oportunizabackend.offers.controller;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
@@ -23,6 +28,12 @@ public class JobController {
     }
 
     @GetMapping
+    @Operation(summary = "Get all jobs")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "All jobs obtained", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
     public ResponseEntity<Page<JobDTO>> getAllJobs(
             @RequestParam String title,
             @RequestParam Double minSalary,
@@ -36,11 +47,23 @@ public class JobController {
     }
 
     @GetMapping("/{jobId}")
+    @Operation(summary = "Get job by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Job obtained", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = JobDTO.class))
+            })
+    })
     public ResponseEntity<JobDTO> getJob(@PathVariable long jobId) {
         return ResponseEntity.ok(jobService.getJob(jobId));
     }
 
     @GetMapping("/users/{userId}")
+    @Operation(summary = "Get jobs by user id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User jobs found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
     public ResponseEntity<Page<JobDTO>> getUserJobs(@PathVariable long userId,
                                                     @RequestParam(defaultValue = "0") int page,
                                                     @RequestParam(defaultValue = "10") int size) {
@@ -48,11 +71,23 @@ public class JobController {
     }
 
     @PutMapping("/{jobId}")
+    @Operation(summary = "Update job")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Job updated", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = JobDTO.class))
+            })
+    })
     public ResponseEntity<JobDTO> updateJob(@PathVariable long jobId, @RequestBody @Valid JobDTO updatedJob) {
         return ResponseEntity.ok(jobService.updateJob(jobId, updatedJob));
     }
 
     @PostMapping("/users/{userId}")
+    @Operation(summary = "Create job")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Job created", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = JobDTO.class))
+            })
+    })
     public ResponseEntity<JobDTO> createJob(@PathVariable long userId, @RequestBody @Valid CreateJobDTO jobDTO) {
         var user = userService.getUserById(userId);
         var job = jobService.createJob(jobDTO, user);
@@ -61,6 +96,12 @@ public class JobController {
     }
 
     @DeleteMapping("/{jobId}") // remove job from user's offers and users' favorites
+    @Operation(summary = "Delete job")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Job deleted", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
     public ResponseEntity<String> deleteJob(@PathVariable long jobId) throws Exception {
         Job job = jobService.getJobById(jobId);
         userService.removeOffer(job);
