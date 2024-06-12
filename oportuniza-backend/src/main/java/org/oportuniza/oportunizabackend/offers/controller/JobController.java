@@ -1,6 +1,7 @@
 package org.oportuniza.oportunizabackend.offers.controller;
 
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -8,12 +9,14 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
+import org.oportuniza.oportunizabackend.offers.exceptions.JobNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.service.JobService;
+import org.oportuniza.oportunizabackend.users.exceptions.UserNotFoundException;
 import org.oportuniza.oportunizabackend.users.service.UserService;
+import org.oportuniza.oportunizabackend.utils.ErrorResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -28,85 +31,113 @@ public class JobController {
     }
 
     @GetMapping
+    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get all jobs")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "All jobs obtained", content = {
                     @Content(mediaType = "application/json;charset=UTF-8")
             })
     })
-    public ResponseEntity<Page<JobDTO>> getAllJobs(
-            @RequestParam String title,
-            @RequestParam Double minSalary,
-            @RequestParam Double maxSalary,
-            @RequestParam String workingModel,
-            @RequestParam String workingRegime,
-            @RequestParam Boolean negotiable,
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(jobService.getAllJobs(title, minSalary, maxSalary, workingModel, workingRegime, negotiable, page, size)); // ADD SUPPORT FOR PAGINATION AND FILTERING
+    public Page<JobDTO> getAllJobs(
+            @Parameter(description = "The title of the jobs to filter") @RequestParam(required = false) String title,
+            @Parameter(description = "The minimum salary of the jobs to filter") @RequestParam(required = false) Double minSalary,
+            @Parameter(description = "The maximum salary of the jobs to filter") @RequestParam(required = false) Double maxSalary,
+            @Parameter(description = "The working model of the jobs to filter (e.g., remote, on-site)") @RequestParam(required = false) String workingModel,
+            @Parameter(description = "The working regime of the jobs to filter (e.g., full-time, part-time)") @RequestParam(required = false) String workingRegime,
+            @Parameter(description = "Whether the job salary is negotiable") @RequestParam(required = false) Boolean negotiable,
+            @Parameter(description = "Page number for pagination") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page for pagination") @RequestParam(defaultValue = "10") int size) {
+        return jobService.getAllJobs(title, minSalary, maxSalary, workingModel, workingRegime, negotiable, page, size);
     }
 
     @GetMapping("/{jobId}")
+    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get job by id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Job obtained", content = {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = JobDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Job not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public ResponseEntity<JobDTO> getJob(@PathVariable long jobId) {
-        return ResponseEntity.ok(jobService.getJob(jobId));
+    public JobDTO getJob(
+            @Parameter(description = "The ID of the job to be retrieved") @PathVariable long jobId)
+            throws JobNotFoundException {
+        return jobService.getJob(jobId);
     }
 
     @GetMapping("/users/{userId}")
+    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Get jobs by user id")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User jobs found", content = {
                     @Content(mediaType = "application/json;charset=UTF-8")
             })
     })
-    public ResponseEntity<Page<JobDTO>> getUserJobs(@PathVariable long userId,
-                                                    @RequestParam(defaultValue = "0") int page,
-                                                    @RequestParam(defaultValue = "10") int size) {
-        return ResponseEntity.ok(jobService.getUserJobs(userId, page, size));
+    public Page<JobDTO> getUserJobs(
+            @Parameter(description = "The ID of the user whose jobs are to be retrieved") @PathVariable long userId,
+            @Parameter(description = "Page number for pagination") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page for pagination") @RequestParam(defaultValue = "10") int size) {
+        return jobService.getUserJobs(userId, page, size);
     }
 
     @PutMapping("/{jobId}")
+    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Update job")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Job updated", content = {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = JobDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Job not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public ResponseEntity<JobDTO> updateJob(@PathVariable long jobId, @RequestBody @Valid JobDTO updatedJob) {
-        return ResponseEntity.ok(jobService.updateJob(jobId, updatedJob));
+    public JobDTO updateJob(
+            @Parameter(description = "The ID of the job to be updated") @PathVariable long jobId,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The updated job details") @RequestBody @Valid JobDTO updatedJob)
+            throws JobNotFoundException {
+        return jobService.updateJob(jobId, updatedJob);
     }
 
     @PostMapping("/users/{userId}")
+    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Create job")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Job created", content = {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = JobDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public ResponseEntity<JobDTO> createJob(@PathVariable long userId, @RequestBody @Valid CreateJobDTO jobDTO) {
+    public JobDTO createJob(
+            @Parameter(description = "The ID of the user creating the job") @PathVariable long userId,
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details of the job to be created") @RequestBody @Valid CreateJobDTO jobDTO)
+            throws UserNotFoundException {
         var user = userService.getUserById(userId);
         var job = jobService.createJob(jobDTO, user);
         userService.addOffer(userId, job);
-        return ResponseEntity.status(HttpStatus.CREATED).body(jobService.convertJobToJobDTO(job));
+        return jobService.convertJobToJobDTO(job);
     }
 
     @DeleteMapping("/{jobId}") // remove job from user's offers and users' favorites
+    @ResponseStatus(HttpStatus.OK)
     @Operation(summary = "Delete job")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Job deleted", content = {
                     @Content(mediaType = "application/json;charset=UTF-8")
+            }),
+            @ApiResponse(responseCode = "404", description = "Job not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public ResponseEntity<String> deleteJob(@PathVariable long jobId) throws Exception {
+    public void deleteJob(
+            @Parameter(description = "The ID of the job to be deleted") @PathVariable long jobId)
+            throws JobNotFoundException {
         Job job = jobService.getJobById(jobId);
         userService.removeOffer(job);
         userService.removeOfferFromFavorites(job);
         jobService.deleteJob(jobId);
-        return ResponseEntity.ok("Job deleted successfully.");
     }
 }

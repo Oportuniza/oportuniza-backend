@@ -146,7 +146,6 @@ public class JobsTests {
     }
 
     @Test
-    //@WithMockUser(username = "admin", roles = {"ADMIN"})
     public void createJobTest() throws Exception {
         // Create user
         var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva");
@@ -244,10 +243,6 @@ public class JobsTests {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String deleteContent = deleteResult.getResponse().getContentAsString();
-
-        assertEquals(deleteContent, "Job deleted successfully.");
-
         userRepository.deleteById(user1.id());
     }
 
@@ -304,6 +299,7 @@ public class JobsTests {
         assertEquals(contentObject.getTotalElements(), 1);
 
         jobRepository.deleteAll(jobs);
+        userRepository.deleteById(user1.id());
     }
 
 

@@ -29,7 +29,7 @@ public class OfferController {
             })
     })
     public Page<OfferDTO> getAllOffers(
-            @Parameter(description = "The title of the offers to filter") @RequestParam String title,
+            @Parameter(description = "The title of the offers to filter") @RequestParam(required = false) String title,
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
         return offerService.getAllOffers(title, page, size);

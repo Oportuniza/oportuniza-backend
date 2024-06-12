@@ -226,10 +226,6 @@ public class ServicesTests {
                 .andExpect(status().isOk())
                 .andReturn();
 
-        String deleteContent = deleteResult.getResponse().getContentAsString();
-
-        assertEquals(deleteContent, "Service deleted successfully.");
-
         userRepository.deleteById(user1.id());
     }
 }
