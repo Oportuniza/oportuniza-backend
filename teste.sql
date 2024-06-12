@@ -1,18 +1,18 @@
 -- Limpeza dos dados das tabelas
-DELETE FROM users_roles;
-DELETE FROM service;
-DELETE FROM job;
-DELETE FROM favorites_offers;
-DELETE FROM documents;
-DELETE FROM applications;
-DELETE FROM offers;
-DELETE FROM favorite_users;
-DELETE FROM reviews;
-DELETE FROM users;
-DELETE FROM roles;
-DELETE FROM chat_message;
-DELETE FROM chat_notification;
-DELETE FROM general_notification;
+--DELETE FROM users_roles;
+--DELETE FROM service;
+--DELETE FROM job;
+--DELETE FROM favorites_offers;
+--DELETE FROM documents;
+--DELETE FROM applications;
+--DELETE FROM offers;
+--DELETE FROM favorite_users;
+--DELETE FROM reviews;
+--DELETE FROM users;
+--DELETE FROM roles;
+--DELETE FROM chat_message;
+--DELETE FROM chat_notification;
+--DELETE FROM general_notification;
 
 -- Inserindo dados na tabela chat_message
 INSERT INTO chat_message (id, content, receiver, sender, status, timestamp)
