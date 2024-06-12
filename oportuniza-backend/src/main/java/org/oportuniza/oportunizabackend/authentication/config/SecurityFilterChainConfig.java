@@ -51,6 +51,7 @@ public class SecurityFilterChainConfig {
                 })
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class) // logging filter before jwt to log even invalid requests
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                .oauth2Login(withDefaults())
                 .build();
     }
 

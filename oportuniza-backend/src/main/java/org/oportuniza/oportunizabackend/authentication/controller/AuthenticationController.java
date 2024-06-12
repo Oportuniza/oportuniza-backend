@@ -23,6 +23,7 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -107,6 +108,12 @@ public class AuthenticationController {
         }
         User user = userService.createUser(registerDTO);
         return new RegisterResponseDTO(user.getId(), user.getEmail(), user.getName(), user.getPhoneNumber());
+    }
+
+    @GetMapping("/loginSuccess")
+    public String getLoginInfo(OAuth2AuthenticationToken token) {
+        // You can get user info from the token here
+        return "loginSuccess";
     }
 
 }
