@@ -11,7 +11,7 @@
     <groupId>org.oportuniza</groupId>
     <artifactId>oportuniza-backend</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <packaging>war</packaging>
+    <packaging>jar</packaging>
     <name>oportuniza-backend</name>
     <description>oportuniza-backend</description>
     <properties>
@@ -152,6 +152,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-security</artifactId>
+        </dependency>
+
+        <!-- Cloud -->
+        <dependency>
+            <groupId>com.google.cloud.sql</groupId>
+            <artifactId>postgres-socket-factory</artifactId>
+            <version>1.18.0</version>
         </dependency>
 
     </dependencies>
