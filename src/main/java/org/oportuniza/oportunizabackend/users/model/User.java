@@ -24,14 +24,20 @@ public class User implements UserDetails {
     @Column(nullable = false, unique = true)
     private String email;
 
-    @Column(nullable = false)
+    @Column(name = "auth_provider", nullable = false)
+    private String authProvider;
+
+    @Column
     private String password;
 
-    @Column(nullable = false)
+    @Column
     private String name;
 
-    @Column(name = "phone_number" ,nullable = false)
+    @Column(name = "phone_number")
     private String phoneNumber;
+
+    @Column(name = "picture_url")
+    private String pictureUrl;
 
     @Column(name = "resume_url")
     private String resumeUrl;
