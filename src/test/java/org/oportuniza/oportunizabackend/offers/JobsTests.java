@@ -65,7 +65,7 @@ public class JobsTests {
     @Test
     public void getAllJobsTest() throws Exception {
         //Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva");
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -107,7 +107,7 @@ public class JobsTests {
     @Test
     public void getUserJobs() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva");
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -148,7 +148,7 @@ public class JobsTests {
     @Test
     public void createJobTest() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva");
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -183,7 +183,7 @@ public class JobsTests {
     //@WithMockUser(username = "admin", roles = {"ADMIN"})
     public void getJobByIdTest() throws Exception {
         //Create User
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva");
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -282,7 +282,7 @@ public class JobsTests {
         jobRepository.saveAll(jobs);
 
         //Create User
-        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva"));
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null));
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
 

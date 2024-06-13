@@ -1,6 +1,7 @@
 package org.oportuniza.oportunizabackend.offers.service;
 
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
+import org.oportuniza.oportunizabackend.offers.dto.GetJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.JobNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Job;
@@ -61,8 +62,8 @@ public class JobService {
                 job.getWorkingRegime());
     }
 
-    public JobDTO getJob(long jobId) throws JobNotFoundException {
-        return convertJobToJobDTO(jobRepository.findById(jobId).orElseThrow(() -> new JobNotFoundException(jobId)));
+    public Job getJob(long jobId) throws JobNotFoundException {
+        return jobRepository.findById(jobId).orElseThrow(() -> new JobNotFoundException(jobId));
     }
 
     public JobDTO updateJob(long jobId, JobDTO updatedJob) throws JobNotFoundException {

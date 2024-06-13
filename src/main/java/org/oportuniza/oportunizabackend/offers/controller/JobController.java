@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
+import org.oportuniza.oportunizabackend.offers.dto.GetJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.JobNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Job;
@@ -61,10 +62,21 @@ public class JobController {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public JobDTO getJob(
+    public GetJobDTO getJob(
             @Parameter(description = "The ID of the job to be retrieved") @PathVariable long jobId)
             throws JobNotFoundException {
-        return jobService.getJob(jobId);
+        var job = jobService.getJob(jobId);
+        return new GetJobDTO(
+                job.getId(),
+                job.getTitle(),
+                job.getDescription(),
+                job.isNegotiable(),
+                job.getCreatedAt(),
+                job.getSalary(),
+                job.getLocalization(),
+                job.getWorkingModel(),
+                job.getWorkingRegime(),
+                userService.convertToUserDTO(job.getUser()));
     }
 
     @GetMapping("/users/{userId}")

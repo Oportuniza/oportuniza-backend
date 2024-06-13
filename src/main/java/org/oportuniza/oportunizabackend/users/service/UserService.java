@@ -175,7 +175,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    private UserDTO convertToUserDTO(User user) {
+    public UserDTO convertToUserDTO(User user) {
         return new UserDTO(
                 user.getId(),
                 user.getEmail(),
