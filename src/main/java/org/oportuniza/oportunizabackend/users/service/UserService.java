@@ -164,6 +164,7 @@ public class UserService implements UserDetailsService {
         user.setPassword(encryptedPassword);
         user.setPhoneNumber(registerDTO.phoneNumber());
         user.setName(registerDTO.name());
+        user.setAuthProvider("local");
 
         Role role = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
             Role newRole = new Role("ROLE_USER");

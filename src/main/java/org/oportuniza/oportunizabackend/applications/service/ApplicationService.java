@@ -91,7 +91,8 @@ public class ApplicationService {
                 application.getMessage(),
                 application.getResumeUrl(),
                 application.getDocuments().stream().map(Document::getUrl).toList(),
-                application.getStatus());
+                application.getStatus(),
+                application.getCreatedAt());
     }
 
     public Application getApplication(Long id) throws ApplicationNotFoundException {

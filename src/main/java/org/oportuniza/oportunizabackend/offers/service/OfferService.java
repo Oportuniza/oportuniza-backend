@@ -54,6 +54,7 @@ public class OfferService {
                     service.getTitle(),
                     service.getDescription(),
                     service.isNegotiable(),
+                    service.getCreatedAt(),
                     service.getPrice()
             );
         } else {
@@ -63,6 +64,7 @@ public class OfferService {
                     job.getTitle(),
                     job.getDescription(),
                     job.isNegotiable(),
+                    job.getCreatedAt(),
                     job.getSalary(),
                     job.getLocalization(),
                     job.getWorkingModel(),

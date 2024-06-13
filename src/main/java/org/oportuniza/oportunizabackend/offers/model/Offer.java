@@ -2,9 +2,11 @@ package org.oportuniza.oportunizabackend.offers.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.users.model.User;
 
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -34,6 +36,10 @@ public abstract class Offer {
     @ManyToOne
     @JoinColumn(name = "user_id")
     private User user;
+
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
+    private Date createdAt;
 
     public void addApplication(Application application) {
         applications.add(application);

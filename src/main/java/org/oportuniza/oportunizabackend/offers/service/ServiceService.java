@@ -59,7 +59,7 @@ public class ServiceService {
 
 
     public ServiceDTO convertServiceToServiceDTO(Service service) {
-        return new ServiceDTO(service.getId(), service.getTitle(), service.getDescription(), service.isNegotiable(), service.getPrice());
+        return new ServiceDTO(service.getId(), service.getTitle(), service.getDescription(), service.isNegotiable(), service.getCreatedAt(), service.getPrice());
     }
 
 

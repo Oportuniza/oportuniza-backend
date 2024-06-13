@@ -54,6 +54,7 @@ public class JobService {
                 job.getTitle(),
                 job.getDescription(),
                 job.isNegotiable(),
+                job.getCreatedAt(),
                 job.getSalary(),
                 job.getLocalization(),
                 job.getWorkingModel(),

@@ -1,20 +1,23 @@
 package org.oportuniza.oportunizabackend.authentication.controller;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.gson.GsonFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
-import org.oportuniza.oportunizabackend.authentication.dto.LoginResponseDTO;
-import org.oportuniza.oportunizabackend.authentication.dto.RegisterResponseDTO;
+import org.oportuniza.oportunizabackend.authentication.dto.*;
 import org.oportuniza.oportunizabackend.authentication.exceptions.EmailAlreadyExistsException;
 import org.oportuniza.oportunizabackend.authentication.utils.JwtUtils;
-import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.oportuniza.oportunizabackend.utils.ErrorResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -23,9 +26,11 @@ import org.springframework.security.core.AuthenticationException;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
+import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -34,15 +39,21 @@ import java.util.stream.Collectors;
 public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
+    private final GoogleIdTokenVerifier verifier;
 
-    public AuthenticationController(AuthenticationManager authenticationManager, UserService userService) {
+    public AuthenticationController(@Value("${spring.security.oauth2.client.registration.google.client-id}")String clientId, AuthenticationManager authenticationManager, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
+        NetHttpTransport transport = new NetHttpTransport();
+        JsonFactory jsonFactory = new GsonFactory();
+        this.verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                .setAudience(Collections.singletonList(clientId))
+                .build();
     }
 
     @PostMapping("/login")
     @ResponseStatus(HttpStatus.OK)
-    @Operation(summary = "Login a user")
+    @Operation(summary = "Login a user with email and password and return a JWT token")
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "User logged in", content = {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = LoginResponseDTO.class))
@@ -82,6 +93,7 @@ public class AuthenticationController {
                 user.getName(),
                 user.getPhoneNumber(),
                 user.getResumeUrl(),
+                user.getPictureUrl(),
                 user.getAverageRating(),
                 user.getReviewCount(),
                 user.getDistrict(),
@@ -110,10 +122,60 @@ public class AuthenticationController {
         return new RegisterResponseDTO(user.getId(), user.getEmail(), user.getName(), user.getPhoneNumber());
     }
 
-    @GetMapping("/loginSuccess")
-    public String getLoginInfo(OAuth2AuthenticationToken token) {
-        // You can get user info from the token here
-        return "loginSuccess";
+
+    @PostMapping("/google")
+    public LoginResponseDTO googleAuth(@RequestBody LoginOAuth2DTO loginOAuth2DTO) throws GeneralSecurityException, IOException {
+        // Validate idToken with Google OAuth2 API
+        GoogleIdToken.Payload payload = verifyIDToken(loginOAuth2DTO.token());
+
+        // Process the authenticated user (create session, etc.)
+        String email = payload.getEmail();
+
+        if (!userService.emailExists(email)) {
+            String firstName = (String) payload.get("given_name");
+            String lastName = (String) payload.get("family_name");
+            String pictureUrl = (String) payload.get("picture");
+
+            // Create a new user if not exists
+            RegisterDTO registerDTO = new RegisterDTO(email,
+                    null,
+                    "google",
+                    null,
+                    firstName + " " + lastName,
+                    pictureUrl);
+            userService.createUser(registerDTO);
+        }
+
+        // Authenticate user (assuming you have a method to create JWT token)
+        User user = userService.loadUserByUsername(email);
+        String jwtToken = JwtUtils.generateToken(user);
+
+        List<String> roles = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        return new LoginResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                roles,
+                user.getName(),
+                user.getPhoneNumber(),
+                user.getResumeUrl(),
+                user.getPictureUrl(),
+                user.getAverageRating(),
+                user.getReviewCount(),
+                user.getDistrict(),
+                user.getCounty(),
+                jwtToken);
+    }
+
+    // Method to verify Google ID token
+    private GoogleIdToken.Payload verifyIDToken(String idToken) throws GeneralSecurityException, IOException {
+        GoogleIdToken idTokenObj = verifier.verify(idToken);
+        if (idTokenObj == null) {
+            throw new BadCredentialsException("Failed to authenticate with Google");
+        }
+        return idTokenObj.getPayload();
     }
 
 }
