@@ -1,5 +1,6 @@
 package org.oportuniza.oportunizabackend.applications.dto;
 
+import java.util.Date;
 import java.util.List;
 
 public record ApplicationDTO (
@@ -12,6 +13,7 @@ public record ApplicationDTO (
         String message,
         String resumeUrl,
         List<String> documentsUrls,
-        String status
+        String status,
+        Date createdAt
 ){
 }

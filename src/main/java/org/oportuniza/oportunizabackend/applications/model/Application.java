@@ -2,9 +2,11 @@ package org.oportuniza.oportunizabackend.applications.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.model.User;
 
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -33,6 +35,10 @@ public class Application {
     private String email;
 
     private String message;
+
+    @CreationTimestamp
+    @Column(updatable = false, name = "created_at")
+    private Date createdAt;
 
     @Column(name = "resume_url")
     private String resumeUrl;
