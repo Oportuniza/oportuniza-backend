@@ -42,8 +42,8 @@ public class ServiceService {
         return services.map(this::convertServiceToServiceDTO);
     }
 
-    public ServiceDTO getService(long serviceId) {
-        return convertServiceToServiceDTO(serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId)));
+    public Service getService(long serviceId) throws ServiceNotFoundException {
+        return serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
     }
 
 
@@ -59,7 +59,7 @@ public class ServiceService {
 
 
     public ServiceDTO convertServiceToServiceDTO(Service service) {
-        return new ServiceDTO(service.getId(), service.getTitle(), service.getDescription(), service.isNegotiable(), service.getPrice());
+        return new ServiceDTO(service.getId(), service.getTitle(), service.getDescription(), service.isNegotiable(), service.getCreatedAt(), service.getPrice());
     }
 
 

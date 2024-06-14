@@ -36,7 +36,7 @@ public class UserService implements UserDetailsService {
 
     public UserDTO getUser(long userId) throws UserNotFoundException {
         User user = getUserById(userId);
-        return convertToUserDTO(user);
+        return convertToDTO(user);
     }
 
     public UserDTO updateUser(long userId, UpdateUserDTO updatedUser)
@@ -62,7 +62,7 @@ public class UserService implements UserDetailsService {
         updatePasswordIfProvided(user, updatedUser);
         userRepository.save(user);
 
-        return convertToUserDTO(user);
+        return convertToDTO(user);
     }
 
     private void updatePasswordIfProvided(User user, UpdateUserDTO updatedUser)
@@ -83,7 +83,7 @@ public class UserService implements UserDetailsService {
     }
 
     public Page<UserDTO> getFavoriteUsers(long userId, int page, int size) {
-        return userRepository.findFavoriteUsersByUserId(userId, PageRequest.of(page, size)).map(this::convertToUserDTO);
+        return userRepository.findFavoriteUsersByUserId(userId, PageRequest.of(page, size)).map(UserService::convertToDTO);
     }
 
     public Page<OfferDTO> getFavoriteOffers(long userId, int page, int size) {
@@ -164,6 +164,7 @@ public class UserService implements UserDetailsService {
         user.setPassword(encryptedPassword);
         user.setPhoneNumber(registerDTO.phoneNumber());
         user.setName(registerDTO.name());
+        user.setAuthProvider("local");
 
         Role role = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
             Role newRole = new Role("ROLE_USER");
@@ -174,7 +175,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    private UserDTO convertToUserDTO(User user) {
+    public static UserDTO convertToDTO(User user) {
         return new UserDTO(
                 user.getId(),
                 user.getEmail(),

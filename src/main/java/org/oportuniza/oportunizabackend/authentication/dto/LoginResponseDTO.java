@@ -9,6 +9,7 @@ public record LoginResponseDTO(
         String name,
         String phoneNumber,
         String resumeUrl,
+        String pictureUrl,
         double averageRating,
         int reviewCount,
         String district,

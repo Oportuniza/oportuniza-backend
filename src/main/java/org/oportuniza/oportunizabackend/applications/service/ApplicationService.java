@@ -24,17 +24,15 @@ public class ApplicationService {
     }
 
     public Page<ApplicationDTO> getApplicationsByUserId(long userId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return applicationRepository.findByUserId(userId, pageable).map(this::convertToDTO);
+        return applicationRepository.findByUserId(userId, PageRequest.of(page, size)).map(this::convertToDTO);
     }
 
     public Page<ApplicationDTO> getApplicationsByOfferId(long offerId, int page, int size) {
-        Pageable pageable = PageRequest.of(page, size);
-        return applicationRepository.findByOfferId(offerId, pageable).map(this::convertToDTO);
+        return applicationRepository.findByOfferId(offerId, PageRequest.of(page, size)).map(this::convertToDTO);
     }
 
-    public ApplicationDTO getApplicationById(long id) throws ApplicationNotFoundException {
-        return convertToDTO(applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id)));
+    public Application getApplicationById(long id) throws ApplicationNotFoundException {
+        return applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id));
     }
 
     public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user) {
@@ -91,7 +89,8 @@ public class ApplicationService {
                 application.getMessage(),
                 application.getResumeUrl(),
                 application.getDocuments().stream().map(Document::getUrl).toList(),
-                application.getStatus());
+                application.getStatus(),
+                application.getCreatedAt());
     }
 
     public Application getApplication(Long id) throws ApplicationNotFoundException {

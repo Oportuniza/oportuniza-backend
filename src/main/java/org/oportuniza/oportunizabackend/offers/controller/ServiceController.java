@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
+import org.oportuniza.oportunizabackend.offers.dto.GetServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.ServiceNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Service;
@@ -60,10 +61,19 @@ public class ServiceController {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public ServiceDTO getService(
+    public GetServiceDTO getService(
             @Parameter(description = "The ID of the service to be retrieved") @PathVariable long serviceId)
             throws ServiceNotFoundException {
-        return serviceService.getService(serviceId);
+        var service = serviceService.getService(serviceId);
+
+        return new GetServiceDTO(
+                service.getId(),
+                service.getTitle(),
+                service.getDescription(),
+                service.isNegotiable(),
+                service.getCreatedAt(),
+                service.getPrice(),
+                UserService.convertToDTO(service.getUser()));
     }
 
     @GetMapping("/users/{userId}")

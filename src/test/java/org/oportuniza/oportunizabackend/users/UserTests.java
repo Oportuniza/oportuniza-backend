@@ -67,7 +67,7 @@ public class UserTests {
     @Test
     public void getUserTest() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva");
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -94,7 +94,7 @@ public class UserTests {
     @Test
     public void updateUserTest() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva");
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -131,9 +131,9 @@ public class UserTests {
     @Test
     public void favoriteUsersTest() throws Exception {
         // Create Users
-        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva"));
-        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "123456789", "Jose da Silva"));
-        var user3 = testUtils.registerUser(new RegisterDTO("joana@gmail.com", "123456", "123456789", "Joana da Silva"));
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null));
+        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "local","123456789", "Jose da Silva", null));
+        var user3 = testUtils.registerUser(new RegisterDTO("joana@gmail.com", "123456", "local","123456789", "Joana da Silva", null));
 
         // Login User 1
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -223,8 +223,8 @@ public class UserTests {
     @Test
     public void favoriteOffersTest() throws Exception {
         // Create Users
-        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva"));
-        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "123456789", "Jose da Silva"));
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null));
+        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "local", "123456789", "Jose da Silva", null));
 
         // Login User 1
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -287,8 +287,8 @@ public class UserTests {
     @Test
     public void reviewsTest() throws Exception {
         // Create user
-        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "123456789", "Joao da Silva"));
-        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "123456789", "Jose da Silva"));
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null));
+        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "local", "123456789", "Jose da Silva", null));
 
         // Login user 1
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
