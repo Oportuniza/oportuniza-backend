@@ -47,11 +47,12 @@ public class SecurityFilterChainConfig {
                             ).permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
+                    registry.requestMatchers(HttpMethod.GET, "/websocket/info").permitAll();
                     registry.anyRequest().authenticated();
                 })
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class) // logging filter before jwt to log even invalid requests
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-                .oauth2Login(withDefaults())
+                //.oauth2Login(withDefaults())
                 .build();
     }
 
@@ -59,6 +60,7 @@ public class SecurityFilterChainConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowCredentials(true);
+        configuration.addAllowedOrigin("http://127.0.0.1:5500");
         configuration.addAllowedOriginPattern("*"); // Allow all origins
         configuration.addAllowedHeader("*"); // Allow all headers
         configuration.addAllowedMethod("*"); // Allow all methods
