@@ -9,8 +9,10 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
+import org.oportuniza.oportunizabackend.applications.dto.GetApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFoundException;
 import org.oportuniza.oportunizabackend.applications.model.Application;
+import org.oportuniza.oportunizabackend.applications.model.Document;
 import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
 import org.oportuniza.oportunizabackend.offers.exceptions.OfferNotFoundException;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
@@ -77,10 +79,23 @@ public class ApplicationController {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public ApplicationDTO getApplicationById(
+    public GetApplicationDTO getApplicationById(
             @Parameter(description = "The ID of the application to be retrieved") @PathVariable long id)
             throws ApplicationNotFoundException {
-        return applicationService.getApplicationById(id);
+        var app = applicationService.getApplicationById(id);
+        return new GetApplicationDTO(
+                app.getId(),
+                app.getFirstName(),
+                app.getLastName(),
+                app.getEmail(),
+                app.getMessage(),
+                app.getResumeUrl(),
+                app.getDocuments().stream().map(Document::getUrl).toList(),
+                app.getStatus(),
+                app.getCreatedAt(),
+                OfferService.convertToDTO(app.getOffer()),
+                UserService.convertToDTO(app.getUser())
+        );
     }
 
     @PostMapping("/users/{userId}/offers/{offerId}")

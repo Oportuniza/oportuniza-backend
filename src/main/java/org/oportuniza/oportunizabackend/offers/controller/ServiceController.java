@@ -73,7 +73,7 @@ public class ServiceController {
                 service.isNegotiable(),
                 service.getCreatedAt(),
                 service.getPrice(),
-                userService.convertToUserDTO(service.getUser()));
+                UserService.convertToDTO(service.getUser()));
     }
 
     @GetMapping("/users/{userId}")

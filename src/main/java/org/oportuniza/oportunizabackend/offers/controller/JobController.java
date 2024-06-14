@@ -76,7 +76,7 @@ public class JobController {
                 job.getLocalization(),
                 job.getWorkingModel(),
                 job.getWorkingRegime(),
-                userService.convertToUserDTO(job.getUser()));
+                userService.convertToDTO(job.getUser()));
     }
 
     @GetMapping("/users/{userId}")
