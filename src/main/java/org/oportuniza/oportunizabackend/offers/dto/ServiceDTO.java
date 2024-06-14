@@ -10,6 +10,7 @@ import java.util.Date;
 @Setter
 public class ServiceDTO extends OfferDTO {
     double price;
+    private final String type = "service";
 
     public ServiceDTO(long id, String title, String description, boolean negotiable, Date createdAt, double price) {
         super(id, title, description, negotiable, createdAt);
