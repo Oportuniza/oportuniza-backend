@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.chat.api.models;
+package org.oportuniza.oportunizabackend.chat.models;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 

@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.chat.api.models;
+package org.oportuniza.oportunizabackend.chat.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -18,5 +18,5 @@ public class ChatNotification {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
-    private String sender;
+    private Long senderId;
 }
