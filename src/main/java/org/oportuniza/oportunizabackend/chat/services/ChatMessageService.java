@@ -4,12 +4,15 @@ import org.oportuniza.oportunizabackend.chat.dtos.MessageDTO;
 import org.oportuniza.oportunizabackend.chat.models.ChatMessage;
 import org.oportuniza.oportunizabackend.chat.models.ChatMessageRepository;
 import org.oportuniza.oportunizabackend.chat.exceptions.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 
 @Service
 public class ChatMessageService {
+    private static final Logger LOG = LoggerFactory.getLogger(ChatMessageService.class);
     private final ChatMessageRepository messageRepository;
 
     public ChatMessageService(ChatMessageRepository messageRepository) {
@@ -49,6 +52,27 @@ public class ChatMessageService {
         return messages;
     }
 
+    public Map<Long, List<MessageDTO>> getHistory(Long userId) {
+        List<MessageDTO> messagesFromUser = messageRepository.findChatMessageByReceiverOrSenderOrderByTimestamp(userId, userId);
+
+        Map<Long, List<MessageDTO>> map = new HashMap<>();
+        for (MessageDTO m : messagesFromUser) {
+            Long other = null;
+            if (m.receiver() != userId){
+                other = m.receiver();
+            }
+            else if (m.sender() != userId){
+                other = m.sender();
+            }
+
+            if (!map.containsKey(m.receiver())) {
+                map.put(other, new ArrayList<>());
+            }
+            map.get(other).add(m);
+        }
+        return map;
+    }
+
     /**
      * Finds message given its id
      * @param id id of the message
@@ -58,8 +82,8 @@ public class ChatMessageService {
         Optional<ChatMessage> message = messageRepository.findById(id);
         if (message.isPresent()){
             ChatMessage msgObj = message.get();
-            msgObj.setStatus(ChatMessage.MessageStatus.DELIVERED);
-            messageRepository.save(msgObj);
+            //msgObj.setStatus(ChatMessage.MessageStatus.DELIVERED);
+            //messageRepository.save(msgObj);
             MessageDTO msg = new MessageDTO(
                     msgObj.getId(),
                     msgObj.getContent(),
