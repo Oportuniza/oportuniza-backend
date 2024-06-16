@@ -65,7 +65,7 @@ public class ChatMessageService {
                 other = m.sender();
             }
 
-            if (!map.containsKey(m.receiver())) {
+            if (!map.containsKey(other)) {
                 map.put(other, new ArrayList<>());
             }
             map.get(other).add(m);
