@@ -23,6 +23,9 @@ import org.oportuniza.oportunizabackend.utils.ErrorResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -172,8 +175,10 @@ public class UserController {
     })
     public UserDTO updateUser(
             @Parameter(description = "The ID of the user to be updated") @PathVariable long userId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The new details for updating the user") @RequestBody @Valid UpdateUserDTO updatedUser)
-            throws UserNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided, PasswordMismatchException {
-        return userService.updateUser(userId, updatedUser);
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The new details for updating the user") @RequestPart("user") @Valid UpdateUserDTO updatedUser,
+            @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
+            @RequestPart(value = "resumeFile", required = false) MultipartFile resumeFile)
+            throws UserNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided, PasswordMismatchException, IOException {
+        return userService.updateUser(userId, updatedUser, profileImage, resumeFile);
     }
 }

@@ -1,5 +1,6 @@
 package org.oportuniza.oportunizabackend.authentication.dto;
 
+import java.util.Date;
 import java.util.List;
 
 public record LoginResponseDTO(
@@ -14,5 +15,6 @@ public record LoginResponseDTO(
         int reviewCount,
         String district,
         String county,
+        Date createdAt,
         String jwtToken) {
 }

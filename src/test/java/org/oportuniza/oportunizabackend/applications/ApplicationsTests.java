@@ -14,14 +14,20 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -67,7 +73,6 @@ public class ApplicationsTests {
 
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
-        var loginResponseDTO2 = testUtils.loginUser(new LoginDTO("gui@gmail.com", "123456"));
 
         // Create Job
         var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Remote", "Full-Time");
@@ -82,14 +87,45 @@ public class ApplicationsTests {
         String jobResponseContent = jobResult.getResponse().getContentAsString();
         JobDTO jobDTO = objectMapper.readValue(jobResponseContent, JobDTO.class);
 
+        CreateApplicationDTO createApplicationDTO = new CreateApplicationDTO("Gui", "Silva", "gui@gmail.com", "I am the best");
 
-        CreateApplicationDTO createApplicationDTO = new CreateApplicationDTO("Gui", "Silva", "gui@gmail.com", "I am the best", "www.resume.com", List.of("www.document.com"));
+        // Generate a simple image in the code
+        // Generate multiple files
+        BufferedImage image1 = new BufferedImage(200, 100, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics1 = image1.createGraphics();
+        graphics1.setColor(Color.GREEN);
+        graphics1.fillRect(0, 0, image1.getWidth(), image1.getHeight());
+        graphics1.dispose();
 
-        // Create Application
-        MvcResult applicationResult = mockMvc.perform(post("/api/applications/users/" + user2.id() + "/offers/" + jobDTO.getId())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + loginResponseDTO2.jwtToken())
-                        .content(objectMapper.writeValueAsString(createApplicationDTO)))
+        BufferedImage image2 = new BufferedImage(200, 100, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics2 = image2.createGraphics();
+        graphics2.setColor(Color.BLUE);
+        graphics2.fillRect(0, 0, image2.getWidth(), image2.getHeight());
+        graphics2.dispose();
+
+        ByteArrayOutputStream baos1 = new ByteArrayOutputStream();
+        ImageIO.write(image1, "jpg", baos1);
+        byte[] imageBytes1 = baos1.toByteArray();
+
+        ByteArrayOutputStream baos2 = new ByteArrayOutputStream();
+        ImageIO.write(image2, "jpg", baos2);
+        byte[] imageBytes2 = baos2.toByteArray();
+
+        MockMultipartFile resumeFile1 = new MockMultipartFile("files", "resume1.jpg", "image/jpeg", imageBytes1);
+        MockMultipartFile resumeFile2 = new MockMultipartFile("files", "resume2.jpg", "image/jpeg", imageBytes2);
+        MockMultipartFile applicationPart = new MockMultipartFile("application", "application.json", "application/json", objectMapper.writeValueAsString(createApplicationDTO).getBytes());
+
+        // Perform the multipart request
+        MvcResult applicationResult = mockMvc.perform(MockMvcRequestBuilders.multipart("/api/applications/users/" + user2.id() + "/offers/" + jobDTO.getId())
+                        .file(resumeFile1)
+                        .file(resumeFile2)
+                        .file(applicationPart)
+                        .header("Authorization", "Bearer " + loginResponseDTO.jwtToken())
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("POST");
+                            return request;
+                        }))
                 .andExpect(status().isCreated())
                 .andReturn();
 
@@ -101,13 +137,11 @@ public class ApplicationsTests {
         assertEquals(newCreatedApplication.lastName(), createApplicationDTO.lastName());
         assertEquals(newCreatedApplication.email(), createApplicationDTO.email());
         assertEquals(newCreatedApplication.message(), createApplicationDTO.message());
-        assertEquals(newCreatedApplication.resumeUrl(), createApplicationDTO.resumeUrl());
-        assertEquals(newCreatedApplication.documentsUrls(), createApplicationDTO.documentsUrls());
 
         // Get applications
         MvcResult applicationsByUserId = mockMvc.perform(get("/api/applications/user/" + user2.id())
                         .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + loginResponseDTO2.jwtToken())) // Use the token of user2
+                        .header("Authorization", "Bearer " + loginResponseDTO.jwtToken())) // Use the token of user2
                 .andExpect(status().isOk())
                 .andReturn();
 

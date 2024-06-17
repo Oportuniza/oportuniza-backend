@@ -23,10 +23,37 @@ public class OfferService {
         this.offerRepository = offerRepository;
     }
 
-    public Page<OfferDTO> getAllOffers(String title, int page, int size) {
+    public Page<OfferDTO> getAllOffers(String title, Double minPrice, Double maxPrice, Double minSalary, Double maxSalary, String workingModel, String workingRegime, Boolean negotiable, int page, int size) {
         Specification<Offer> spec = Specification.where(null);
         if (title != null && !title.isEmpty()) {
             spec = spec.and(OfferSpecifications.titleContains(title));
+        }
+        if (minPrice != null) {
+            spec = spec.and(OfferSpecifications.priceGreaterThanOrEqual(minPrice));
+        }
+
+        if (maxPrice != null) {
+            spec = spec.and(OfferSpecifications.priceLessThanOrEqual(maxPrice));
+        }
+
+        if (minSalary != null) {
+            spec = spec.and(OfferSpecifications.salaryGreaterThanOrEqual(minSalary));
+        }
+
+        if (maxSalary != null) {
+            spec = spec.and(OfferSpecifications.salaryLessThanOrEqual(maxSalary));
+        }
+
+        if (workingModel != null && !workingModel.isEmpty()) {
+            spec = spec.and(OfferSpecifications.workingModelEquals(workingModel));
+        }
+
+        if (workingRegime != null && !workingRegime.isEmpty()) {
+            spec = spec.and(OfferSpecifications.workingRegimeEquals(workingRegime));
+        }
+
+        if (negotiable != null) {
+            spec = spec.and(OfferSpecifications.negotiableEquals(negotiable));
         }
 
         return offerRepository.findAll(spec,PageRequest.of(page, size)).map(OfferService::convertToDTO);

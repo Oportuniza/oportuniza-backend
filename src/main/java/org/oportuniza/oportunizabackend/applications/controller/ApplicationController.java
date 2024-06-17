@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.GetApplicationDTO;
@@ -23,6 +24,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 
 @RestController
@@ -94,7 +98,7 @@ public class ApplicationController {
                 app.getStatus(),
                 app.getCreatedAt(),
                 OfferService.convertToDTO(app.getOffer()),
-                UserService.convertToDTO(app.getUser())
+                userService.convertToDTO(app.getUser())
         );
     }
 
@@ -112,10 +116,11 @@ public class ApplicationController {
     public ApplicationDTO createApplication(
             @Parameter(description = "The ID of the user who wants to create the application") @PathVariable long userId,
             @Parameter(description = "The ID of the offer for which the application is being created") @PathVariable long offerId,
-            @RequestBody CreateApplicationDTO applicationDTO) throws UserNotFoundException, OfferNotFoundException {
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Details for creating the application") @Valid @RequestPart("application") CreateApplicationDTO applicationDTO,
+            @RequestPart(value = "files", required = false) MultipartFile[] files) throws UserNotFoundException, OfferNotFoundException, IOException {
         var user = userService.getUserById(userId);
         var offer = offerService.getOffer(offerId);
-        Application createdApplication = applicationService.createApplication(applicationDTO, offer, user);
+        Application createdApplication = applicationService.createApplication(applicationDTO, offer, user, files);
         userService.addApplication(user, createdApplication);
         offerService.addApplication(offer, createdApplication);
         return applicationService.convertToDTO(createdApplication);

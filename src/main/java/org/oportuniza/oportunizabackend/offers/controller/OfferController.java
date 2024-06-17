@@ -30,9 +30,16 @@ public class OfferController {
     })
     public Page<OfferDTO> getAllOffers(
             @Parameter(description = "The title of the offers to filter") @RequestParam(required = false) String title,
+            @Parameter(description = "Minimum price of the service") @RequestParam(required = false) Double minPrice,
+            @Parameter(description = "Maximum price of the service") @RequestParam(required = false) Double maxPrice,
+            @Parameter(description = "The minimum salary of the jobs to filter") @RequestParam(required = false) Double minSalary,
+            @Parameter(description = "The maximum salary of the jobs to filter") @RequestParam(required = false) Double maxSalary,
+            @Parameter(description = "The working model of the jobs to filter (e.g., remote, on-site)") @RequestParam(required = false) String workingModel,
+            @Parameter(description = "The working regime of the jobs to filter (e.g., full-time, part-time)") @RequestParam(required = false) String workingRegime,
+            @Parameter(description = "Whether the offer salary/price is negotiable") @RequestParam(required = false) Boolean negotiable,
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
-        return offerService.getAllOffers(title, page, size);
+        return offerService.getAllOffers(title, minPrice, maxPrice, minSalary, maxSalary, workingModel, workingRegime, negotiable, page, size);
     }
 
 }

@@ -65,7 +65,7 @@ public class AuthenticationTests {
 
         // Capture and parse the register response
         String registerResponseContent = registerResult.getResponse().getContentAsString();
-        RegisterResponseDTO registerResponse = objectMapper.readValue(registerResponseContent, RegisterResponseDTO.class);
+        LoginResponseDTO registerResponse = objectMapper.readValue(registerResponseContent, LoginResponseDTO.class);
 
         // Validate register response fields
         assertNotNull(registerResponse.email());
@@ -90,7 +90,6 @@ public class AuthenticationTests {
         // Validate login response fields
         assertNotNull(loginResponse.jwtToken());
         assertNotNull(loginResponse.email());
-        assertNotNull(loginResponse.id());
         assertNotNull(loginResponse.roles());
         assertEquals(registerDTO.email(), loginResponse.email());
         assertEquals(registerResponse.id(), loginResponse.id());

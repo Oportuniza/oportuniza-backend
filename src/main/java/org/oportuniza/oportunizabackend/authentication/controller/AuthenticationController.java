@@ -98,6 +98,7 @@ public class AuthenticationController {
                 user.getReviewCount(),
                 user.getDistrict(),
                 user.getCounty(),
+                user.getCreatedAt(),
                 jwtToken);
     }
 
@@ -112,14 +113,44 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public RegisterResponseDTO createUser(
+    public LoginResponseDTO createUser(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details to register a user") @RequestBody @Valid RegisterDTO registerDTO)
             throws EmailAlreadyExistsException {
         if (userService.emailExists(registerDTO.email())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
         User user = userService.createUser(registerDTO);
-        return new RegisterResponseDTO(user.getId(), user.getEmail(), user.getName(), user.getPhoneNumber());
+        // Create authentication token
+        var emailPassword = new UsernamePasswordAuthenticationToken(registerDTO.email(), registerDTO.password());
+
+        // Authenticate the user
+        var authentication = authenticationManager.authenticate(emailPassword);
+
+        if (!authentication.isAuthenticated()) {
+            throw new BadCredentialsException("Authentication failed");
+        }
+        // If authenticated, generate the JWT token
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwtToken = JwtUtils.generateToken(user);
+
+        List<String> roles = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        return new LoginResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                roles,
+                user.getName(),
+                user.getPhoneNumber(),
+                user.getResumeUrl(),
+                user.getPictureUrl(),
+                user.getAverageRating(),
+                user.getReviewCount(),
+                user.getDistrict(),
+                user.getCounty(),
+                user.getCreatedAt(),
+                jwtToken);
     }
 
 
@@ -166,6 +197,7 @@ public class AuthenticationController {
                 user.getReviewCount(),
                 user.getDistrict(),
                 user.getCounty(),
+                user.getCreatedAt(),
                 jwtToken);
     }
 

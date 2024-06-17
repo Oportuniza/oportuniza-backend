@@ -8,19 +8,24 @@ import org.oportuniza.oportunizabackend.applications.model.Document;
 import org.oportuniza.oportunizabackend.applications.repository.ApplicationRepository;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.model.User;
+import org.oportuniza.oportunizabackend.users.service.GoogleCloudStorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
 
 
 @Service
 public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
+    private final GoogleCloudStorageService googleCloudStorageService;
 
-    public ApplicationService(final ApplicationRepository applicationRepository) {
+    public ApplicationService(final ApplicationRepository applicationRepository, GoogleCloudStorageService googleCloudStorageService) {
         this.applicationRepository = applicationRepository;
+        this.googleCloudStorageService = googleCloudStorageService;
     }
 
     public Page<ApplicationDTO> getApplicationsByUserId(long userId, int page, int size) {
@@ -35,7 +40,7 @@ public class ApplicationService {
         return applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id));
     }
 
-    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user) {
+    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user, MultipartFile[] files) throws IOException {
         var app = new Application();
         app.setOffer(offer);
         app.setUser(user);
@@ -43,14 +48,16 @@ public class ApplicationService {
         app.setLastName(applicationDTO.lastName());
         app.setEmail(applicationDTO.email());
         app.setMessage(applicationDTO.message());
-        app.setResumeUrl(applicationDTO.resumeUrl());
         app.setStatus("Pending");
 
-        for (var documentUrl : applicationDTO.documentsUrls()) {
-            var document = new Document();
-            document.setUrl(documentUrl);
-            document.setApplication(app);
-            app.addDocument(document);
+        for (var file : files) {
+            if (file!= null && !file.isEmpty()) {
+                var documentUrl = googleCloudStorageService.uploadFile(file);
+                var document = new Document();
+                document.setUrl(documentUrl);
+                document.setApplication(app);
+                app.addDocument(document);
+            }
         }
 
         applicationRepository.save(app);
@@ -87,8 +94,8 @@ public class ApplicationService {
                 application.getLastName(),
                 application.getEmail(),
                 application.getMessage(),
-                application.getResumeUrl(),
-                application.getDocuments().stream().map(Document::getUrl).toList(),
+                application.getResumeUrl() != null ? googleCloudStorageService.generateV4GetObjectSignedUrl(application.getResumeUrl()) : null,
+                application.getDocuments().stream().map(app -> application.getResumeUrl() != null ? googleCloudStorageService.generateV4GetObjectSignedUrl(application.getResumeUrl()) : null).toList(),
                 application.getStatus(),
                 application.getCreatedAt());
     }
