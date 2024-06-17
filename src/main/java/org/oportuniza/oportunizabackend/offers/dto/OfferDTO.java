@@ -19,7 +19,7 @@ public abstract class OfferDTO {
     private String imageFileName;
     private Date createdAt;
 
-    public OfferDTO(long id, String title, String description, String district,  String county, boolean negotiable, URL image, String imageFileName, Date createdAt) {
+    public OfferDTO(long id, String title, String description, String district, String county, boolean negotiable, URL image, String imageFileName, Date createdAt) {
         this.id = id;
         this.title = title;
         this.description = description;

@@ -63,7 +63,7 @@ public class ServicesTests {
     public void getAllServicesTest() throws Exception {
 
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -103,7 +103,7 @@ public class ServicesTests {
     @Test
     public void getUserServices() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -142,7 +142,7 @@ public class ServicesTests {
     @Test
     public void createServiceTest() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -173,7 +173,7 @@ public class ServicesTests {
     @Test
     public void getServiceByIdTest() throws Exception {
         //Create User
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));

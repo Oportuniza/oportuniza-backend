@@ -66,8 +66,8 @@ public class ApplicationsTests {
     @Test
     public void testGetApplicationsByUserId() throws Exception {
         //Create User
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
-        var registerDTO2 = new RegisterDTO("gui@gmail.com", "123456", "local", "123456789", "Gui da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
+        var registerDTO2 = new RegisterDTO("gui@gmail.com", "123456", "local", "123456789", "Gui da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         var user2 = testUtils.registerUser(registerDTO2);
 

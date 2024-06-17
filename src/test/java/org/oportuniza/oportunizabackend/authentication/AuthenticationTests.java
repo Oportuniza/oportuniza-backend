@@ -56,7 +56,7 @@ public class AuthenticationTests {
     @Test
     public void registerAndLoginUserTest() throws Exception {
         // Register user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao", null, "Vila Nova de Famalicão", "Braga");
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(registerDTO)))

@@ -16,10 +16,12 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMock
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
@@ -66,7 +68,7 @@ public class JobsTests {
     @Test
     public void getAllJobsTest() throws Exception {
         //Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -108,7 +110,7 @@ public class JobsTests {
     @Test
     public void getUserJobs() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -149,20 +151,28 @@ public class JobsTests {
     @Test
     public void createJobTest() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
 
         // Create Job
         var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Braga", "Remote", "Full-Time");
+        MockMultipartFile jobPart = new MockMultipartFile("job", "job.json", "application/json", objectMapper.writeValueAsString(CreateJobDTO).getBytes());
 
-        MvcResult result = mockMvc.perform(post("/api/jobs/users/" + user1.id())
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .header("Authorization", "Bearer " + loginResponseDTO.jwtToken())
-                        .content(objectMapper.writeValueAsString(CreateJobDTO)))
+        // Executando a requisição usando o MockMvc
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                        .multipart(String.format("/api/jobs/users/" + user1.id()))
+                        .file(jobPart)
+                        .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("POST");
+                            return request;
+                        }))
                 .andExpect(status().isCreated())
                 .andReturn();
+
 
         String content = result.getResponse().getContentAsString();
         JobDTO job = objectMapper.readValue(content, JobDTO.class);
@@ -184,7 +194,7 @@ public class JobsTests {
     //@WithMockUser(username = "admin", roles = {"ADMIN"})
     public void getJobByIdTest() throws Exception {
         //Create User
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -283,7 +293,7 @@ public class JobsTests {
         jobRepository.saveAll(jobs);
 
         //Create User
-        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null));
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga"));
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
 

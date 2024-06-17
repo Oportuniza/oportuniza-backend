@@ -66,7 +66,7 @@ public class OffersTests {
     @Test
     public void getAllOffersTest() throws Exception {
         //Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Vila Nova de Famalicão", "Braga");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
