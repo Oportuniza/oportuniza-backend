@@ -25,6 +25,10 @@ public abstract class Offer {
     @Column(nullable = false)
     private String description;
 
+    private String district;
+
+    private String county;
+
     @Column(name = "image_url")
     private URL imageUrl;
 

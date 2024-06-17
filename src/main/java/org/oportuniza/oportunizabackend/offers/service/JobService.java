@@ -61,13 +61,13 @@ public class JobService {
                 job.getId(),
                 job.getTitle(),
                 job.getDescription(),
+                job.getDistrict(),
+                job.getCounty(),
                 job.isNegotiable(),
                 job.getImageUrl(),
                 job.getImageFileName(),
                 job.getCreatedAt(),
                 job.getSalary(),
-                job.getDistrict(),
-                job.getCounty(),
                 job.getWorkingModel(),
                 job.getWorkingRegime());
     }

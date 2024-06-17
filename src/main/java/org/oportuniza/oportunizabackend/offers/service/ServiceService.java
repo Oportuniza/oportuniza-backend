@@ -6,7 +6,6 @@ import org.oportuniza.oportunizabackend.offers.dto.UpdateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.ServiceNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.repository.ServiceRepository;
-import org.oportuniza.oportunizabackend.offers.service.specifications.OfferSpecifications;
 import org.oportuniza.oportunizabackend.offers.service.specifications.ServiceSpecifications;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.service.GoogleCloudStorageService;
@@ -17,7 +16,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 
@@ -88,6 +86,8 @@ public class ServiceService {
                 service.getId(),
                 service.getTitle(),
                 service.getDescription(),
+                service.getDistrict(),
+                service.getCounty(),
                 service.isNegotiable(),
                 service.getImageUrl(),
                 service.getImageFileName(),
