@@ -18,10 +18,10 @@ public class NotificationService {
         this.messagingTemplate = messagingTemplate;
     }
 
-    public void sendNotification(String message, String targetUser) {
+    public void sendNotification(String message, Long targetUser) {
         GeneralNotification notification = new GeneralNotification(message, targetUser);
         messagingTemplate.convertAndSendToUser(
-                targetUser,"/notifications",
+                String.valueOf(targetUser),"/notifications",
                 notification);
         notificationRepository.save(notification);
     }

@@ -19,9 +19,9 @@ public class GeneralNotification {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String message;
-    private String targetUser;
+    private Long targetUser;
 
-    public GeneralNotification(String message, String targetUser) {
+    public GeneralNotification(String message, Long targetUser) {
         this.message = message;
         this.targetUser = targetUser;
     }

@@ -27,4 +27,10 @@ public class NotificationController {
     public ResponseEntity<?> addNotification (@RequestBody NotificationDTO notification) {
         return ResponseEntity.ok(notificationService.createNotification(notification));
     }
+
+    @GetMapping("/notifications/trigger/{userId}/{message}")
+    public ResponseEntity<?> triggerNotification (@PathVariable Long userId, @PathVariable String message) {
+        notificationService.sendNotification(message, userId);
+        return ResponseEntity.ok(0);
+    }
 }
