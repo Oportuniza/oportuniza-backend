@@ -29,6 +29,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Date;
@@ -65,7 +67,7 @@ public class AuthenticationController {
     })
     public LoginResponseDTO authenticateAndGetToken(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The email and password to login a user") @RequestBody @Valid LoginDTO loginDTO)
-            throws AuthenticationException {
+            throws AuthenticationException, MalformedURLException, URISyntaxException {
         // Create authentication token
         var emailPassword = new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password());
 
@@ -81,6 +83,7 @@ public class AuthenticationController {
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userService.loadUserByUsername(userDetails.getUsername());
         user.setLastActivityAt(new Date());
+        userService.save(user);
 
         String jwtToken = JwtUtils.generateToken(userDetails);
 
@@ -94,8 +97,8 @@ public class AuthenticationController {
                 roles,
                 user.getName(),
                 user.getPhoneNumber(),
-                user.getResumeUrl(),
-                user.getPictureUrl(),
+                userService.getResumeUrl(user),
+                userService.getPictureUrl(user),
                 user.getAverageRating(),
                 user.getReviewCount(),
                 user.getDistrict(),
@@ -117,7 +120,7 @@ public class AuthenticationController {
     })
     public LoginResponseDTO createUser(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details to register a user") @RequestBody @Valid RegisterDTO registerDTO)
-            throws EmailAlreadyExistsException {
+            throws EmailAlreadyExistsException, MalformedURLException, URISyntaxException {
         if (userService.emailExists(registerDTO.email())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
@@ -145,8 +148,8 @@ public class AuthenticationController {
                 roles,
                 user.getName(),
                 user.getPhoneNumber(),
-                user.getResumeUrl(),
-                user.getPictureUrl(),
+                userService.getResumeUrl(user),
+                userService.getPictureUrl(user),
                 user.getAverageRating(),
                 user.getReviewCount(),
                 user.getDistrict(),
@@ -157,7 +160,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/google")
-    public LoginResponseDTO googleAuth(@RequestBody LoginOAuth2DTO loginOAuth2DTO) throws GeneralSecurityException, IOException {
+    public LoginResponseDTO googleAuth(@RequestBody LoginOAuth2DTO loginOAuth2DTO) throws GeneralSecurityException, IOException, URISyntaxException {
         // Validate idToken with Google OAuth2 API
         GoogleIdToken.Payload payload = verifyIDToken(loginOAuth2DTO.token());
 
@@ -193,8 +196,8 @@ public class AuthenticationController {
                 roles,
                 user.getName(),
                 user.getPhoneNumber(),
-                user.getResumeUrl(),
-                user.getPictureUrl(),
+                userService.getResumeUrl(user),
+                userService.getPictureUrl(user),
                 user.getAverageRating(),
                 user.getReviewCount(),
                 user.getDistrict(),

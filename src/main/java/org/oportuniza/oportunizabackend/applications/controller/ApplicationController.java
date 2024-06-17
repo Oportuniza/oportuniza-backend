@@ -27,6 +27,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 
 @RestController
@@ -85,7 +87,7 @@ public class ApplicationController {
     })
     public GetApplicationDTO getApplicationById(
             @Parameter(description = "The ID of the application to be retrieved") @PathVariable long id)
-            throws ApplicationNotFoundException {
+            throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
         var app = applicationService.getApplicationById(id);
         return new GetApplicationDTO(
                 app.getId(),
@@ -117,7 +119,7 @@ public class ApplicationController {
             @Parameter(description = "The ID of the user who wants to create the application") @PathVariable long userId,
             @Parameter(description = "The ID of the offer for which the application is being created") @PathVariable long offerId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Details for creating the application") @Valid @RequestPart("application") CreateApplicationDTO applicationDTO,
-            @RequestPart(value = "files", required = false) MultipartFile[] files) throws UserNotFoundException, OfferNotFoundException, IOException {
+            @RequestPart(value = "files", required = false) MultipartFile[] files) throws UserNotFoundException, OfferNotFoundException, IOException, URISyntaxException {
         var user = userService.getUserById(userId);
         var offer = offerService.getOffer(offerId);
         Application createdApplication = applicationService.createApplication(applicationDTO, offer, user, files);
@@ -139,7 +141,7 @@ public class ApplicationController {
     })
     public ApplicationDTO acceptApplication(
             @Parameter(description = "The ID of the application to be updated") @PathVariable long id)
-            throws ApplicationNotFoundException {
+            throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
         return applicationService.acceptApplication(id);
     }
 
@@ -156,7 +158,7 @@ public class ApplicationController {
     })
     public ApplicationDTO rejectApplication(
             @Parameter(description = "The ID of the application to be updated") @PathVariable long id)
-            throws ApplicationNotFoundException {
+            throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
         return applicationService.rejectApplication(id);
     }
 

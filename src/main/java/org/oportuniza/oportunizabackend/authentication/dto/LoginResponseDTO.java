@@ -1,5 +1,6 @@
 package org.oportuniza.oportunizabackend.authentication.dto;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
@@ -9,8 +10,8 @@ public record LoginResponseDTO(
         List<String> roles,
         String name,
         String phoneNumber,
-        String resumeUrl,
-        String pictureUrl,
+        URL resumeUrl,
+        URL pictureUrl,
         double averageRating,
         int reviewCount,
         String district,

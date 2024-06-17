@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 
 @Service
@@ -29,11 +31,23 @@ public class ApplicationService {
     }
 
     public Page<ApplicationDTO> getApplicationsByUserId(long userId, int page, int size) {
-        return applicationRepository.findByUserId(userId, PageRequest.of(page, size)).map(this::convertToDTO);
+        return applicationRepository.findByUserId(userId, PageRequest.of(page, size)).map(a -> {
+            try {
+                return convertToDTO(a);
+            } catch (MalformedURLException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public Page<ApplicationDTO> getApplicationsByOfferId(long offerId, int page, int size) {
-        return applicationRepository.findByOfferId(offerId, PageRequest.of(page, size)).map(this::convertToDTO);
+        return applicationRepository.findByOfferId(offerId, PageRequest.of(page, size)).map(a -> {
+            try {
+                return convertToDTO(a);
+            } catch (MalformedURLException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public Application getApplicationById(long id) throws ApplicationNotFoundException {
@@ -64,14 +78,14 @@ public class ApplicationService {
         return app;
     }
 
-    public ApplicationDTO acceptApplication(long id) {
+    public ApplicationDTO acceptApplication(long id) throws MalformedURLException, URISyntaxException {
         var app = getApplication(id);
         app.setStatus("Accepted");
         applicationRepository.save(app);
         return convertToDTO(app);
     }
 
-    public ApplicationDTO rejectApplication(long id) {
+    public ApplicationDTO rejectApplication(long id) throws MalformedURLException, URISyntaxException {
         var app = getApplication(id);
         app.setStatus("Rejected");
         applicationRepository.save(app);
@@ -85,7 +99,7 @@ public class ApplicationService {
         applicationRepository.deleteById(id);
     }
 
-    public ApplicationDTO convertToDTO(Application application) {
+    public ApplicationDTO convertToDTO(Application application) throws MalformedURLException, URISyntaxException {
         return new ApplicationDTO(
                 application.getId(),
                 application.getOffer().getId(),
@@ -94,8 +108,14 @@ public class ApplicationService {
                 application.getLastName(),
                 application.getEmail(),
                 application.getMessage(),
-                application.getResumeUrl() != null ? googleCloudStorageService.generateV4GetObjectSignedUrl(application.getResumeUrl()) : null,
-                application.getDocuments().stream().map(app -> application.getResumeUrl() != null ? googleCloudStorageService.generateV4GetObjectSignedUrl(application.getResumeUrl()) : null).toList(),
+                application.getResumeUrl() != null ? googleCloudStorageService.getPublicUrl(application.getResumeUrl()) : null,
+                application.getDocuments().stream().map(app -> {
+                    try {
+                        return application.getResumeUrl() != null ? googleCloudStorageService.getPublicUrl(application.getResumeUrl()) : null;
+                    } catch (MalformedURLException | URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).toList(),
                 application.getStatus(),
                 application.getCreatedAt());
     }

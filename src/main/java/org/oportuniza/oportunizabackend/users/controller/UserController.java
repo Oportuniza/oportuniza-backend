@@ -26,6 +26,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 @RestController
 @RequestMapping("/api/users")
@@ -49,7 +51,7 @@ public class UserController {
     public Page<UserDTO> getFavoriteUsers(
             @Parameter(description = "The ID of the user whose favorite users are to be retrieved") @PathVariable long userId,
             @Parameter(description = "Page number for pagination") @RequestParam(defaultValue = "0") int page,
-            @Parameter(description = "Number of items per page for pagination") @RequestParam(defaultValue = "10") int size) {
+            @Parameter(description = "Number of items per page for pagination") @RequestParam(defaultValue = "10") int size) throws MalformedURLException, URISyntaxException {
         return userService.getFavoriteUsers(userId, page, size);
     }
 
@@ -81,7 +83,7 @@ public class UserController {
     })
     public UserDTO getUserById(
             @Parameter(description = "The ID of the user to be retrieved") @PathVariable long userId)
-            throws UserNotFoundException {
+            throws UserNotFoundException, MalformedURLException, URISyntaxException {
         return userService.getUser(userId);
     }
 
@@ -178,7 +180,7 @@ public class UserController {
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The new details for updating the user") @RequestPart("user") @Valid UpdateUserDTO updatedUser,
             @RequestPart(value = "profileImage", required = false) MultipartFile profileImage,
             @RequestPart(value = "resumeFile", required = false) MultipartFile resumeFile)
-            throws UserNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided, PasswordMismatchException, IOException {
+            throws UserNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided, PasswordMismatchException, IOException, URISyntaxException {
         return userService.updateUser(userId, updatedUser, profileImage, resumeFile);
     }
 }
