@@ -202,7 +202,7 @@ public class ServicesTests {
         assertEquals(service.getPrice(), createServiceDTO.price());
 
         //Update Service
-        var updateServiceDTO = new ServiceDTO(serviceId, "Updated Service Title", "Updated Service Description", true, 1000.0);
+        var updateServiceDTO = new ServiceDTO(serviceId, "Updated Service Title", "Updated Service Description", true, null, null, 1000.0);
         MvcResult updateResult = mockMvc.perform(put("/api/services/" + serviceId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + loginResponseDTO.jwtToken())

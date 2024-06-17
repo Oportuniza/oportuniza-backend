@@ -126,7 +126,7 @@ public class ServiceController {
     public ServiceDTO createService(
             @Parameter(description = "The ID of the user creating the service") @PathVariable long userId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details of the service to be created") @RequestBody @Valid CreateServiceDTO serviceDTO)
-            throws UserNotFoundException {
+            throws UserNotFoundException, MalformedURLException, URISyntaxException {
         var user = userService.getUserById(userId);
         var service = serviceService.createService(serviceDTO, user);
         userService.addOffer(userId, service);

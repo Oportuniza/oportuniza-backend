@@ -8,18 +8,24 @@ import org.oportuniza.oportunizabackend.offers.repository.ServiceRepository;
 import org.oportuniza.oportunizabackend.offers.service.specifications.OfferSpecifications;
 import org.oportuniza.oportunizabackend.offers.service.specifications.ServiceSpecifications;
 import org.oportuniza.oportunizabackend.users.model.User;
+import org.oportuniza.oportunizabackend.users.service.GoogleCloudStorageService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 
 @org.springframework.stereotype.Service
 public class ServiceService {
     private final ServiceRepository serviceRepository;
+    private final GoogleCloudStorageService googleCloudStorageService;
 
-    public ServiceService(ServiceRepository serviceRepository) {
+    public ServiceService(ServiceRepository serviceRepository, GoogleCloudStorageService googleCloudStorageService) {
         this.serviceRepository = serviceRepository;
+        this.googleCloudStorageService = googleCloudStorageService;
     }
 
     public Page<ServiceDTO> getAllServices(String title, Double minPrice, Double maxPrice, Boolean negotiable, int page, int size) {
@@ -59,7 +65,15 @@ public class ServiceService {
 
 
     public ServiceDTO convertServiceToServiceDTO(Service service) {
-        return new ServiceDTO(service.getId(), service.getTitle(), service.getDescription(), service.isNegotiable(), service.getCreatedAt(), service.getPrice());
+        return new ServiceDTO(
+                service.getId(),
+                service.getTitle(),
+                service.getDescription(),
+                service.isNegotiable(),
+                service.getImageUrl(),
+                service.getImageFileName(),
+                service.getCreatedAt(),
+                service.getPrice());
     }
 
 

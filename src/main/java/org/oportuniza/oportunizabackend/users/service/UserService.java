@@ -24,7 +24,6 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
-import java.net.URL;
 import java.util.Date;
 
 @Service
@@ -35,7 +34,7 @@ public class UserService implements UserDetailsService {
     private final FavoriteOffersRepository favoriteOffersRepository;
     private final GoogleCloudStorageService googleCloudStorageService;
 
-    public UserService(final UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, JobRepository jobRepository, FavoriteOffersRepository favoriteOffersRepository, GoogleCloudStorageService googleCloudStorageService) {
+    public UserService(final UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, FavoriteOffersRepository favoriteOffersRepository, GoogleCloudStorageService googleCloudStorageService) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
@@ -47,7 +46,7 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public UserDTO getUser(long userId) throws UserNotFoundException, MalformedURLException, URISyntaxException {
+    public UserDTO getUser(long userId) throws UserNotFoundException {
         User user = getUserById(userId);
         return convertToDTO(user);
     }
@@ -69,16 +68,20 @@ public class UserService implements UserDetailsService {
             user.setCounty(updatedUser.county());
         }
         if (profileImage != null && !profileImage.isEmpty()) {
-            if (user.getPictureUrl() != null) {
-                googleCloudStorageService.deleteFile(user.getPictureUrl());
+            if (user.getPictureUrl() != null && user.getPictureName() != null && !user.getPictureName().isEmpty()) {
+                googleCloudStorageService.deleteFile(user.getPictureName());
             }
-            user.setPictureUrl(googleCloudStorageService.uploadFile(profileImage));
+            var pictureUrl = googleCloudStorageService.uploadFile(profileImage);
+            user.setPictureUrl(pictureUrl.getValue1());
+            user.setPictureName(pictureUrl.getValue0());
         }
         if (resumeFile != null && !resumeFile.isEmpty()) {
-            if (user.getResumeUrl() != null) {
-                googleCloudStorageService.deleteFile(user.getResumeUrl());
+            if (user.getResumeUrl() != null && user.getResumeName() != null && !user.getResumeName().isEmpty()) {
+                googleCloudStorageService.deleteFile(user.getResumeName());
             }
-            user.setResumeUrl(googleCloudStorageService.uploadFile(resumeFile));
+            var resumeUrl = googleCloudStorageService.uploadFile(resumeFile);
+            user.setResumeUrl(resumeUrl.getValue1());
+            user.setResumeName(resumeUrl.getValue0());
         }
 
         updatePasswordIfProvided(user, updatedUser);
@@ -105,13 +108,7 @@ public class UserService implements UserDetailsService {
     }
 
     public Page<UserDTO> getFavoriteUsers(long userId, int page, int size) {
-        return userRepository.findFavoriteUsersByUserId(userId, PageRequest.of(page, size)).map(u -> {
-            try {
-                return convertToDTO(u);
-            } catch (MalformedURLException | URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        return userRepository.findFavoriteUsersByUserId(userId, PageRequest.of(page, size)).map(this::convertToDTO);
     }
 
     public Page<OfferDTO> getFavoriteOffers(long userId, int page, int size) {
@@ -204,15 +201,7 @@ public class UserService implements UserDetailsService {
         return userRepository.save(user);
     }
 
-    public URL getResumeUrl(User user) throws MalformedURLException, URISyntaxException {
-        return googleCloudStorageService.getPublicUrl(user.getResumeUrl());
-    }
-
-    public URL getPictureUrl(User user) throws MalformedURLException, URISyntaxException {
-        return googleCloudStorageService.getPublicUrl(user.getPictureUrl());
-    }
-
-    public UserDTO convertToDTO(User user) throws MalformedURLException, URISyntaxException {
+    public UserDTO convertToDTO(User user) {
         return new UserDTO(
                 user.getId(),
                 user.getEmail(),
@@ -220,8 +209,10 @@ public class UserService implements UserDetailsService {
                 user.getPhoneNumber(),
                 user.getDistrict(),
                 user.getCounty(),
-                user.getResumeUrl() != null ? googleCloudStorageService.getPublicUrl(user.getResumeUrl()) : null,
-                user.getPictureUrl() != null ? googleCloudStorageService.getPublicUrl(user.getPictureUrl()) : null,
+                user.getResumeUrl(),
+                user.getResumeName(),
+                user.getPictureUrl(),
+                user.getPictureName(),
                 user.getAverageRating(),
                 user.getReviewCount(),
                 user.getLastActivityAt(),

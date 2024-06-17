@@ -1,26 +1,33 @@
 package org.oportuniza.oportunizabackend.offers.service;
 
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
-import org.oportuniza.oportunizabackend.offers.dto.GetJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
+import org.oportuniza.oportunizabackend.offers.dto.UpdateJobDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.JobNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.repository.JobRepository;
 import org.oportuniza.oportunizabackend.offers.service.specifications.JobSpecifications;
 import org.oportuniza.oportunizabackend.users.model.User;
+import org.oportuniza.oportunizabackend.users.service.GoogleCloudStorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.URISyntaxException;
 
 
 @Service
 public class JobService {
     private final JobRepository jobRepository;
+    private final GoogleCloudStorageService googleCloudStorageService;
 
-    public JobService(JobRepository jobRepository) {
+    public JobService(JobRepository jobRepository, GoogleCloudStorageService googleCloudStorageService) {
         this.jobRepository = jobRepository;
+        this.googleCloudStorageService = googleCloudStorageService;
     }
 
     public Page<JobDTO> getAllJobs(String title, Double minSalary, Double maxSalary, String workingModel, String workingRegime, Boolean negotiable, int page, int size) {
@@ -55,6 +62,8 @@ public class JobService {
                 job.getTitle(),
                 job.getDescription(),
                 job.isNegotiable(),
+                job.getImageUrl(),
+                job.getImageFileName(),
                 job.getCreatedAt(),
                 job.getSalary(),
                 job.getLocalization(),
@@ -66,20 +75,42 @@ public class JobService {
         return jobRepository.findById(jobId).orElseThrow(() -> new JobNotFoundException(jobId));
     }
 
-    public JobDTO updateJob(long jobId, JobDTO updatedJob) throws JobNotFoundException {
+    public JobDTO updateJob(long jobId, UpdateJobDTO updatedJob, MultipartFile image) throws JobNotFoundException, IOException, URISyntaxException {
         Job job = jobRepository.findById(jobId).orElseThrow(() -> new JobNotFoundException(jobId));
-        job.setTitle(updatedJob.getTitle());
-        job.setDescription(updatedJob.getDescription());
-        job.setNegotiable(updatedJob.isNegotiable());
-        job.setSalary(updatedJob.getSalary());
-        job.setLocalization(updatedJob.getLocalization());
-        job.setWorkingModel(updatedJob.getWorkingModel());
-        job.setWorkingRegime(updatedJob.getWorkingRegime());
+        if (updatedJob.title() != null && !updatedJob.title().isEmpty()) {
+            job.setTitle(updatedJob.title());
+        }
+        if (updatedJob.description() != null && !updatedJob.description().isEmpty()) {
+            job.setDescription(updatedJob.description());
+        }
+        if (updatedJob.negotiable() != null) {
+            job.setNegotiable(updatedJob.negotiable());
+        }
+        if (updatedJob.salary() != null) {
+            job.setSalary(updatedJob.salary());
+        }
+        if (updatedJob.localization() != null && !updatedJob.localization().isEmpty()) {
+            job.setLocalization(updatedJob.localization());
+        }
+        if (updatedJob.workingModel() != null && !updatedJob.workingModel().isEmpty()) {
+            job.setWorkingModel(updatedJob.workingModel());
+        }
+        if (updatedJob.workingRegime() != null && !updatedJob.workingRegime().isEmpty()) {
+            job.setWorkingRegime(updatedJob.workingRegime());
+        }
+        if (image != null && !image.isEmpty()) {
+            if (job.getImageUrl() != null && job.getImageFileName()!= null && !job.getImageFileName().isEmpty()) {
+                googleCloudStorageService.deleteFile(job.getImageFileName());
+            }
+            var imageUrl = googleCloudStorageService.uploadFile(image);
+            job.setImageUrl(imageUrl.getValue1());
+            job.setImageFileName(imageUrl.getValue0());
+        }
         jobRepository.save(job);
-        return updatedJob;
+        return convertJobToJobDTO(job);
     }
 
-    public Job createJob(CreateJobDTO job, User user) {
+    public Job createJob(CreateJobDTO job, User user, MultipartFile image) throws IOException, URISyntaxException {
         Job newJob = new Job();
         newJob.setUser(user);
         newJob.setTitle(job.title());
@@ -89,11 +120,20 @@ public class JobService {
         newJob.setLocalization(job.localization());
         newJob.setWorkingModel(job.workingModel());
         newJob.setWorkingRegime(job.workingRegime());
+        if (image != null && !image.isEmpty()) {
+            var imageUrl = googleCloudStorageService.uploadFile(image);
+            newJob.setImageUrl(imageUrl.getValue1());
+            newJob.setImageFileName(imageUrl.getValue0());
+        }
         jobRepository.save(newJob);
         return newJob;
     }
 
-    public void deleteJob(long jobId) {
+    public void deleteJob(long jobId) throws JobNotFoundException {
+        Job job = getJob(jobId);
+        if (job.getImageFileName() != null && !job.getImageFileName().isEmpty()) {
+            googleCloudStorageService.deleteFile(job.getImageFileName());
+        }
         jobRepository.deleteById(jobId);
     }
 

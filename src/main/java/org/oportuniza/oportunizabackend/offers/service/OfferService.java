@@ -10,17 +10,23 @@ import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.repository.OfferRepository;
 import org.oportuniza.oportunizabackend.offers.service.specifications.OfferSpecifications;
+import org.oportuniza.oportunizabackend.users.service.GoogleCloudStorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 @org.springframework.stereotype.Service
 public class OfferService {
     private final OfferRepository offerRepository;
+    private final GoogleCloudStorageService googleCloudStorageService;
 
 
-    public OfferService(OfferRepository offerRepository) {
+    public OfferService(OfferRepository offerRepository, GoogleCloudStorageService googleCloudStorageService) {
         this.offerRepository = offerRepository;
+        this.googleCloudStorageService = googleCloudStorageService;
     }
 
     public Page<OfferDTO> getAllOffers(String title, Double minPrice, Double maxPrice, Double minSalary, Double maxSalary, String workingModel, String workingRegime, Boolean negotiable, int page, int size) {
@@ -81,6 +87,8 @@ public class OfferService {
                     service.getTitle(),
                     service.getDescription(),
                     service.isNegotiable(),
+                    service.getImageUrl(),
+                    service.getImageFileName(),
                     service.getCreatedAt(),
                     service.getPrice()
             );
@@ -91,6 +99,8 @@ public class OfferService {
                     job.getTitle(),
                     job.getDescription(),
                     job.isNegotiable(),
+                    job.getImageUrl(),
+                    job.getImageFileName(),
                     job.getCreatedAt(),
                     job.getSalary(),
                     job.getLocalization(),

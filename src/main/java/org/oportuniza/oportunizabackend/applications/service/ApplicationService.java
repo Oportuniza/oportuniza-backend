@@ -1,5 +1,6 @@
 package org.oportuniza.oportunizabackend.applications.service;
 
+import org.javatuples.Pair;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFoundException;
@@ -54,7 +55,7 @@ public class ApplicationService {
         return applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id));
     }
 
-    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user, MultipartFile[] files) throws IOException {
+    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user, MultipartFile[] files) throws IOException, URISyntaxException {
         var app = new Application();
         app.setOffer(offer);
         app.setUser(user);
@@ -68,7 +69,8 @@ public class ApplicationService {
             if (file!= null && !file.isEmpty()) {
                 var documentUrl = googleCloudStorageService.uploadFile(file);
                 var document = new Document();
-                document.setUrl(documentUrl);
+                document.setUrl(documentUrl.getValue1());
+                document.setName(documentUrl.getValue0());
                 document.setApplication(app);
                 app.addDocument(document);
             }
@@ -108,14 +110,9 @@ public class ApplicationService {
                 application.getLastName(),
                 application.getEmail(),
                 application.getMessage(),
-                application.getResumeUrl() != null ? googleCloudStorageService.getPublicUrl(application.getResumeUrl()) : null,
-                application.getDocuments().stream().map(app -> {
-                    try {
-                        return application.getResumeUrl() != null ? googleCloudStorageService.getPublicUrl(application.getResumeUrl()) : null;
-                    } catch (MalformedURLException | URISyntaxException e) {
-                        throw new RuntimeException(e);
-                    }
-                }).toList(),
+                application.getResumeUrl(),
+                application.getResumeName(),
+                application.getDocuments().stream().map(doc -> new Pair<>(doc.getName(), doc.getUrl())).toList(),
                 application.getStatus(),
                 application.getCreatedAt());
     }

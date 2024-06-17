@@ -10,6 +10,7 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.net.URL;
 import java.util.*;
 
 @Data
@@ -37,10 +38,16 @@ public class User implements UserDetails {
     private String phoneNumber;
 
     @Column(name = "picture_url")
-    private String pictureUrl;
+    private URL pictureUrl;
+
+    @Column(name = "picture_name")
+    private String pictureName;
 
     @Column(name = "resume_url")
-    private String resumeUrl;
+    private URL resumeUrl;
+
+    @Column(name = "resume_name")
+    private String resumeName;
 
     @Column(name = "average_rating")
     private double averageRating;

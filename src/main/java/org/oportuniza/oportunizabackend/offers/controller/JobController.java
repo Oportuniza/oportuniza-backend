@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.GetJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
+import org.oportuniza.oportunizabackend.offers.dto.UpdateJobDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.JobNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.service.JobService;
@@ -19,7 +20,9 @@ import org.oportuniza.oportunizabackend.utils.ErrorResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
@@ -110,9 +113,10 @@ public class JobController {
     })
     public JobDTO updateJob(
             @Parameter(description = "The ID of the job to be updated") @PathVariable long jobId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The updated job details") @RequestBody @Valid JobDTO updatedJob)
-            throws JobNotFoundException {
-        return jobService.updateJob(jobId, updatedJob);
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The updated job details") @RequestPart("job") @Valid UpdateJobDTO updatedJob,
+            @RequestPart(value = "image", required = false) MultipartFile image)
+            throws JobNotFoundException, IOException, URISyntaxException {
+        return jobService.updateJob(jobId, updatedJob, image);
     }
 
     @PostMapping("/users/{userId}")
@@ -128,10 +132,11 @@ public class JobController {
     })
     public JobDTO createJob(
             @Parameter(description = "The ID of the user creating the job") @PathVariable long userId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details of the job to be created") @RequestBody @Valid CreateJobDTO jobDTO)
-            throws UserNotFoundException {
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details of the job to be created") @RequestPart("job") @Valid CreateJobDTO jobDTO,
+            @RequestPart(value = "image", required = false) MultipartFile image)
+            throws UserNotFoundException, IOException, URISyntaxException {
         var user = userService.getUserById(userId);
-        var job = jobService.createJob(jobDTO, user);
+        var job = jobService.createJob(jobDTO, user, image);
         userService.addOffer(userId, job);
         return jobService.convertJobToJobDTO(job);
     }

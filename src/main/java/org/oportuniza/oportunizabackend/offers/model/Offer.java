@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.users.model.User;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +26,10 @@ public abstract class Offer {
     private String description;
 
     @Column(name = "image_url")
-    private String imageUrl;
+    private URL imageUrl;
+
+    @Column(name = "image_file_name")
+    private String imageFileName;
 
     @Column(nullable = false)
     private boolean negotiable;

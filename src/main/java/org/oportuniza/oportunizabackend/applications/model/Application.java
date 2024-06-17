@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.model.User;
 
+import java.net.URL;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.Set;
@@ -41,7 +42,10 @@ public class Application {
     private Date createdAt;
 
     @Column(name = "resume_url")
-    private String resumeUrl;
+    private URL resumeUrl;
+
+    @Column(name = "resume_name")
+    private String resumeName;
 
     @OneToMany(mappedBy = "application", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Document> documents = new HashSet<>();

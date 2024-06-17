@@ -8,12 +8,12 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.javatuples.Pair;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.GetApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFoundException;
 import org.oportuniza.oportunizabackend.applications.model.Application;
-import org.oportuniza.oportunizabackend.applications.model.Document;
 import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
 import org.oportuniza.oportunizabackend.offers.exceptions.OfferNotFoundException;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
@@ -96,7 +96,8 @@ public class ApplicationController {
                 app.getEmail(),
                 app.getMessage(),
                 app.getResumeUrl(),
-                app.getDocuments().stream().map(Document::getUrl).toList(),
+                app.getResumeName(),
+                app.getDocuments().stream().map(doc -> new Pair<>(doc.getName(), doc.getUrl())).toList(),
                 app.getStatus(),
                 app.getCreatedAt(),
                 OfferService.convertToDTO(app.getOffer()),

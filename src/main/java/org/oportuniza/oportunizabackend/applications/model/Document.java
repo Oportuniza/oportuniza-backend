@@ -5,6 +5,8 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.net.URL;
+
 @Getter
 @Setter
 @NoArgsConstructor
@@ -15,7 +17,9 @@ public class Document {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private long id;
 
-    private String url;
+    private URL url;
+
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "application_id", nullable = false)
