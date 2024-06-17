@@ -29,8 +29,11 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -64,7 +67,7 @@ public class AuthenticationController {
     })
     public LoginResponseDTO authenticateAndGetToken(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The email and password to login a user") @RequestBody @Valid LoginDTO loginDTO)
-            throws AuthenticationException {
+            throws AuthenticationException, MalformedURLException, URISyntaxException {
         // Create authentication token
         var emailPassword = new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password());
 
@@ -79,6 +82,8 @@ public class AuthenticationController {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userService.loadUserByUsername(userDetails.getUsername());
+        user.setLastActivityAt(new Date());
+        userService.save(user);
 
         String jwtToken = JwtUtils.generateToken(userDetails);
 
@@ -92,12 +97,14 @@ public class AuthenticationController {
                 roles,
                 user.getName(),
                 user.getPhoneNumber(),
-                user.getResumeUrl(),
-                user.getPictureUrl(),
+                userService.getResumeUrl(user),
+                userService.getPictureUrl(user),
                 user.getAverageRating(),
                 user.getReviewCount(),
                 user.getDistrict(),
                 user.getCounty(),
+                user.getLastActivityAt(),
+                user.getCreatedAt(),
                 jwtToken);
     }
 
@@ -112,19 +119,50 @@ public class AuthenticationController {
                     @Content(mediaType = "application/json", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public RegisterResponseDTO createUser(
+    public LoginResponseDTO createUser(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details to register a user") @RequestBody @Valid RegisterDTO registerDTO)
-            throws EmailAlreadyExistsException {
+            throws EmailAlreadyExistsException, MalformedURLException, URISyntaxException {
         if (userService.emailExists(registerDTO.email())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }
         User user = userService.createUser(registerDTO);
-        return new RegisterResponseDTO(user.getId(), user.getEmail(), user.getName(), user.getPhoneNumber());
+        // Create authentication token
+        var emailPassword = new UsernamePasswordAuthenticationToken(registerDTO.email(), registerDTO.password());
+
+        // Authenticate the user
+        var authentication = authenticationManager.authenticate(emailPassword);
+
+        if (!authentication.isAuthenticated()) {
+            throw new BadCredentialsException("Authentication failed");
+        }
+        // If authenticated, generate the JWT token
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        String jwtToken = JwtUtils.generateToken(user);
+
+        List<String> roles = user.getAuthorities().stream()
+                .map(GrantedAuthority::getAuthority)
+                .collect(Collectors.toList());
+
+        return new LoginResponseDTO(
+                user.getId(),
+                user.getEmail(),
+                roles,
+                user.getName(),
+                user.getPhoneNumber(),
+                userService.getResumeUrl(user),
+                userService.getPictureUrl(user),
+                user.getAverageRating(),
+                user.getReviewCount(),
+                user.getDistrict(),
+                user.getCounty(),
+                user.getLastActivityAt(),
+                user.getCreatedAt(),
+                jwtToken);
     }
 
 
     @PostMapping("/google")
-    public LoginResponseDTO googleAuth(@RequestBody LoginOAuth2DTO loginOAuth2DTO) throws GeneralSecurityException, IOException {
+    public LoginResponseDTO googleAuth(@RequestBody LoginOAuth2DTO loginOAuth2DTO) throws GeneralSecurityException, IOException, URISyntaxException {
         // Validate idToken with Google OAuth2 API
         GoogleIdToken.Payload payload = verifyIDToken(loginOAuth2DTO.token());
 
@@ -160,12 +198,14 @@ public class AuthenticationController {
                 roles,
                 user.getName(),
                 user.getPhoneNumber(),
-                user.getResumeUrl(),
-                user.getPictureUrl(),
+                userService.getResumeUrl(user),
+                userService.getPictureUrl(user),
                 user.getAverageRating(),
                 user.getReviewCount(),
                 user.getDistrict(),
                 user.getCounty(),
+                user.getLastActivityAt(),
+                user.getCreatedAt(),
                 jwtToken);
     }
 

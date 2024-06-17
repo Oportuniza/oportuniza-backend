@@ -8,34 +8,53 @@ import org.oportuniza.oportunizabackend.applications.model.Document;
 import org.oportuniza.oportunizabackend.applications.repository.ApplicationRepository;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.model.User;
+import org.oportuniza.oportunizabackend.users.service.GoogleCloudStorageService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 
 
 @Service
 public class ApplicationService {
 
     private final ApplicationRepository applicationRepository;
+    private final GoogleCloudStorageService googleCloudStorageService;
 
-    public ApplicationService(final ApplicationRepository applicationRepository) {
+    public ApplicationService(final ApplicationRepository applicationRepository, GoogleCloudStorageService googleCloudStorageService) {
         this.applicationRepository = applicationRepository;
+        this.googleCloudStorageService = googleCloudStorageService;
     }
 
     public Page<ApplicationDTO> getApplicationsByUserId(long userId, int page, int size) {
-        return applicationRepository.findByUserId(userId, PageRequest.of(page, size)).map(this::convertToDTO);
+        return applicationRepository.findByUserId(userId, PageRequest.of(page, size)).map(a -> {
+            try {
+                return convertToDTO(a);
+            } catch (MalformedURLException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public Page<ApplicationDTO> getApplicationsByOfferId(long offerId, int page, int size) {
-        return applicationRepository.findByOfferId(offerId, PageRequest.of(page, size)).map(this::convertToDTO);
+        return applicationRepository.findByOfferId(offerId, PageRequest.of(page, size)).map(a -> {
+            try {
+                return convertToDTO(a);
+            } catch (MalformedURLException | URISyntaxException e) {
+                throw new RuntimeException(e);
+            }
+        });
     }
 
     public Application getApplicationById(long id) throws ApplicationNotFoundException {
         return applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id));
     }
 
-    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user) {
+    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user, MultipartFile[] files) throws IOException {
         var app = new Application();
         app.setOffer(offer);
         app.setUser(user);
@@ -43,28 +62,30 @@ public class ApplicationService {
         app.setLastName(applicationDTO.lastName());
         app.setEmail(applicationDTO.email());
         app.setMessage(applicationDTO.message());
-        app.setResumeUrl(applicationDTO.resumeUrl());
         app.setStatus("Pending");
 
-        for (var documentUrl : applicationDTO.documentsUrls()) {
-            var document = new Document();
-            document.setUrl(documentUrl);
-            document.setApplication(app);
-            app.addDocument(document);
+        for (var file : files) {
+            if (file!= null && !file.isEmpty()) {
+                var documentUrl = googleCloudStorageService.uploadFile(file);
+                var document = new Document();
+                document.setUrl(documentUrl);
+                document.setApplication(app);
+                app.addDocument(document);
+            }
         }
 
         applicationRepository.save(app);
         return app;
     }
 
-    public ApplicationDTO acceptApplication(long id) {
+    public ApplicationDTO acceptApplication(long id) throws MalformedURLException, URISyntaxException {
         var app = getApplication(id);
         app.setStatus("Accepted");
         applicationRepository.save(app);
         return convertToDTO(app);
     }
 
-    public ApplicationDTO rejectApplication(long id) {
+    public ApplicationDTO rejectApplication(long id) throws MalformedURLException, URISyntaxException {
         var app = getApplication(id);
         app.setStatus("Rejected");
         applicationRepository.save(app);
@@ -78,7 +99,7 @@ public class ApplicationService {
         applicationRepository.deleteById(id);
     }
 
-    public ApplicationDTO convertToDTO(Application application) {
+    public ApplicationDTO convertToDTO(Application application) throws MalformedURLException, URISyntaxException {
         return new ApplicationDTO(
                 application.getId(),
                 application.getOffer().getId(),
@@ -87,8 +108,14 @@ public class ApplicationService {
                 application.getLastName(),
                 application.getEmail(),
                 application.getMessage(),
-                application.getResumeUrl(),
-                application.getDocuments().stream().map(Document::getUrl).toList(),
+                application.getResumeUrl() != null ? googleCloudStorageService.getPublicUrl(application.getResumeUrl()) : null,
+                application.getDocuments().stream().map(app -> {
+                    try {
+                        return application.getResumeUrl() != null ? googleCloudStorageService.getPublicUrl(application.getResumeUrl()) : null;
+                    } catch (MalformedURLException | URISyntaxException e) {
+                        throw new RuntimeException(e);
+                    }
+                }).toList(),
                 application.getStatus(),
                 application.getCreatedAt());
     }

@@ -6,7 +6,6 @@ public record UpdateUserDTO (
         String oldPassword,
         String name,
         String phoneNumber,
-        String resumeUrl,
         String district,
         String county) {
 }

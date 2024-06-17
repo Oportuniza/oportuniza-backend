@@ -1,5 +1,8 @@
 package org.oportuniza.oportunizabackend.users.dto;
 
+import java.net.URL;
+import java.util.Date;
+
 public record UserDTO (
         long id,
         String email,
@@ -7,8 +10,11 @@ public record UserDTO (
         String phoneNumber,
         String district,
         String county,
-        String resumeUrl,
+        URL resumeUrl,
+        URL pictureUrl,
         Double rating,
-        int reviewsCount) {
+        int reviewsCount,
+        Date lastLogin,
+        Date createdAt) {
 }
 

@@ -20,6 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 @RestController
 @RequestMapping("/api/jobs")
 public class JobController {
@@ -64,7 +67,7 @@ public class JobController {
     })
     public GetJobDTO getJob(
             @Parameter(description = "The ID of the job to be retrieved") @PathVariable long jobId)
-            throws JobNotFoundException {
+            throws JobNotFoundException, MalformedURLException, URISyntaxException {
         var job = jobService.getJob(jobId);
         return new GetJobDTO(
                 job.getId(),

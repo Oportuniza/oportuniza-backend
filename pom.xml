@@ -39,6 +39,14 @@
             <scope>test</scope>
         </dependency>
 
+        <!-- Bucket Google Cloud -->
+        <!-- https://mvnrepository.com/artifact/com.google.cloud/google-cloud-storage -->
+        <dependency>
+            <groupId>com.google.cloud</groupId>
+            <artifactId>google-cloud-storage</artifactId>
+            <version>2.40.0</version>
+        </dependency>
+        
         <!-- Spring Boot documentation -->
         <dependency>
             <groupId>org.springdoc</groupId>

@@ -15,15 +15,23 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.MvcResult;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 
+import javax.imageio.ImageIO;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -105,18 +113,45 @@ public class UserTests {
                 null,
                 "João Candido",
                 "987654321",
-                null,
                 "Viana do Castelo",
                 "Ponte de Lima");
-        MvcResult result = mockMvc.perform(put(String.format("/api/users/%d", loginResponseDTO.id()))
+
+        // Gerar uma imagem simples no código
+        BufferedImage image = new BufferedImage(200, 100, BufferedImage.TYPE_INT_RGB);
+        Graphics2D graphics = image.createGraphics();
+        graphics.setColor(Color.GREEN);
+        graphics.fillRect(0, 0, image.getWidth(), image.getHeight());
+        graphics.dispose();
+
+        // Converter a imagem em bytes
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        ImageIO.write(image, "jpg", baos);
+        byte[] imageBytes = baos.toByteArray();
+
+        // Criar um MockMultipartFile para a imagem
+        MockMultipartFile profileImageFile = new MockMultipartFile("profileImage", "profile.jpg", "image/jpeg", imageBytes);
+
+        // Criar um MockMultipartFile para o JSON
+        MockMultipartFile userPart = new MockMultipartFile("user", "user.json", "application/json", objectMapper.writeValueAsString(updateUserDTO).getBytes());
+
+        // Executando a requisição usando o MockMvc
+        MvcResult result = mockMvc.perform(MockMvcRequestBuilders
+                        .multipart(String.format("/api/users/%d", loginResponseDTO.id()))
+                        .file(profileImageFile)
+                        .file(userPart)
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO.jwtToken()))
-                        .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
-                        .content(objectMapper.writeValueAsString(updateUserDTO)))
+                        .contentType(MediaType.MULTIPART_FORM_DATA)
+                        .with(request -> {
+                            request.setMethod("PUT");
+                            return request;
+                        }))
                 .andExpect(status().isOk())
                 .andReturn();
 
         String content = result.getResponse().getContentAsString();
         UserDTO response = objectMapper.readValue(content, UserDTO.class);
+
+        System.out.println(response);
 
         assertNotNull(response);
         assertEquals(updateUserDTO.email(), response.email());

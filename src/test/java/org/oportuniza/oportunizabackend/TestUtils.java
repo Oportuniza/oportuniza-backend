@@ -33,7 +33,7 @@ public class TestUtils {
     @Autowired
     private ObjectMapper objectMapper;
 
-    public RegisterResponseDTO registerUser(RegisterDTO registerDTO) throws Exception {
+    public LoginResponseDTO registerUser(RegisterDTO registerDTO) throws Exception {
         MvcResult registerResult = mockMvc.perform(post("/api/auth/register")
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8))
                         .content(objectMapper.writeValueAsString(registerDTO)))
@@ -42,7 +42,7 @@ public class TestUtils {
 
         // Capture and parse the register response
         String registerResponseContent = registerResult.getResponse().getContentAsString();
-        return objectMapper.readValue(registerResponseContent, RegisterResponseDTO.class);
+        return objectMapper.readValue(registerResponseContent, LoginResponseDTO.class);
     }
 
     public LoginResponseDTO loginUser(LoginDTO loginDTO) throws Exception {
