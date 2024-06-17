@@ -3,11 +3,16 @@ package org.oportuniza.oportunizabackend.offers.controller;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
+import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
+import org.oportuniza.oportunizabackend.offers.exceptions.OfferNotFoundException;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
+import org.oportuniza.oportunizabackend.users.dto.UserDTO;
+import org.oportuniza.oportunizabackend.users.exceptions.UserNotFoundException;
+import org.oportuniza.oportunizabackend.utils.ErrorResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
@@ -56,5 +61,22 @@ public class OfferController {
             @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
             @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
         return offerService.getOfferByUserId(userId, page, size);
+    }
+
+    @PatchMapping("/removeImage/{offerId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Remove image of offer")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Offer updated", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = UserDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Offer not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
+    })
+    public void removeImage(
+            @Parameter(description = "The ID of the offer to be updated") @PathVariable long offerId)
+            throws OfferNotFoundException{
+        offerService.removeImage(offerId);
     }
 }

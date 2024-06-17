@@ -21,10 +21,12 @@ import java.net.URISyntaxException;
 @org.springframework.stereotype.Service
 public class OfferService {
     private final OfferRepository offerRepository;
+    private final GoogleCloudStorageService googleCloudStorageService;
 
 
-    public OfferService(OfferRepository offerRepository) {
+    public OfferService(OfferRepository offerRepository, GoogleCloudStorageService googleCloudStorageService) {
         this.offerRepository = offerRepository;
+        this.googleCloudStorageService = googleCloudStorageService;
     }
 
     public Page<OfferDTO> getAllOffers(String title, Double minPrice, Double maxPrice, Double minSalary, Double maxSalary, String workingModel, String workingRegime, Boolean negotiable, int page, int size) {
@@ -79,6 +81,14 @@ public class OfferService {
     public void removeApplication(Application application) {
         var offer = application.getOffer();
         offer.removeApplication(application);
+        offerRepository.save(offer);
+    }
+
+    public void removeImage(long offerId){
+        Offer offer = offerRepository.findById(offerId).orElseThrow(() -> new OfferNotFoundException(offerId));
+        googleCloudStorageService.deleteFile(offer.getImageFileName());
+        offer.setImageUrl(null);
+        offer.setImageFileName(null);
         offerRepository.save(offer);
     }
 
