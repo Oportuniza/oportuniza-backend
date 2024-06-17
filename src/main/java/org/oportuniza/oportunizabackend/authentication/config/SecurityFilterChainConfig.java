@@ -49,6 +49,7 @@ public class SecurityFilterChainConfig {
                             ).permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
+                    registry.requestMatchers(HttpMethod.POST, "/api/auth/google").permitAll();
                     registry.anyRequest().authenticated();
                 })
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class) // logging filter before jwt to log even invalid requests
