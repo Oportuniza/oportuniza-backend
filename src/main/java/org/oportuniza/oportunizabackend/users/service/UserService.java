@@ -160,6 +160,22 @@ public class UserService implements UserDetailsService {
         });
     }
 
+    public void removePicture(long userId){
+        User user = getUserById(userId);
+        googleCloudStorageService.deleteFile(user.getPictureName());
+        user.setPictureUrl(null);
+        user.setPictureName(null);
+        userRepository.save(user);
+    }
+
+    public void removeResume(long userId){
+        User user = getUserById(userId);
+        googleCloudStorageService.deleteFile(user.getResumeName());
+        user.setResumeUrl(null);
+        user.setResumeName(null);
+        userRepository.save(user);
+    }
+
     public void addApplication(User user, Application application) {
         user.addApplication(application);
         userRepository.save(user);

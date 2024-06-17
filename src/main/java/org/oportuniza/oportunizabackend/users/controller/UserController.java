@@ -183,4 +183,38 @@ public class UserController {
             throws UserNotFoundException, OldPasswordNotProvided, NewPasswordNotProvided, PasswordMismatchException, IOException, URISyntaxException {
         return userService.updateUser(userId, updatedUser, profileImage, resumeFile);
     }
+
+    @PatchMapping("/removePicture/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Remove profile picture from user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = UserDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
+    })
+    public void removePicture(
+            @Parameter(description = "The ID of the user to be updated") @PathVariable long userId)
+            throws UserNotFoundException {
+        userService.removePicture(userId);
+    }
+
+    @PatchMapping("/removeResume/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Remove profile picture from user")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User updated", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = UserDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
+    })
+    public void removeResume(
+            @Parameter(description = "The ID of the user to be updated") @PathVariable long userId)
+            throws UserNotFoundException {
+        userService.removeResume(userId);
+    }
 }
