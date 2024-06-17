@@ -10,8 +10,6 @@ import java.util.Date;
 @Setter
 public class JobDTO extends OfferDTO{
     private double salary;
-    private String district;
-    private String county;
     private String workingModel;
     private String workingRegime;
     private final String type = "job";
