@@ -75,7 +75,7 @@ public class ApplicationsTests {
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
 
         // Create Job
-        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Remote", "Full-Time");
+        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Braga", "Remote", "Full-Time");
 
         MvcResult jobResult = mockMvc.perform(post("/api/jobs/users/" + user1.id())
                         .contentType(MediaType.APPLICATION_JSON)

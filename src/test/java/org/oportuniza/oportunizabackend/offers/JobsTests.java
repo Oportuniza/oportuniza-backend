@@ -72,7 +72,7 @@ public class JobsTests {
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
 
         // Create Job
-        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Remote", "Full-Time");
+        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Braga", "Remote", "Full-Time");
 
         MvcResult jobResult = mockMvc.perform(post("/api/jobs/users/" + user1.id())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -97,7 +97,7 @@ public class JobsTests {
         assertEquals(job.getDescription(), CreateJobDTO.description());
         assertEquals(job.isNegotiable(), CreateJobDTO.negotiable());
         assertEquals(job.getSalary(), CreateJobDTO.salary());
-        assertEquals(job.getLocalization(), CreateJobDTO.localization());
+        assertEquals(job.getCounty(), CreateJobDTO.county());
         assertEquals(job.getWorkingModel(), CreateJobDTO.workingModel());
         assertEquals(job.getWorkingRegime(), CreateJobDTO.workingRegime());
 
@@ -114,7 +114,7 @@ public class JobsTests {
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
 
         // Create Job
-        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Remote", "Full-Time");
+        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Braga", "Remote", "Full-Time");
 
         MvcResult jobResult = mockMvc.perform(post("/api/jobs/users/" + user1.id())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -138,7 +138,7 @@ public class JobsTests {
         assertEquals(job.getTitle(), CreateJobDTO.title());
         assertEquals(job.isNegotiable(), CreateJobDTO.negotiable());
         assertEquals(job.getSalary(), CreateJobDTO.salary());
-        assertEquals(job.getLocalization(), CreateJobDTO.localization());
+        assertEquals(job.getCounty(), CreateJobDTO.county());
         assertEquals(job.getWorkingModel(), CreateJobDTO.workingModel());
         assertEquals(job.getWorkingRegime(), CreateJobDTO.workingRegime());
 
@@ -155,7 +155,7 @@ public class JobsTests {
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
 
         // Create Job
-        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Remote", "Full-Time");
+        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Braga", "Remote", "Full-Time");
 
         MvcResult result = mockMvc.perform(post("/api/jobs/users/" + user1.id())
                         .contentType(MediaType.APPLICATION_JSON)
@@ -172,7 +172,7 @@ public class JobsTests {
         assertEquals(job.getDescription(), CreateJobDTO.description());
         assertEquals(job.isNegotiable(), CreateJobDTO.negotiable());
         assertEquals(job.getSalary(), CreateJobDTO.salary());
-        assertEquals(job.getLocalization(), CreateJobDTO.localization());
+        assertEquals(job.getCounty(), CreateJobDTO.county());
         assertEquals(job.getWorkingModel(), CreateJobDTO.workingModel());
         assertEquals(job.getWorkingRegime(), CreateJobDTO.workingRegime());
 
@@ -190,7 +190,7 @@ public class JobsTests {
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
 
         // Create Job
-        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Remote", "Full-Time");
+        var CreateJobDTO = new CreateJobDTO("Job Title", "Job Description", true, 1000.0, "Braga", "Braga", "Remote", "Full-Time");
         MvcResult jobResult = mockMvc.perform(post("/api/jobs/users/" + user1.id())
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + loginResponseDTO.jwtToken())
@@ -212,12 +212,12 @@ public class JobsTests {
         assertEquals(job.getDescription(), CreateJobDTO.description());
         assertEquals(job.isNegotiable(), CreateJobDTO.negotiable());
         assertEquals(job.getSalary(), CreateJobDTO.salary());
-        assertEquals(job.getLocalization(), CreateJobDTO.localization());
+        assertEquals(job.getCounty(), CreateJobDTO.county());
         assertEquals(job.getWorkingModel(), CreateJobDTO.workingModel());
         assertEquals(job.getWorkingRegime(), CreateJobDTO.workingRegime());
 
         //Update Job
-        var updateJobDTO = new UpdateJobDTO("Updated Job Title", "Updated Job Description", true, 1000.0, "Braga", "Remote", "Full-Time");
+        var updateJobDTO = new UpdateJobDTO("Updated Job Title", "Updated Job Description", true, 1000.0, "Braga", "Braga","Remote", "Full-Time");
         MvcResult updateResult = mockMvc.perform(put("/api/jobs/" + jobId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + loginResponseDTO.jwtToken())
@@ -233,7 +233,7 @@ public class JobsTests {
         assertEquals(updatedJob.getDescription(), updateJobDTO.description());
         assertEquals(updatedJob.isNegotiable(), updateJobDTO.negotiable());
         assertEquals(updatedJob.getSalary(), updateJobDTO.salary());
-        assertEquals(updatedJob.getLocalization(), updateJobDTO.localization());
+        assertEquals(updatedJob.getCounty(), updateJobDTO.county());
         assertEquals(updatedJob.getWorkingModel(), updateJobDTO.workingModel());
         assertEquals(updatedJob.getWorkingRegime(), updateJobDTO.workingRegime());
 
@@ -255,7 +255,7 @@ public class JobsTests {
         job1.setDescription("Description 1");
         job1.setNegotiable(true);
         job1.setSalary(1000.0);
-        job1.setLocalization("Braga");
+        job1.setDistrict("Braga");
         job1.setWorkingModel("Remote");
         job1.setWorkingRegime("Full-Time");
         jobs.add(job1);
@@ -265,7 +265,7 @@ public class JobsTests {
         job2.setDescription("Description 2");
         job2.setNegotiable(false);
         job2.setSalary(2000.0);
-        job2.setLocalization("Porto");
+        job2.setDistrict("Porto");
         job2.setWorkingModel("Presential");
         job2.setWorkingRegime("Part-Time");
         jobs.add(job2);
@@ -275,7 +275,7 @@ public class JobsTests {
         job3.setDescription("Description 3");
         job3.setNegotiable(true);
         job3.setSalary(3000.0);
-        job3.setLocalization("Lisboa");
+        job3.setDistrict("Lisboa");
         job3.setWorkingModel("Remote");
         job3.setWorkingRegime("Full-Time");
         jobs.add(job3);

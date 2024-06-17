@@ -87,7 +87,7 @@ public class ApplicationController {
     })
     public GetApplicationDTO getApplicationById(
             @Parameter(description = "The ID of the application to be retrieved") @PathVariable long id)
-            throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
+            throws ApplicationNotFoundException {
         var app = applicationService.getApplicationById(id);
         return new GetApplicationDTO(
                 app.getId(),
