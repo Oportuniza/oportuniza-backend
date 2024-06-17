@@ -7,6 +7,7 @@ import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
+import org.oportuniza.oportunizabackend.offers.dto.UpdateJobDTO;
 import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.repository.JobRepository;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
@@ -216,7 +217,7 @@ public class JobsTests {
         assertEquals(job.getWorkingRegime(), CreateJobDTO.workingRegime());
 
         //Update Job
-        var updateJobDTO = new JobDTO(jobId, "Updated Job Title", "Updated Job Description", true, 1000.0, "Braga", "Remote", "Full-Time");
+        var updateJobDTO = new UpdateJobDTO("Updated Job Title", "Updated Job Description", true, 1000.0, "Braga", "Remote", "Full-Time");
         MvcResult updateResult = mockMvc.perform(put("/api/jobs/" + jobId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + loginResponseDTO.jwtToken())
@@ -228,13 +229,13 @@ public class JobsTests {
 
         JobDTO updatedJob = objectMapper.readValue(updateContent, JobDTO.class);
         assertNotNull(updatedJob);
-        assertEquals(updatedJob.getTitle(), updateJobDTO.getTitle());
-        assertEquals(updatedJob.getDescription(), updateJobDTO.getDescription());
-        assertEquals(updatedJob.isNegotiable(), updateJobDTO.isNegotiable());
-        assertEquals(updatedJob.getSalary(), updateJobDTO.getSalary());
-        assertEquals(updatedJob.getLocalization(), updateJobDTO.getLocalization());
-        assertEquals(updatedJob.getWorkingModel(), updateJobDTO.getWorkingModel());
-        assertEquals(updatedJob.getWorkingRegime(), updateJobDTO.getWorkingRegime());
+        assertEquals(updatedJob.getTitle(), updateJobDTO.title());
+        assertEquals(updatedJob.getDescription(), updateJobDTO.description());
+        assertEquals(updatedJob.isNegotiable(), updateJobDTO.negotiable());
+        assertEquals(updatedJob.getSalary(), updateJobDTO.salary());
+        assertEquals(updatedJob.getLocalization(), updateJobDTO.localization());
+        assertEquals(updatedJob.getWorkingModel(), updateJobDTO.workingModel());
+        assertEquals(updatedJob.getWorkingRegime(), updateJobDTO.workingRegime());
 
         //Delete Job
 
