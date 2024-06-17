@@ -66,7 +66,8 @@ public class JobService {
                 job.getImageFileName(),
                 job.getCreatedAt(),
                 job.getSalary(),
-                job.getLocalization(),
+                job.getDistrict(),
+                job.getCounty(),
                 job.getWorkingModel(),
                 job.getWorkingRegime());
     }
@@ -89,8 +90,11 @@ public class JobService {
         if (updatedJob.salary() != null) {
             job.setSalary(updatedJob.salary());
         }
-        if (updatedJob.localization() != null && !updatedJob.localization().isEmpty()) {
-            job.setLocalization(updatedJob.localization());
+        if (updatedJob.district() != null && !updatedJob.district().isEmpty()) {
+            job.setDistrict(updatedJob.district());
+        }
+        if (updatedJob.county() != null && !updatedJob.county().isEmpty()) {
+            job.setCounty(updatedJob.county());
         }
         if (updatedJob.workingModel() != null && !updatedJob.workingModel().isEmpty()) {
             job.setWorkingModel(updatedJob.workingModel());
@@ -117,7 +121,8 @@ public class JobService {
         newJob.setDescription(job.description());
         newJob.setNegotiable(job.negotiable());
         newJob.setSalary(job.salary());
-        newJob.setLocalization(job.localization());
+        newJob.setDistrict(job.district());
+        newJob.setCounty(job.county());
         newJob.setWorkingModel(job.workingModel());
         newJob.setWorkingRegime(job.workingRegime());
         if (image != null && !image.isEmpty()) {

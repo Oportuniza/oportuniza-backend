@@ -5,7 +5,8 @@ public record CreateJobDTO(
         String description,
         boolean negotiable,
         Double salary,
-        String localization,
+        String district,
+        String county,
         String workingModel,
         String workingRegime
 ) {

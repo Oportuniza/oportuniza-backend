@@ -70,7 +70,7 @@ public class JobController {
     })
     public GetJobDTO getJob(
             @Parameter(description = "The ID of the job to be retrieved") @PathVariable long jobId)
-            throws JobNotFoundException, MalformedURLException, URISyntaxException {
+            throws JobNotFoundException {
         var job = jobService.getJob(jobId);
         return new GetJobDTO(
                 job.getId(),
@@ -79,7 +79,8 @@ public class JobController {
                 job.isNegotiable(),
                 job.getCreatedAt(),
                 job.getSalary(),
-                job.getLocalization(),
+                job.getDistrict(),
+                job.getCounty(),
                 job.getWorkingModel(),
                 job.getWorkingRegime(),
                 userService.convertToDTO(job.getUser()));

@@ -5,7 +5,8 @@ public record UpdateJobDTO (
         String description,
         Boolean negotiable,
         Double salary,
-        String localization,
+        String district,
+        String county,
         String workingModel,
         String workingRegime
 ){

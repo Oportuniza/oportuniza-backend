@@ -11,7 +11,8 @@ public record GetJobDTO (
         boolean negotiable,
         Date createdAt,
         double salary,
-        String localization,
+        String district,
+        String county,
         String workingModel,
         String workingRegime,
         UserDTO userDTO)

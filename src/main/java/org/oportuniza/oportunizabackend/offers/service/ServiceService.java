@@ -2,6 +2,7 @@ package org.oportuniza.oportunizabackend.offers.service;
 
 import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
+import org.oportuniza.oportunizabackend.offers.dto.UpdateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.ServiceNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.repository.ServiceRepository;
@@ -13,7 +14,9 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
@@ -53,14 +56,30 @@ public class ServiceService {
     }
 
 
-    public ServiceDTO updateService(long serviceId, ServiceDTO updatedService) throws ServiceNotFoundException {
+    public ServiceDTO updateService(long serviceId, UpdateServiceDTO updatedService, MultipartFile image) throws ServiceNotFoundException, IOException, URISyntaxException {
         Service service = serviceRepository.findById(serviceId).orElseThrow(() -> new ServiceNotFoundException(serviceId));
-        service.setTitle(updatedService.getTitle());
-        service.setDescription(updatedService.getDescription());
-        service.setNegotiable(updatedService.isNegotiable());
-        service.setPrice(updatedService.getPrice());
+        if (updatedService.negotiable() != null) {
+            service.setNegotiable(updatedService.negotiable());
+        }
+        if (updatedService.price() != null) {
+            service.setPrice(updatedService.price());
+        }
+        if (updatedService.title() != null && !updatedService.title().isEmpty()) {
+            service.setTitle(updatedService.title());
+        }
+        if (updatedService.description() != null && !updatedService.description().isEmpty()) {
+            service.setDescription(updatedService.description());
+        }
+        if (image != null && !image.isEmpty()) {
+            if (service.getImageUrl() != null && service.getImageFileName()!= null && !service.getImageFileName().isEmpty()) {
+                googleCloudStorageService.deleteFile(service.getImageFileName());
+            }
+            var imageUrl = googleCloudStorageService.uploadFile(image);
+            service.setImageUrl(imageUrl.getValue1());
+            service.setImageFileName(imageUrl.getValue0());
+        }
         serviceRepository.save(service);
-        return updatedService;
+        return convertServiceToServiceDTO(service);
     }
 
 
@@ -77,13 +96,18 @@ public class ServiceService {
     }
 
 
-    public Service createService(CreateServiceDTO service, User user) {
+    public Service createService(CreateServiceDTO service, User user, MultipartFile image) throws IOException, URISyntaxException {
         Service newService = new Service();
         newService.setUser(user);
         newService.setTitle(service.title());
         newService.setDescription(service.description());
         newService.setNegotiable(service.negotiable());
         newService.setPrice(service.price());
+        if (image != null && !image.isEmpty()) {
+            var imageUrl = googleCloudStorageService.uploadFile(image);
+            newService.setImageUrl(imageUrl.getValue1());
+            newService.setImageFileName(imageUrl.getValue0());
+        }
         serviceRepository.save(newService);
         return newService;
     }

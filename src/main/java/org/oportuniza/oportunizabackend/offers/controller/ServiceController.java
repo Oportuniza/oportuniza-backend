@@ -10,6 +10,7 @@ import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.GetServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
+import org.oportuniza.oportunizabackend.offers.dto.UpdateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.ServiceNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.service.ServiceService;
@@ -19,7 +20,9 @@ import org.oportuniza.oportunizabackend.utils.ErrorResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
@@ -107,9 +110,10 @@ public class ServiceController {
     })
     public ServiceDTO updateService(
             @Parameter(description = "The ID of the service to be updated") @PathVariable long serviceId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The updated service details")  @RequestBody @Valid ServiceDTO updatedService)
-            throws ServiceNotFoundException {
-        return serviceService.updateService(serviceId, updatedService);
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The updated service details")  @RequestPart("service") @Valid UpdateServiceDTO updatedService,
+            @RequestPart(value = "image", required = false) MultipartFile image)
+            throws ServiceNotFoundException, IOException, URISyntaxException {
+        return serviceService.updateService(serviceId, updatedService, image);
     }
 
     @PostMapping("/users/{userId}")
@@ -125,10 +129,11 @@ public class ServiceController {
     })
     public ServiceDTO createService(
             @Parameter(description = "The ID of the user creating the service") @PathVariable long userId,
-            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details of the service to be created") @RequestBody @Valid CreateServiceDTO serviceDTO)
-            throws UserNotFoundException, MalformedURLException, URISyntaxException {
+            @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details of the service to be created") @RequestPart("service") @Valid CreateServiceDTO serviceDTO,
+            @RequestPart(value = "image", required = false) MultipartFile image)
+            throws UserNotFoundException, IOException, URISyntaxException {
         var user = userService.getUserById(userId);
-        var service = serviceService.createService(serviceDTO, user);
+        var service = serviceService.createService(serviceDTO, user, image);
         userService.addOffer(userId, service);
         return serviceService.convertServiceToServiceDTO(service);
     }
