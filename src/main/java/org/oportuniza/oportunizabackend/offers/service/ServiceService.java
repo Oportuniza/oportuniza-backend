@@ -68,6 +68,12 @@ public class ServiceService {
         if (updatedService.description() != null && !updatedService.description().isEmpty()) {
             service.setDescription(updatedService.description());
         }
+        if (updatedService.district() != null && !updatedService.district().isEmpty()) {
+            service.setDistrict(updatedService.district());
+        }
+        if (updatedService.county() != null && !updatedService.county().isEmpty()) {
+            service.setCounty(updatedService.county());
+        }
         if (image != null && !image.isEmpty()) {
             if (service.getImageUrl() != null && service.getImageFileName()!= null && !service.getImageFileName().isEmpty()) {
                 googleCloudStorageService.deleteFile(service.getImageFileName());

@@ -7,6 +7,7 @@ import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
+import org.oportuniza.oportunizabackend.offers.dto.UpdateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.repository.ServiceRepository;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -202,7 +203,7 @@ public class ServicesTests {
         assertEquals(service.getPrice(), createServiceDTO.price());
 
         //Update Service
-        var updateServiceDTO = new ServiceDTO(serviceId, "Updated Service Title", "Updated Service Description", true, null, null, 1000.0);
+        var updateServiceDTO = new UpdateServiceDTO("Updated Service Title", "Updated Service Description", "Braga", "Braga",  1000.0, null);
         MvcResult updateResult = mockMvc.perform(put("/api/services/" + serviceId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .header("Authorization", "Bearer " + loginResponseDTO.jwtToken())
@@ -214,10 +215,10 @@ public class ServicesTests {
 
         ServiceDTO updatedService = objectMapper.readValue(updateContent, ServiceDTO.class);
         assertNotNull(updatedService);
-        assertEquals(updatedService.getTitle(), updateServiceDTO.getTitle());
-        assertEquals(updatedService.getDescription(), updateServiceDTO.getDescription());
-        assertEquals(updatedService.isNegotiable(), updateServiceDTO.isNegotiable());
-        assertEquals(updatedService.getPrice(), updateServiceDTO.getPrice());
+        assertEquals(updatedService.getTitle(), updateServiceDTO.title());
+        assertEquals(updatedService.getDescription(), updateServiceDTO.description());
+        assertEquals(updatedService.isNegotiable(), updateServiceDTO.negotiable());
+        assertEquals(updatedService.getPrice(), updateServiceDTO.price());
 
         //Delete Service
 
