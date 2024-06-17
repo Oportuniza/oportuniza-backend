@@ -88,6 +88,10 @@ public class User implements UserDetails {
     @Column(name = "updated_at")
     private Date updatedAt;
 
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "last_activity_at")
+    private Date lastActivityAt;
+
     public void addRole(Role role) {
         this.roles.add(role);
     }

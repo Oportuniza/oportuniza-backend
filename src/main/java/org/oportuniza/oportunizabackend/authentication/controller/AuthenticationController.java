@@ -31,6 +31,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -79,6 +80,7 @@ public class AuthenticationController {
 
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userService.loadUserByUsername(userDetails.getUsername());
+        user.setLastActivityAt(new Date());
 
         String jwtToken = JwtUtils.generateToken(userDetails);
 
