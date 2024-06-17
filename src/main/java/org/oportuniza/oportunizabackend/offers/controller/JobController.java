@@ -76,6 +76,8 @@ public class JobController {
                 job.getId(),
                 job.getTitle(),
                 job.getDescription(),
+                job.getImageUrl(),
+                job.getImageFileName(),
                 job.isNegotiable(),
                 job.getCreatedAt(),
                 job.getSalary(),

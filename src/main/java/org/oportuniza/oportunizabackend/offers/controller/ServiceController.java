@@ -69,13 +69,17 @@ public class ServiceController {
     })
     public GetServiceDTO getService(
             @Parameter(description = "The ID of the service to be retrieved") @PathVariable long serviceId)
-            throws ServiceNotFoundException, MalformedURLException, URISyntaxException {
+            throws ServiceNotFoundException {
         var service = serviceService.getService(serviceId);
 
         return new GetServiceDTO(
                 service.getId(),
                 service.getTitle(),
                 service.getDescription(),
+                service.getDistrict(),
+                service.getCounty(),
+                service.getImageUrl(),
+                service.getImageFileName(),
                 service.isNegotiable(),
                 service.getCreatedAt(),
                 service.getPrice(),
