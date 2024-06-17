@@ -67,7 +67,7 @@ public class AuthenticationController {
     })
     public LoginResponseDTO authenticateAndGetToken(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The email and password to login a user") @RequestBody @Valid LoginDTO loginDTO)
-            throws AuthenticationException, MalformedURLException, URISyntaxException {
+            throws AuthenticationException {
         // Create authentication token
         var emailPassword = new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password());
 
@@ -123,7 +123,7 @@ public class AuthenticationController {
     })
     public LoginResponseDTO createUser(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The details to register a user") @RequestBody @Valid RegisterDTO registerDTO)
-            throws EmailAlreadyExistsException, MalformedURLException, URISyntaxException {
+            throws EmailAlreadyExistsException {
         if (userService.emailExists(registerDTO.email())) {
             throw new EmailAlreadyExistsException("Email already exists");
         }

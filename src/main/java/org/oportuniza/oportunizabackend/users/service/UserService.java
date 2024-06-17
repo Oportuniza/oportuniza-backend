@@ -189,6 +189,8 @@ public class UserService implements UserDetailsService {
         user.setPassword(encryptedPassword);
         user.setPhoneNumber(registerDTO.phoneNumber());
         user.setName(registerDTO.name());
+        user.setDistrict(registerDTO.district());
+        user.setCounty(registerDTO.county());
         user.setAuthProvider("local");
         user.setLastActivityAt(new Date());
 
