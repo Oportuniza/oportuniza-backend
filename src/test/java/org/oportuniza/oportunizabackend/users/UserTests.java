@@ -15,8 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.PageImpl;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -37,7 +35,6 @@ import java.nio.charset.StandardCharsets;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.springframework.restdocs.mockmvc.RestDocumentationRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -75,7 +72,7 @@ public class UserTests {
     @Test
     public void getUserTest() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Viana do Castelo", "Ponte de Lima");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -102,7 +99,7 @@ public class UserTests {
     @Test
     public void updateUserTest() throws Exception {
         // Create user
-        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null);
+        var registerDTO = new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Viana do Castelo", "Ponte de Lima");
         var user1 = testUtils.registerUser(registerDTO);
         // Login user
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -166,9 +163,9 @@ public class UserTests {
     @Test
     public void favoriteUsersTest() throws Exception {
         // Create Users
-        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null));
-        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "local","123456789", "Jose da Silva", null));
-        var user3 = testUtils.registerUser(new RegisterDTO("joana@gmail.com", "123456", "local","123456789", "Joana da Silva", null));
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null, "Viana do Castelo", "Ponte de Lima"));
+        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "local","123456789", "Jose da Silva", null, "Viana do Castelo", "Ponte de Lima"));
+        var user3 = testUtils.registerUser(new RegisterDTO("joana@gmail.com", "123456", "local","123456789", "Joana da Silva", null, "Viana do Castelo", "Ponte de Lima"));
 
         // Login User 1
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -258,8 +255,8 @@ public class UserTests {
     @Test
     public void favoriteOffersTest() throws Exception {
         // Create Users
-        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null));
-        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "local", "123456789", "Jose da Silva", null));
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local","123456789", "Joao da Silva", null, "Viana do Castelo", "Ponte de Lima"));
+        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "local", "123456789", "Jose da Silva", null, "Viana do Castelo", "Ponte de Lima"));
 
         // Login User 1
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));
@@ -291,7 +288,7 @@ public class UserTests {
                 .andExpect(status().isOk());
 
         // Get favorite offers
-        result = mockMvc.perform(get(String.format("/api/users/%d/favorites/offers", loginResponseDTO2.id()))
+        mockMvc.perform(get(String.format("/api/users/%d/favorites/offers", loginResponseDTO2.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
                 .andExpect(status().isOk())
@@ -306,13 +303,11 @@ public class UserTests {
                 .andExpect(status().isOk());
 
         // Get favorite offers
-        result = mockMvc.perform(get(String.format("/api/users/%d/favorites/offers", loginResponseDTO2.id()))
+        mockMvc.perform(get(String.format("/api/users/%d/favorites/offers", loginResponseDTO2.id()))
                         .header("Authorization", String.format("Bearer %s", loginResponseDTO2.jwtToken()))
                         .contentType(new MediaType(MediaType.APPLICATION_JSON, StandardCharsets.UTF_8)))
                 .andExpect(status().isOk())
                 .andReturn();
-
-        content = result.getResponse().getContentAsString();
 
         offerRepository.deleteById(serviceDTO.getId());
         userRepository.deleteById(user1.id());
@@ -322,8 +317,8 @@ public class UserTests {
     @Test
     public void reviewsTest() throws Exception {
         // Create user
-        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null));
-        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "local", "123456789", "Jose da Silva", null));
+        var user1 = testUtils.registerUser(new RegisterDTO("joao@gmail.com", "123456", "local", "123456789", "Joao da Silva", null, "Viana do Castelo", "Ponte de Lima"));
+        var user2 = testUtils.registerUser(new RegisterDTO("jose@gmail.com", "123456", "local", "123456789", "Jose da Silva", null, "Viana do Castelo", "Ponte de Lima"));
 
         // Login user 1
         var loginResponseDTO = testUtils.loginUser(new LoginDTO("joao@gmail.com", "123456"));

@@ -29,8 +29,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.Date;
@@ -166,7 +164,7 @@ public class AuthenticationController {
 
 
     @PostMapping("/google")
-    public LoginResponseDTO googleAuth(@RequestBody LoginOAuth2DTO loginOAuth2DTO) throws GeneralSecurityException, IOException, URISyntaxException {
+    public LoginResponseDTO googleAuth(@RequestBody LoginOAuth2DTO loginOAuth2DTO) throws GeneralSecurityException, IOException {
         // Validate idToken with Google OAuth2 API
         GoogleIdToken.Payload payload = verifyIDToken(loginOAuth2DTO.token());
 
@@ -184,7 +182,9 @@ public class AuthenticationController {
                     "google",
                     null,
                     firstName + " " + lastName,
-                    pictureUrl);
+                    pictureUrl,
+                    null,
+                    null);
             userService.createUser(registerDTO);
         }
 
