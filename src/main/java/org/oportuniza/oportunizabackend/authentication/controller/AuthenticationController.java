@@ -103,6 +103,7 @@ public class AuthenticationController {
                 user.getReviewCount(),
                 user.getDistrict(),
                 user.getCounty(),
+                user.getLastActivityAt(),
                 user.getCreatedAt(),
                 jwtToken);
     }
@@ -154,6 +155,7 @@ public class AuthenticationController {
                 user.getReviewCount(),
                 user.getDistrict(),
                 user.getCounty(),
+                user.getLastActivityAt(),
                 user.getCreatedAt(),
                 jwtToken);
     }
@@ -202,6 +204,7 @@ public class AuthenticationController {
                 user.getReviewCount(),
                 user.getDistrict(),
                 user.getCounty(),
+                user.getLastActivityAt(),
                 user.getCreatedAt(),
                 jwtToken);
     }

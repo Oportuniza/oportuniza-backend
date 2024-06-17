@@ -46,12 +46,6 @@ public class GoogleCloudStorageService {
         return new URI("https://storage.googleapis.com/" + bucketName + "/" + fileName).toURL();
     }
 
-    public URL generateV4GetObjectSignedUrl(String fileName) {
-        BlobId blobId = BlobId.of(bucketName, fileName);
-        BlobInfo blobInfo = BlobInfo.newBuilder(blobId).build();
-        return storage.signUrl(blobInfo, 15, TimeUnit.MINUTES, Storage.SignUrlOption.withV4Signature());
-    }
-
     public void deleteFile(String fileName) {
         storage.delete(BlobId.of(bucketName, fileName));
     }

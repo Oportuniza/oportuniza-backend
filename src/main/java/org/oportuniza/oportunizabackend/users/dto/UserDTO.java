@@ -14,6 +14,7 @@ public record UserDTO (
         URL pictureUrl,
         Double rating,
         int reviewsCount,
+        Date lastLogin,
         Date createdAt) {
 }
 

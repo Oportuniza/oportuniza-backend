@@ -20,6 +20,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
+
 
 @RestController
 @RequestMapping("/api/services")
@@ -63,7 +66,7 @@ public class ServiceController {
     })
     public GetServiceDTO getService(
             @Parameter(description = "The ID of the service to be retrieved") @PathVariable long serviceId)
-            throws ServiceNotFoundException {
+            throws ServiceNotFoundException, MalformedURLException, URISyntaxException {
         var service = serviceService.getService(serviceId);
 
         return new GetServiceDTO(

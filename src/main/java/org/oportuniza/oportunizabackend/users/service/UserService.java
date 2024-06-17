@@ -224,6 +224,7 @@ public class UserService implements UserDetailsService {
                 user.getPictureUrl() != null ? googleCloudStorageService.getPublicUrl(user.getPictureUrl()) : null,
                 user.getAverageRating(),
                 user.getReviewCount(),
+                user.getLastActivityAt(),
                 user.getCreatedAt());
     }
 

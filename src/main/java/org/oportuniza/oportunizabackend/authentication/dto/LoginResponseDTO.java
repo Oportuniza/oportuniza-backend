@@ -16,6 +16,7 @@ public record LoginResponseDTO(
         int reviewCount,
         String district,
         String county,
+        Date lastLogin,
         Date createdAt,
         String jwtToken) {
 }
