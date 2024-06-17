@@ -1,4 +1,4 @@
-package org.oportuniza.oportunizabackend.chat.api.models;
+package org.oportuniza.oportunizabackend.chat.models;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -23,8 +23,8 @@ public class ChatMessage {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
     private String content;
-    private String sender;
-    private String receiver;
+    private Long sender;
+    private Long receiver;
     private Date timestamp;
     //private MessageType type;
     private MessageStatus status;

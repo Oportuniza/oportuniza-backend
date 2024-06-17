@@ -1,6 +1,5 @@
 package org.oportuniza.oportunizabackend.notifications.services;
 
-import org.oportuniza.oportunizabackend.chat.api.models.ChatMessageRepository;
 import org.oportuniza.oportunizabackend.notifications.dtos.NotificationDTO;
 import org.oportuniza.oportunizabackend.notifications.model.GeneralNotification;
 import org.oportuniza.oportunizabackend.notifications.model.GeneralNotificationRepository;

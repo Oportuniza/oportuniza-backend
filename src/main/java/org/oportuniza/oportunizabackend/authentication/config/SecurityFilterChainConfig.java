@@ -32,10 +32,11 @@ public class SecurityFilterChainConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         return httpSecurity
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                //.cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(AbstractHttpConfigurer::disable) // Cross-Site Request Forgery (why to disable this?)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(registry -> {
+                    //registry.anyRequest().permitAll();
                     registry.requestMatchers(
                             "/swagger-ui.html",
                             "/swagger-ui/**",
@@ -43,7 +44,8 @@ public class SecurityFilterChainConfig {
                             "/swagger-resources/**",
                             "/v3/api-docs",
                             "/v3/api-docs/**",
-                            "/webjars/**"
+                            "/webjars/**",
+                            "/websocket/**"
                             ).permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/auth/register").permitAll();
                     registry.requestMatchers(HttpMethod.POST, "/api/auth/login").permitAll();
@@ -51,6 +53,7 @@ public class SecurityFilterChainConfig {
                 })
                 .addFilterBefore(loggingFilter, UsernamePasswordAuthenticationFilter.class) // logging filter before jwt to log even invalid requests
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+                //.oauth2Login(withDefaults())
                 .build();
     }
 

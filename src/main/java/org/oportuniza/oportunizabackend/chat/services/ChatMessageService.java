@@ -1,14 +1,18 @@
 package org.oportuniza.oportunizabackend.chat.services;
 
-import org.oportuniza.oportunizabackend.chat.api.models.ChatMessage;
-import org.oportuniza.oportunizabackend.chat.api.models.ChatMessageRepository;
+import org.oportuniza.oportunizabackend.chat.dtos.MessageDTO;
+import org.oportuniza.oportunizabackend.chat.models.ChatMessage;
+import org.oportuniza.oportunizabackend.chat.models.ChatMessageRepository;
 import org.oportuniza.oportunizabackend.chat.exceptions.ResourceNotFoundException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Service;
-import java.util.List;
-import java.util.Optional;
+
+import java.util.*;
 
 @Service
 public class ChatMessageService {
+    private static final Logger LOG = LoggerFactory.getLogger(ChatMessageService.class);
     private final ChatMessageRepository messageRepository;
 
     public ChatMessageService(ChatMessageRepository messageRepository) {
@@ -23,13 +27,13 @@ public class ChatMessageService {
 
     /**
      * Gets new messages received from sender to receiver
-     * @param sender who sent the message
-     * @param receiver who is to receive
+     * @param senderId who sent the message
+     * @param receiverId who is to receive
      * @return number of new messages
      */
-    public long countNewMessages(String sender, String receiver) {
+    public long countNewMessages(Long senderId, Long receiverId) {
         return messageRepository.countBySenderAndReceiverAndStatus(
-                sender, receiver, ChatMessage.MessageStatus.RECEIVED);
+                senderId, receiverId, ChatMessage.MessageStatus.RECEIVED);
     }
 
     /**
@@ -38,7 +42,7 @@ public class ChatMessageService {
      * @param receiver who received the message
      * @return the list of messages
      */
-    public List<ChatMessage> findChatMessages(String sender, String receiver) {
+    public List<ChatMessage> findChatMessages(Long sender, Long receiver) {
         var messages = messageRepository.findBySenderAndReceiver(sender, receiver);
 
         if(!messages.isEmpty()) {
@@ -48,17 +52,46 @@ public class ChatMessageService {
         return messages;
     }
 
+    public Map<Long, List<MessageDTO>> getHistory(Long userId) {
+        List<MessageDTO> messagesFromUser = messageRepository.findChatMessageByReceiverOrSenderOrderByTimestamp(userId, userId);
+
+        Map<Long, List<MessageDTO>> map = new HashMap<>();
+        for (MessageDTO m : messagesFromUser) {
+            Long other = null;
+            if (m.receiver() != userId){
+                other = m.receiver();
+            }
+            else if (m.sender() != userId){
+                other = m.sender();
+            }
+
+            if (!map.containsKey(other)) {
+                map.put(other, new ArrayList<>());
+            }
+            map.get(other).add(m);
+        }
+        return map;
+    }
+
     /**
      * Finds message given its id
      * @param id id of the message
      * @return the found message (or throw an error)
      */
-    public ChatMessage findById(String id) {
+    public MessageDTO findById(Long id) {
         Optional<ChatMessage> message = messageRepository.findById(id);
         if (message.isPresent()){
-            var msgObj = message.get();
-            msgObj.setStatus(ChatMessage.MessageStatus.DELIVERED);
-            return messageRepository.save(msgObj);
+            ChatMessage msgObj = message.get();
+            //msgObj.setStatus(ChatMessage.MessageStatus.DELIVERED);
+            //messageRepository.save(msgObj);
+            MessageDTO msg = new MessageDTO(
+                    msgObj.getId(),
+                    msgObj.getContent(),
+                    msgObj.getSender(),
+                    msgObj.getReceiver(),
+                    msgObj.getTimestamp(),
+                    msgObj.getStatus());
+            return msg;
 
         } else {
             throw new ResourceNotFoundException("can't find message (" + id + ")");
@@ -71,7 +104,7 @@ public class ChatMessageService {
      * @param receiver who is to receive
      * @param status final state of all that message
      */
-    public void updateStatuses(String sender, String receiver, ChatMessage.MessageStatus status) {
+    public void updateStatuses(Long sender, Long receiver, ChatMessage.MessageStatus status) {
         List<ChatMessage> messages = findChatMessages(sender, receiver);
         for (ChatMessage message : messages) {
             message.setStatus(status);
