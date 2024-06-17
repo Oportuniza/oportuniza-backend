@@ -5,6 +5,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
 import org.springframework.data.domain.Page;
@@ -42,4 +43,18 @@ public class OfferController {
         return offerService.getAllOffers(title, minPrice, maxPrice, minSalary, maxSalary, workingModel, workingRegime, negotiable, page, size);
     }
 
+    @GetMapping("/users/{userId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get offers by user id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User offers found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            })
+    })
+    public Page<OfferDTO> getUserOffers(
+            @Parameter(description = "The user id to filter offers") @PathVariable Long userId,
+            @Parameter(description = "Page number") @RequestParam(defaultValue = "0") int page,
+            @Parameter(description = "Number of items per page") @RequestParam(defaultValue = "10") int size) {
+        return offerService.getOfferByUserId(userId, page, size);
+    }
 }
