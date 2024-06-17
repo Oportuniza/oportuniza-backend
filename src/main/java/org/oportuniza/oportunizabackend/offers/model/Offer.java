@@ -16,7 +16,7 @@ import java.util.List;
 @Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Offer {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE)
     private Long id;
 
     @Column(nullable = false)
@@ -24,6 +24,10 @@ public abstract class Offer {
 
     @Column(nullable = false)
     private String description;
+
+    private String district;
+
+    private String county;
 
     @Column(name = "image_url")
     private URL imageUrl;

@@ -13,13 +13,13 @@ public class ServiceDTO extends OfferDTO {
     double price;
     private final String type = "service";
 
-    public ServiceDTO(long id, String title, String description, boolean negotiable, URL image, String imageFileName, Date createdAt, double price) {
-        super(id, title, description, negotiable, image, imageFileName, createdAt);
+    public ServiceDTO(long id, String title, String description, String district, String county, boolean negotiable, URL image, String imageFileName, Date createdAt, double price) {
+        super(id, title, description, district, county, negotiable, image, imageFileName, createdAt);
         this.price = price;
     }
 
-    public ServiceDTO(long id, String title, String description, boolean negotiable, URL image, String imageFileName, double price) {
-        super(id, title, description, image, imageFileName, negotiable);
+    public ServiceDTO(long id, String title, String description, String district, String county, boolean negotiable, URL image, String imageFileName, double price) {
+        super(id, title, description, district, county, image, imageFileName, negotiable);
         this.price = price;
     }
 

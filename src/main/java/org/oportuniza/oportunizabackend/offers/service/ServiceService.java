@@ -6,7 +6,6 @@ import org.oportuniza.oportunizabackend.offers.dto.UpdateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.ServiceNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.repository.ServiceRepository;
-import org.oportuniza.oportunizabackend.offers.service.specifications.OfferSpecifications;
 import org.oportuniza.oportunizabackend.offers.service.specifications.ServiceSpecifications;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.service.GoogleCloudStorageService;
@@ -17,7 +16,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 
 
@@ -70,6 +68,12 @@ public class ServiceService {
         if (updatedService.description() != null && !updatedService.description().isEmpty()) {
             service.setDescription(updatedService.description());
         }
+        if (updatedService.district() != null && !updatedService.district().isEmpty()) {
+            service.setDistrict(updatedService.district());
+        }
+        if (updatedService.county() != null && !updatedService.county().isEmpty()) {
+            service.setCounty(updatedService.county());
+        }
         if (image != null && !image.isEmpty()) {
             if (service.getImageUrl() != null && service.getImageFileName()!= null && !service.getImageFileName().isEmpty()) {
                 googleCloudStorageService.deleteFile(service.getImageFileName());
@@ -88,6 +92,8 @@ public class ServiceService {
                 service.getId(),
                 service.getTitle(),
                 service.getDescription(),
+                service.getDistrict(),
+                service.getCounty(),
                 service.isNegotiable(),
                 service.getImageUrl(),
                 service.getImageFileName(),
