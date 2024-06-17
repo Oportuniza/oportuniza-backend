@@ -14,6 +14,7 @@ import org.oportuniza.oportunizabackend.offers.dto.UpdateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.exceptions.ServiceNotFoundException;
 import org.oportuniza.oportunizabackend.offers.model.Service;
 import org.oportuniza.oportunizabackend.offers.service.ServiceService;
+import org.oportuniza.oportunizabackend.users.dto.UserDTO;
 import org.oportuniza.oportunizabackend.users.exceptions.UserNotFoundException;
 import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.oportuniza.oportunizabackend.utils.ErrorResponse;
