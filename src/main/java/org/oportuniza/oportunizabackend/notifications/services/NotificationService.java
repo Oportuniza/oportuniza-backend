@@ -26,7 +26,7 @@ public class NotificationService {
         notificationRepository.save(notification);
     }
 
-    public List<GeneralNotification> getNotifications(String targetUser) {
+    public List<GeneralNotification> getNotifications(Long targetUser) {
         return this.notificationRepository.findByTargetUser(targetUser);
     }
 
