@@ -14,10 +14,40 @@ DELETE FROM chat_message;
 DELETE FROM chat_notification;
 DELETE FROM general_notification;
 
--- Inserindo dados na tabela users
 INSERT INTO users (id, average_rating, county, created_at, district, email, name, password, phone_number, resume_url, review_count, updated_at)
 VALUES
-    (1, 4.5, 'São Paulo', '2024-01-01 00:00:00', 'SP', 'email@example.com', 'João Silva', 'senha123', '11987654321', 'http://resumeurl.com/resume.pdf', 10, '2024-06-01 00:00:00');
+    (1, 4.5, 'São Paulo', '2024-01-01 00:00:00', 'SP', 'email@example.com', 'João Silva', 'senha123', '11987654321', 'http://resumeurl.com/resume.pdf', 10, '2024-06-01 00:00:00'),
+    (2, 3.8, 'Braga', '2024-01-01 00:00:00', 'Braga', 'email2@example.com', 'Gui Silva', 'senha123', '999999999999', 'http://resumeurl.com/resume2.pdf', 8, '2024-06-01 00:00:00');
+
+-- Generate 50000 chat messages with random sender, receiver and timestamps
+DO
+$$
+    DECLARE
+        counter INTEGER := 1;
+        sender_id INTEGER;
+        receiver_id INTEGER;
+        message_time TIMESTAMP;
+    BEGIN
+        WHILE counter <= 50000 LOOP
+                -- Generate random sender and receiver id between 1 and 100
+                sender_id := floor(random() * 100 + 1)::INTEGER;
+                receiver_id := floor(random() * 100 + 1)::INTEGER;
+
+                -- Ensure sender and receiver are not the same
+                WHILE sender_id = receiver_id LOOP
+                        receiver_id := floor(random() * 100 + 1)::INTEGER;
+                    END LOOP;
+
+                -- Generate random timestamp within the last 30 days
+                message_time := NOW() - INTERVAL '1 day' * floor(random() * 30)::INTEGER;
+
+                INSERT INTO chat_message (id, content, receiver, sender, status, timestamp)
+                VALUES (counter, 'Message ' || counter, 'user' || receiver_id, 'user' || sender_id, 1, message_time);
+
+                counter := counter + 1;
+            END LOOP;
+    END;
+$$;
 
 -- Generate 500 job offers
 DO

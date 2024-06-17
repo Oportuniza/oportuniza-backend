@@ -67,6 +67,10 @@ public class OfferService {
         return offerRepository.findById(offerId).orElseThrow(() -> new OfferNotFoundException(offerId));
     }
 
+    public Page<OfferDTO> getOfferByUserId(long userId, int page, int size) {
+        return offerRepository.findOffersByUserId(userId, PageRequest.of(page, size)).map(OfferService::convertToDTO);
+    }
+
     public void addApplication(Offer offer, Application application) {
         offer.addApplication(application);
         offerRepository.save(offer);
