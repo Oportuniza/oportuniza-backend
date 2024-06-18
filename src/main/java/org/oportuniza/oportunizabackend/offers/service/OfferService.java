@@ -92,6 +92,10 @@ public class OfferService {
         offerRepository.save(offer);
     }
 
+    public OfferDTO getOfferById(long offerId) throws OfferNotFoundException {
+        return convertToDTO(getOffer(offerId));
+    }
+
     public static OfferDTO convertToDTO(Offer offer) {
         if (offer instanceof Service service) {
             return new ServiceDTO(

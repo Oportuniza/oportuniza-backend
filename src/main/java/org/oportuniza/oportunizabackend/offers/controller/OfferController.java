@@ -79,4 +79,23 @@ public class OfferController {
             throws OfferNotFoundException{
         offerService.removeImage(offerId);
     }
+
+
+    @GetMapping("/{offerId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get offer by id")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Offer found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8")
+            }),
+            @ApiResponse(responseCode = "404", description = "Offer not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
+    })
+    public OfferDTO getOfferById(
+            @Parameter(description = "The ID of the offer to be obtained") @PathVariable long offerId)
+            throws OfferNotFoundException {
+        return offerService.getOfferById(offerId);
+    }
+
 }
