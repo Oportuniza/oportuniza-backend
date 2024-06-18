@@ -134,12 +134,11 @@ public class JobService {
         return newJob;
     }
 
-    public void deleteJob(long jobId) throws JobNotFoundException {
-        Job job = getJob(jobId);
+    public void deleteJob(Job job) {
         if (job.getImageFileName() != null && !job.getImageFileName().isEmpty()) {
             googleCloudStorageService.deleteFile(job.getImageFileName());
         }
-        jobRepository.deleteById(jobId);
+        jobRepository.delete(job);
     }
 
     public Job getJobById(long jobId) throws JobNotFoundException {

@@ -16,6 +16,7 @@ public record GetServiceDTO (
         boolean negotiable,
         Date createdAt,
         double price,
-        UserDTO user
+        UserDTO user,
+        String type
 ) {
 }

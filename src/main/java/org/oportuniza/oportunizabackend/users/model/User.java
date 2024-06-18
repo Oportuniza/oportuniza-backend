@@ -46,8 +46,11 @@ public class User implements UserDetails {
     @Column(name = "resume_url")
     private URL resumeUrl;
 
-    @Column(name = "resume_name")
+    @Column(name = "resume_name_in_bucket")
     private String resumeName;
+
+    @Column(name = "resume_file_name")
+    private String resumeFileName;
 
     @Column(name = "average_rating")
     private double averageRating;

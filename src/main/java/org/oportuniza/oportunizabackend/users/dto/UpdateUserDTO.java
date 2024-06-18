@@ -7,5 +7,6 @@ public record UpdateUserDTO (
         String name,
         String phoneNumber,
         String district,
-        String county) {
+        String county,
+        String resumeFileName) {
 }

@@ -1,6 +1,7 @@
 package org.oportuniza.oportunizabackend.applications.service;
 
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFoundException;
@@ -18,6 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 
@@ -56,7 +58,7 @@ public class ApplicationService {
         return applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id));
     }
 
-    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user, MultipartFile[] files) throws IOException, URISyntaxException {
+    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user, MultipartFile resume, MultipartFile[] files) throws IOException, URISyntaxException {
         var app = new Application();
         app.setOffer(offer);
         app.setUser(user);
@@ -65,15 +67,31 @@ public class ApplicationService {
         app.setEmail(applicationDTO.email());
         app.setMessage(applicationDTO.message());
         app.setStatus("Pending");
+        app.setPhoneNumber(applicationDTO.phoneNumber());
+        app.setResumeFileName(applicationDTO.resumeFileName());
+        if (resume != null && !resume.isEmpty()) {
+            var resumeUrl = googleCloudStorageService.uploadFile(resume);
+            app.setResumeUrl(resumeUrl.getValue1());
+            app.setResumeNameInBucket(resumeUrl.getValue0());
+        } else {
+            app.setResumeNameInBucket(applicationDTO.resumeNameInBucket());
+            app.setResumeUrl(new URI(applicationDTO.resumeUrl()).toURL());
+        }
 
-        for (var file : files) {
-            if (file!= null && !file.isEmpty()) {
-                var documentUrl = googleCloudStorageService.uploadFile(file);
-                var document = new Document();
-                document.setUrl(documentUrl.getValue1());
-                document.setName(documentUrl.getValue0());
-                document.setApplication(app);
-                app.addDocument(document);
+        var filesNames = applicationDTO.documentsFilesNames();
+        if (files != null && filesNames != null && files.length == filesNames.size()) {
+            for (int i = 0; i < files.length; i++) {
+                var file = files[i];
+                var fileName = filesNames.get(i);
+                if (file != null && !file.isEmpty()) {
+                    var documentUrl = googleCloudStorageService.uploadFile(file);
+                    var document = new Document();
+                    document.setUrl(documentUrl.getValue1());
+                    document.setNameInBucket(documentUrl.getValue0());
+                    document.setFileName(fileName);
+                    document.setApplication(app);
+                    app.addDocument(document);
+                }
             }
         }
 
@@ -118,17 +136,26 @@ public class ApplicationService {
                 application.getUser().getId(),
                 application.getFirstName(),
                 application.getLastName(),
+                application.getPhoneNumber(),
                 application.getEmail(),
                 application.getMessage(),
                 application.getResumeUrl(),
-                application.getResumeName(),
-                application.getDocuments().stream().map(doc -> new Pair<>(doc.getName(), doc.getUrl())).toList(),
+                application.getResumeNameInBucket(),
+                application.getResumeFileName(),
+                application.getDocuments().stream().map(doc -> new Triplet<>(doc.getFileName(), doc.getNameInBucket(), doc.getUrl())).toList(),
                 application.getStatus(),
                 application.getCreatedAt());
     }
 
     public Application getApplication(Long id) throws ApplicationNotFoundException {
         return applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id));
+    }
+
+    public void removeOfferFromApplications(Offer offer) {
+        for (Application application : offer.getApplications()) {
+            application.setOffer(null);
+            applicationRepository.save(application);
+        }
     }
 
     private boolean applicationExists(long id) {
