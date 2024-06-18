@@ -57,7 +57,7 @@ public class ApplicationService {
         return applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id));
     }
 
-    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user, MultipartFile[] files) throws IOException, URISyntaxException {
+    public Application createApplication(CreateApplicationDTO applicationDTO, Offer offer, User user, MultipartFile resume, MultipartFile[] files) throws IOException, URISyntaxException {
         var app = new Application();
         app.setOffer(offer);
         app.setUser(user);
@@ -65,9 +65,16 @@ public class ApplicationService {
         app.setLastName(applicationDTO.lastName());
         app.setEmail(applicationDTO.email());
         app.setMessage(applicationDTO.message());
-        app.setResumeName(applicationDTO.resumeName());
-        app.setResumeUrl(new URI(applicationDTO.resumeUrl()).toURL());
-        app.setStatus("Pending");
+        if (resume != null && !resume.isEmpty()) {
+            var resumeUrl = googleCloudStorageService.uploadFile(resume);
+            app.setResumeUrl(resumeUrl.getValue1());
+            app.setResumeName(resumeUrl.getValue0());
+        } else if (applicationDTO.resumeName() != null && !applicationDTO.resumeName().isEmpty()
+                &&  applicationDTO.resumeUrl() != null && !applicationDTO.resumeUrl().isEmpty()) {
+            app.setResumeName(applicationDTO.resumeName());
+            app.setResumeUrl(new URI(applicationDTO.resumeUrl()).toURL());
+            app.setStatus("Pending");
+        }
 
         for (var file : files) {
             if (file!= null && !file.isEmpty()) {

@@ -124,11 +124,12 @@ public class ApplicationController {
             @Parameter(description = "The ID of the user who wants to create the application") @PathVariable long userId,
             @Parameter(description = "The ID of the offer for which the application is being created") @PathVariable long offerId,
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "Details for creating the application") @Valid @RequestPart("application") CreateApplicationDTO applicationDTO,
+            @RequestPart(value = "resume", required = false) MultipartFile resume,
             @RequestPart(value = "files", required = false) MultipartFile[] files) throws UserNotFoundException, OfferNotFoundException, IOException, URISyntaxException {
         var user = userService.getUserById(userId);
         var offer = offerService.getOffer(offerId);
         notificationService.sendNotification("O seu anúncio \"" + offer.getTitle() + "\" recebeu uma candidatura.", offer.getUser().getId());
-        Application createdApplication = applicationService.createApplication(applicationDTO, offer, user, files);
+        Application createdApplication = applicationService.createApplication(applicationDTO, offer, user, resume, files);
         userService.addApplication(user, createdApplication);
         offerService.addApplication(offer, createdApplication);
         return applicationService.convertToDTO(createdApplication);
