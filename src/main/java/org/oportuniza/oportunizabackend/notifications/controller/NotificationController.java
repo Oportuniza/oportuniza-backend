@@ -18,7 +18,7 @@ public class NotificationController {
     }
 
     @GetMapping("/notifications/{targetUser}")
-    public ResponseEntity<?> findNotifications (@PathVariable String targetUser) {
+    public ResponseEntity<?> findNotifications (@PathVariable Long targetUser) {
         return ResponseEntity
                 .ok(notificationService.getNotifications(targetUser));
     }
@@ -26,5 +26,11 @@ public class NotificationController {
     @PostMapping("/notifications/add")
     public ResponseEntity<?> addNotification (@RequestBody NotificationDTO notification) {
         return ResponseEntity.ok(notificationService.createNotification(notification));
+    }
+
+    @GetMapping("/notifications/trigger/{userId}/{message}")
+    public ResponseEntity<?> triggerNotification (@PathVariable Long userId, @PathVariable String message) {
+        notificationService.sendNotification(message, userId);
+        return ResponseEntity.ok(0);
     }
 }
