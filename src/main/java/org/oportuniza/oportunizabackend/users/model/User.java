@@ -78,14 +78,14 @@ public class User implements UserDetails {
             name = "favorites_offers",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "offer_id"))
-    private List<Offer> favoritesOffers = new ArrayList<>();
+    private Set<Offer> favoritesOffers = new HashSet<>();
 
     @ManyToMany
     @JoinTable(
             name = "favorite_users",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "favorite_user_id"))
-    private List<User> favoriteUsers;
+    private Set<User> favoriteUsers;
 
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
