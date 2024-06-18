@@ -162,9 +162,12 @@ public class ServiceController {
             @Parameter(description = "The ID of the service to be deleted") @PathVariable long serviceId)
             throws ServiceNotFoundException {
         Service service = serviceService.getServiceById(serviceId);
-        applicationService.removeOfferFromApplications(service);
+        for (var application : service.getApplications()) {
+            userService.removeApplication(application);
+        }
         userService.removeOffer(service);
         userService.removeOfferFromFavorites(service);
+        applicationService.removeOfferApplications(service);
         serviceService.deleteService(serviceId);
     }
 }

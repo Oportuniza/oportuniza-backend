@@ -151,7 +151,7 @@ public class ApplicationService {
         return applicationRepository.findById(id).orElseThrow(() -> new ApplicationNotFoundException(id));
     }
 
-    public void removeOfferFromApplications(Offer offer) {
+    public void removeOfferApplications(Offer offer) {
         applicationRepository.deleteAll(offer.getApplications());
     }
 

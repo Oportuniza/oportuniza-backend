@@ -163,9 +163,12 @@ public class JobController {
             @Parameter(description = "The ID of the job to be deleted") @PathVariable long jobId)
             throws JobNotFoundException {
         Job job = jobService.getJobById(jobId);
-        applicationService.removeOfferFromApplications(job);
+        for (var application : job.getApplications()) {
+            userService.removeApplication(application);
+        }
         userService.removeOffer(job);
         userService.removeOfferFromFavorites(job);
+        applicationService.removeOfferApplications(job);
         jobService.deleteJob(job);
     }
 }
