@@ -18,6 +18,7 @@ public record GetJobDTO (
         String county,
         String workingModel,
         String workingRegime,
-        UserDTO userDTO)
+        UserDTO userDTO,
+        String type)
     {
 }

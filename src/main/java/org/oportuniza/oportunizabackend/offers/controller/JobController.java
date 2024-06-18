@@ -88,7 +88,8 @@ public class JobController {
                 job.getCounty(),
                 job.getWorkingModel(),
                 job.getWorkingRegime(),
-                userService.convertToDTO(job.getUser()));
+                userService.convertToDTO(job.getUser()),
+                "job");
     }
 
     @GetMapping("/users/{userId}")
