@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
 import org.oportuniza.oportunizabackend.offers.dto.CreateJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.GetJobDTO;
 import org.oportuniza.oportunizabackend.offers.dto.JobDTO;
@@ -31,10 +32,12 @@ import java.net.URISyntaxException;
 public class JobController {
     private final JobService jobService;
     private final UserService userService;
+    private final ApplicationService applicationService;
 
-    public JobController(JobService jobService, UserService userService) {
+    public JobController(JobService jobService, UserService userService, ApplicationService applicationService) {
         this.jobService = jobService;
         this.userService = userService;
+        this.applicationService = applicationService;
     }
 
     @GetMapping
@@ -159,8 +162,9 @@ public class JobController {
             @Parameter(description = "The ID of the job to be deleted") @PathVariable long jobId)
             throws JobNotFoundException {
         Job job = jobService.getJobById(jobId);
+        applicationService.removeOfferFromApplications(job);
         userService.removeOffer(job);
         userService.removeOfferFromFavorites(job);
-        jobService.deleteJob(jobId);
+        jobService.deleteJob(job);
     }
 }

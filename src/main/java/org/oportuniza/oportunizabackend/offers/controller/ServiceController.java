@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
 import org.oportuniza.oportunizabackend.offers.dto.CreateServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.GetServiceDTO;
 import org.oportuniza.oportunizabackend.offers.dto.ServiceDTO;
@@ -33,10 +34,12 @@ import java.net.URISyntaxException;
 public class ServiceController {
     private final ServiceService serviceService;
     private final UserService userService;
+    private final ApplicationService applicationService;
 
-    public ServiceController(ServiceService serviceService, UserService userService) {
+    public ServiceController(ServiceService serviceService, UserService userService, ApplicationService applicationService) {
         this.serviceService = serviceService;
         this.userService = userService;
+        this.applicationService = applicationService;
     }
 
     @GetMapping
@@ -158,6 +161,7 @@ public class ServiceController {
             @Parameter(description = "The ID of the service to be deleted") @PathVariable long serviceId)
             throws ServiceNotFoundException {
         Service service = serviceService.getServiceById(serviceId);
+        applicationService.removeOfferFromApplications(service);
         userService.removeOffer(service);
         userService.removeOfferFromFavorites(service);
         serviceService.deleteService(serviceId);
