@@ -39,6 +39,9 @@ public class Application {
 
     private String message;
 
+    @Column(name = "phone_number")
+    private String phoneNumber;
+
     @CreationTimestamp
     @Column(updatable = false, name = "created_at")
     private Date createdAt;
@@ -46,8 +49,11 @@ public class Application {
     @Column(name = "resume_url")
     private URL resumeUrl;
 
-    @Column(name = "resume_name")
-    private String resumeName;
+    @Column(name = "resume_name_in_bucket")
+    private String resumeNameInBucket;
+
+    @Column(name = "resume_file_name")
+    private String resumeFileName;
 
     @OneToMany(mappedBy = "application", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<Document> documents = new HashSet<>();

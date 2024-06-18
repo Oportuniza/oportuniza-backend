@@ -4,7 +4,6 @@ import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
-import org.oportuniza.oportunizabackend.offers.repository.JobRepository;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
 import org.oportuniza.oportunizabackend.users.dto.UpdateUserDTO;
 import org.oportuniza.oportunizabackend.users.dto.UserDTO;
@@ -22,7 +21,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.util.Date;
 
@@ -82,6 +80,7 @@ public class UserService implements UserDetailsService {
             var resumeUrl = googleCloudStorageService.uploadFile(resumeFile);
             user.setResumeUrl(resumeUrl.getValue1());
             user.setResumeName(resumeUrl.getValue0());
+            user.setResumeFileName(updatedUser.resumeFileName());
         }
 
         updatePasswordIfProvided(user, updatedUser);
@@ -229,6 +228,7 @@ public class UserService implements UserDetailsService {
                 user.getCounty(),
                 user.getResumeUrl(),
                 user.getResumeName(),
+                user.getResumeFileName(),
                 user.getPictureUrl(),
                 user.getPictureName(),
                 user.getAverageRating(),

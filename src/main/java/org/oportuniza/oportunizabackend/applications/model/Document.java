@@ -19,7 +19,11 @@ public class Document {
 
     private URL url;
 
-    private String name;
+    @Column(name = "name_in_bucket")
+    private String nameInBucket;
+
+    @Column(name = "file_name")
+    private String fileName;
 
     @ManyToOne
     @JoinColumn(name = "application_id", nullable = false)

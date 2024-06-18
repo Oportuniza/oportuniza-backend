@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.GetApplicationDTO;
@@ -97,11 +98,13 @@ public class ApplicationController {
                 app.getId(),
                 app.getFirstName(),
                 app.getLastName(),
+                app.getPhoneNumber(),
                 app.getEmail(),
                 app.getMessage(),
                 app.getResumeUrl(),
-                app.getResumeName(),
-                app.getDocuments().stream().map(doc -> new Pair<>(doc.getName(), doc.getUrl())).toList(),
+                app.getResumeNameInBucket(),
+                app.getResumeFileName(),
+                app.getDocuments().stream().map(doc -> new Triplet<>(doc.getFileName(), doc.getNameInBucket(), doc.getUrl())).toList(),
                 app.getStatus(),
                 app.getCreatedAt(),
                 OfferService.convertToDTO(app.getOffer()),

@@ -12,6 +12,7 @@ public record UserDTO (
         String county,
         URL resumeUrl,
         String resumeName,
+        String resumeFileName,
         URL pictureUrl,
         String pictureName,
         Double rating,

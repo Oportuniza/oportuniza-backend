@@ -65,24 +65,29 @@ public class ApplicationService {
         app.setLastName(applicationDTO.lastName());
         app.setEmail(applicationDTO.email());
         app.setMessage(applicationDTO.message());
+        app.setStatus("Pending");
+        app.setPhoneNumber(applicationDTO.phoneNumber());
+        app.setResumeFileName(applicationDTO.resumeFileName());
         if (resume != null && !resume.isEmpty()) {
             var resumeUrl = googleCloudStorageService.uploadFile(resume);
             app.setResumeUrl(resumeUrl.getValue1());
-            app.setResumeName(resumeUrl.getValue0());
-        } else if (applicationDTO.resumeName() != null && !applicationDTO.resumeName().isEmpty()
-                &&  applicationDTO.resumeUrl() != null && !applicationDTO.resumeUrl().isEmpty()) {
-            app.setResumeName(applicationDTO.resumeName());
+            app.setResumeNameInBucket(resumeUrl.getValue0());
+        } else {
+            app.setResumeNameInBucket(applicationDTO.resumeNameInBucket());
             app.setResumeUrl(new URI(applicationDTO.resumeUrl()).toURL());
-            app.setStatus("Pending");
         }
 
-        if (files != null) {
-            for (var file : files) {
-                if (file!= null && !file.isEmpty()) {
+        var filesNames = applicationDTO.documentsFilesNames();
+        if (files != null && filesNames != null && files.length == filesNames.size()) {
+            for (int i = 0; i < files.length; i++) {
+                var file = files[i];
+                var fileName = filesNames.get(i);
+                if (file != null && !file.isEmpty()) {
                     var documentUrl = googleCloudStorageService.uploadFile(file);
                     var document = new Document();
                     document.setUrl(documentUrl.getValue1());
-                    document.setName(documentUrl.getValue0());
+                    document.setNameInBucket(documentUrl.getValue0());
+                    document.setFileName(fileName);
                     document.setApplication(app);
                     app.addDocument(document);
                 }
