@@ -2,6 +2,7 @@ package org.oportuniza.oportunizabackend.applications.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.model.User;
@@ -14,6 +15,7 @@ import java.util.Set;
 @Data
 @Entity
 @Table(name = "applications")
+@ToString(exclude = {"user","offer"})
 public class Application {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
