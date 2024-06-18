@@ -1,6 +1,7 @@
 package org.oportuniza.oportunizabackend.applications.service;
 
 import org.javatuples.Pair;
+import org.javatuples.Triplet;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFoundException;
@@ -135,11 +136,13 @@ public class ApplicationService {
                 application.getUser().getId(),
                 application.getFirstName(),
                 application.getLastName(),
+                application.getPhoneNumber(),
                 application.getEmail(),
                 application.getMessage(),
                 application.getResumeUrl(),
-                application.getResumeName(),
-                application.getDocuments().stream().map(doc -> new Pair<>(doc.getName(), doc.getUrl())).toList(),
+                application.getResumeNameInBucket(),
+                application.getResumeFileName(),
+                application.getDocuments().stream().map(doc -> new Triplet<>(doc.getFileName(), doc.getNameInBucket(), doc.getUrl())).toList(),
                 application.getStatus(),
                 application.getCreatedAt());
     }
