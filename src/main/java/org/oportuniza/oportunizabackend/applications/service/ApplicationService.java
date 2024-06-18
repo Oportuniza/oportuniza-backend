@@ -152,10 +152,7 @@ public class ApplicationService {
     }
 
     public void removeOfferFromApplications(Offer offer) {
-        for (Application application : offer.getApplications()) {
-            application.setOffer(null);
-            applicationRepository.save(application);
-        }
+        applicationRepository.deleteAll(offer.getApplications());
     }
 
     private boolean applicationExists(long id) {
