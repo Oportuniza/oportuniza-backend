@@ -76,14 +76,16 @@ public class ApplicationService {
             app.setStatus("Pending");
         }
 
-        for (var file : files) {
-            if (file!= null && !file.isEmpty()) {
-                var documentUrl = googleCloudStorageService.uploadFile(file);
-                var document = new Document();
-                document.setUrl(documentUrl.getValue1());
-                document.setName(documentUrl.getValue0());
-                document.setApplication(app);
-                app.addDocument(document);
+        if (files != null) {
+            for (var file : files) {
+                if (file!= null && !file.isEmpty()) {
+                    var documentUrl = googleCloudStorageService.uploadFile(file);
+                    var document = new Document();
+                    document.setUrl(documentUrl.getValue1());
+                    document.setName(documentUrl.getValue0());
+                    document.setApplication(app);
+                    app.addDocument(document);
+                }
             }
         }
 
