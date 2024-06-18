@@ -4,6 +4,8 @@ public record CreateApplicationDTO(
         String firstName,
         String lastName,
         String email,
-        String message
+        String message,
+        String resumeUrl,
+        String resumeName
 ) {
 }

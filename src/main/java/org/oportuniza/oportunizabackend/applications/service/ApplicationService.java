@@ -18,6 +18,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 
 
@@ -64,6 +65,8 @@ public class ApplicationService {
         app.setLastName(applicationDTO.lastName());
         app.setEmail(applicationDTO.email());
         app.setMessage(applicationDTO.message());
+        app.setResumeName(applicationDTO.resumeName());
+        app.setResumeUrl(new URI(applicationDTO.resumeUrl()).toURL());
         app.setStatus("Pending");
 
         for (var file : files) {
