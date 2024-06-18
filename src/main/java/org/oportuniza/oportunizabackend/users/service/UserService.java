@@ -1,5 +1,7 @@
 package org.oportuniza.oportunizabackend.users.service;
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
@@ -24,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URISyntaxException;
+import java.security.GeneralSecurityException;
 import java.util.Date;
 
 @Service
@@ -33,13 +36,34 @@ public class UserService implements UserDetailsService {
     private final PasswordEncoder passwordEncoder;
     private final FavoriteOffersRepository favoriteOffersRepository;
     private final GoogleCloudStorageService googleCloudStorageService;
+    private final GoogleIdTokenVerifier verifier;
 
-    public UserService(final UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, FavoriteOffersRepository favoriteOffersRepository, GoogleCloudStorageService googleCloudStorageService) {
+    public UserService(final UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, FavoriteOffersRepository favoriteOffersRepository, GoogleCloudStorageService googleCloudStorageService, GoogleIdTokenVerifier verifier) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.favoriteOffersRepository = favoriteOffersRepository;
         this.googleCloudStorageService = googleCloudStorageService;
+        this.verifier = verifier;
+    }
+
+    private UserDTO verifyIDToken(String idToken) {
+        try {
+            GoogleIdToken idTokenObj = verifier.verify(idToken);
+            if (idTokenObj == null) {
+                return null;
+            }
+            GoogleIdToken.Payload payload = idTokenObj.getPayload();
+            String firstName = (String) payload.get("given_name");
+            String lastName = (String) payload.get("family_name");
+            String email = payload.getEmail();
+            String pictureUrl = (String) payload.get("picture");
+
+            // todo :
+            // return new UserDTO(firstName, lastName, email, pictureUrl);
+        } catch (GeneralSecurityException | IOException e) {
+            return null;
+        }
     }
 
     public void save(User user) {
