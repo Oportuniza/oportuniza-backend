@@ -109,6 +109,8 @@ public class ServiceService {
         newService.setDescription(service.description());
         newService.setNegotiable(service.negotiable());
         newService.setPrice(service.price());
+        newService.setDistrict(service.district());
+        newService.setCounty(service.county());
         if (image != null && !image.isEmpty()) {
             var imageUrl = googleCloudStorageService.uploadFile(image);
             newService.setImageUrl(imageUrl.getValue1());

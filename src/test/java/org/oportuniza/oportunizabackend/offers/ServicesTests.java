@@ -1,6 +1,7 @@
 package org.oportuniza.oportunizabackend.offers;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.api.client.googleapis.testing.TestUtils;
 import org.junit.jupiter.api.Test;
 import org.oportuniza.oportunizabackend.TestUtils;
 import org.oportuniza.oportunizabackend.authentication.dto.LoginDTO;
