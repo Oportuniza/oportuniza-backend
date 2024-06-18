@@ -7,6 +7,7 @@ import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFo
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.applications.model.Document;
 import org.oportuniza.oportunizabackend.applications.repository.ApplicationRepository;
+import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.service.GoogleCloudStorageService;
@@ -80,18 +81,27 @@ public class ApplicationService {
         return app;
     }
 
-    public ApplicationDTO acceptApplication(long id) throws MalformedURLException, URISyntaxException {
+    public Application acceptApplication(long id) {
         var app = getApplication(id);
+        var offer = app.getOffer();
+        if (offer instanceof Job job) {
+            for (Application application : job.getApplications()) {
+                if (application.getStatus().equals("Accepted")) {
+                    application.setStatus("Rejected");
+                    applicationRepository.save(application);
+                }
+            }
+        }
         app.setStatus("Accepted");
         applicationRepository.save(app);
-        return convertToDTO(app);
+        return app;
     }
 
-    public ApplicationDTO rejectApplication(long id) throws MalformedURLException, URISyntaxException {
+    public Application rejectApplication(long id) {
         var app = getApplication(id);
         app.setStatus("Rejected");
         applicationRepository.save(app);
-        return convertToDTO(app);
+        return app;
     }
 
     public void deleteApplication(long id) throws ApplicationNotFoundException {

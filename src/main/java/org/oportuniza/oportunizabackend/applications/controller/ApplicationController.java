@@ -15,7 +15,9 @@ import org.oportuniza.oportunizabackend.applications.dto.GetApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFoundException;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
+import org.oportuniza.oportunizabackend.notifications.services.NotificationService;
 import org.oportuniza.oportunizabackend.offers.exceptions.OfferNotFoundException;
+import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
 import org.oportuniza.oportunizabackend.users.exceptions.UserNotFoundException;
 import org.oportuniza.oportunizabackend.users.service.UserService;
@@ -38,11 +40,13 @@ public class ApplicationController {
     private final ApplicationService applicationService;
     private final UserService userService;
     private final OfferService offerService;
+    private final NotificationService notificationService;
 
-    public ApplicationController(final ApplicationService applicationService, UserService userService, OfferService offerService) {
+    public ApplicationController(final ApplicationService applicationService, UserService userService, OfferService offerService, NotificationService notificationService) {
         this.applicationService = applicationService;
         this.userService = userService;
         this.offerService = offerService;
+        this.notificationService = notificationService;
     }
 
     @GetMapping("/user/{userId}")
@@ -123,6 +127,7 @@ public class ApplicationController {
             @RequestPart(value = "files", required = false) MultipartFile[] files) throws UserNotFoundException, OfferNotFoundException, IOException, URISyntaxException {
         var user = userService.getUserById(userId);
         var offer = offerService.getOffer(offerId);
+        notificationService.sendNotification("O seu anúncio \"" + offer.getTitle() + "\" recebeu uma candidatura.", offer.getUser().getId());
         Application createdApplication = applicationService.createApplication(applicationDTO, offer, user, files);
         userService.addApplication(user, createdApplication);
         offerService.addApplication(offer, createdApplication);
@@ -143,7 +148,9 @@ public class ApplicationController {
     public ApplicationDTO acceptApplication(
             @Parameter(description = "The ID of the application to be updated") @PathVariable long id)
             throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
-        return applicationService.acceptApplication(id);
+        var app = applicationService.acceptApplication(id);
+        notificationService.sendNotification("A sua candidatura ao anúncio \"" + app.getOffer().getTitle() + "\" foi aceite.", app.getUser().getId());
+        return applicationService.convertToDTO(app);
     }
 
     @PatchMapping("/{id}/reject")
@@ -160,7 +167,9 @@ public class ApplicationController {
     public ApplicationDTO rejectApplication(
             @Parameter(description = "The ID of the application to be updated") @PathVariable long id)
             throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
-        return applicationService.rejectApplication(id);
+        var app = applicationService.rejectApplication(id);
+        notificationService.sendNotification("A sua candidatura ao anúncio \"" + app.getOffer().getTitle() + "\" foi rejeitada.", app.getUser().getId());
+        return applicationService.convertToDTO(app);
     }
 
     @DeleteMapping("/{id}")
