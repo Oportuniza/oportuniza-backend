@@ -1,10 +1,5 @@
 package org.oportuniza.oportunizabackend.authentication.controller;
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
-import com.google.api.client.http.javanet.NetHttpTransport;
-import com.google.api.client.json.JsonFactory;
-import com.google.api.client.json.gson.GsonFactory;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
@@ -13,7 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
 import org.oportuniza.oportunizabackend.authentication.dto.*;
 import org.oportuniza.oportunizabackend.authentication.exceptions.EmailAlreadyExistsException;
-import org.oportuniza.oportunizabackend.authentication.utils.JwtUtils;
+import org.oportuniza.oportunizabackend.authentication.utils.AuthenticationUtils;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.oportuniza.oportunizabackend.utils.ErrorResponse;
@@ -23,33 +18,23 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
 
-import java.io.IOException;
-import java.security.GeneralSecurityException;
-import java.util.Collections;
+import java.net.MalformedURLException;
+import java.net.URISyntaxException;
 import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/auth")
 public class AuthenticationController {
     private final AuthenticationManager authenticationManager;
     private final UserService userService;
-    private final GoogleIdTokenVerifier verifier;
 
     public AuthenticationController(@Value("${spring.security.oauth2.client.registration.google.client-id}")String clientId, AuthenticationManager authenticationManager, UserService userService) {
         this.authenticationManager = authenticationManager;
         this.userService = userService;
-        NetHttpTransport transport = new NetHttpTransport();
-        JsonFactory jsonFactory = new GsonFactory();
-        this.verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                .setAudience(Collections.singletonList(clientId))
-                .build();
     }
 
     @PostMapping("/login")
@@ -66,46 +51,19 @@ public class AuthenticationController {
     public LoginResponseDTO authenticateAndGetToken(
             @io.swagger.v3.oas.annotations.parameters.RequestBody(description = "The email and password to login a user") @RequestBody @Valid LoginDTO loginDTO)
             throws AuthenticationException {
-        // Create authentication token
-        var emailPassword = new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password());
-
-        // Authenticate the user
-        var authentication = authenticationManager.authenticate(emailPassword);
+        var authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.email(), loginDTO.password()));
 
         if (!authentication.isAuthenticated()) {
             throw new BadCredentialsException("Authentication failed");
         }
         // If authenticated, generate the JWT token
         SecurityContextHolder.getContext().setAuthentication(authentication);
-
         UserDetails userDetails = (UserDetails) authentication.getPrincipal();
         User user = userService.loadUserByUsername(userDetails.getUsername());
         user.setLastActivityAt(new Date());
         userService.save(user);
 
-        String jwtToken = JwtUtils.generateToken(userDetails);
-
-        List<String> roles = userDetails.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        return new LoginResponseDTO(
-                user.getId(),
-                user.getEmail(),
-                roles,
-                user.getName(),
-                user.getPhoneNumber(),
-                user.getResumeUrl(),
-                user.getResumeName(),
-                user.getPictureUrl(),
-                user.getPictureName(),
-                user.getAverageRating(),
-                user.getReviewCount(),
-                user.getDistrict(),
-                user.getCounty(),
-                user.getLastActivityAt(),
-                user.getCreatedAt(),
-                jwtToken);
+        return AuthenticationUtils.buildLoginResponse(user);
     }
 
     @PostMapping("/register")
@@ -126,97 +84,37 @@ public class AuthenticationController {
             throw new EmailAlreadyExistsException("Email already exists");
         }
         User user = userService.createUser(registerDTO);
-        // Create authentication token
-        var emailPassword = new UsernamePasswordAuthenticationToken(registerDTO.email(), registerDTO.password());
-
         // Authenticate the user
-        var authentication = authenticationManager.authenticate(emailPassword);
+        var authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(registerDTO.email(), registerDTO.password()));
 
         if (!authentication.isAuthenticated()) {
             throw new BadCredentialsException("Authentication failed");
         }
         // If authenticated, generate the JWT token
         SecurityContextHolder.getContext().setAuthentication(authentication);
-        String jwtToken = JwtUtils.generateToken(user);
-
-        List<String> roles = user.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        return new LoginResponseDTO(
-                user.getId(),
-                user.getEmail(),
-                roles,
-                user.getName(),
-                user.getPhoneNumber(),
-                user.getResumeUrl(),
-                user.getResumeName(),
-                user.getPictureUrl(),
-                user.getPictureName(),
-                user.getAverageRating(),
-                user.getReviewCount(),
-                user.getDistrict(),
-                user.getCounty(),
-                user.getLastActivityAt(),
-                user.getCreatedAt(),
-                jwtToken);
+        return AuthenticationUtils.buildLoginResponse(user);
     }
 
     @PostMapping("/google")
-    public LoginResponseDTO googleAuth(@RequestBody LoginOAuth2DTO loginOAuth2DTO) throws GeneralSecurityException, IOException {
-        // Validate idToken with Google OAuth2 API
-        GoogleIdToken.Payload payload = verifyIDToken(loginOAuth2DTO.getIdToken());
+    public LoginResponseDTO googleAuth(@RequestBody GoogleDTO googleDTO) throws MalformedURLException, URISyntaxException, EmailAlreadyExistsException {
 
-        // Process the authenticated user (create session, etc.)
-        String email = payload.getEmail();
-
-        if (!userService.emailExists(email)) {
-            String firstName = (String) payload.get("given_name");
-            String lastName = (String) payload.get("family_name");
-            String pictureUrl = (String) payload.get("picture");
-
-            // Create a new user if not exists
-            User u = new User();
-            u.setAuthProvider("google");
-            u.setEmail(email);
-            u.setName(firstName + " " + lastName);
-            userService.createOrUpdateUser(u);
+        User user;
+        if (!userService.emailExists(googleDTO.email())) {
+            user = userService.createUser(googleDTO);
+        } else {
+            user = userService.loadUserByUsername(googleDTO.email());
+            if (!user.getAuthProvider().equals("google")) {
+                throw new EmailAlreadyExistsException("Email already exists with different provider");
+            }
         }
-
-        // Authenticate user (assuming you have a method to create JWT token)
-        User user = userService.loadUserByUsername(email);
-        String jwtToken = JwtUtils.generateToken(user);
-
-        List<String> roles = user.getAuthorities().stream()
-                .map(GrantedAuthority::getAuthority)
-                .collect(Collectors.toList());
-
-        return new LoginResponseDTO(
-                user.getId(),
-                user.getEmail(),
-                roles,
-                user.getName(),
-                user.getPhoneNumber(),
-                user.getResumeUrl(),
-                user.getResumeName(),
-                user.getPictureUrl(),
-                user.getPictureName(),
-                user.getAverageRating(),
-                user.getReviewCount(),
-                user.getDistrict(),
-                user.getCounty(),
-                user.getLastActivityAt(),
-                user.getCreatedAt(),
-                jwtToken);
-    }
-
-    // Method to verify Google ID token
-    private GoogleIdToken.Payload verifyIDToken(String idToken) throws GeneralSecurityException, IOException {
-        GoogleIdToken idTokenObj = verifier.verify(idToken);
-        if (idTokenObj == null) {
-            throw new BadCredentialsException("Failed to authenticate with Google");
+        // Authenticate the user
+        var authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
+        if (!authentication.isAuthenticated()) {
+            throw new BadCredentialsException("Authentication failed");
         }
-        return idTokenObj.getPayload();
+        // If authenticated, generate the JWT token
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        return AuthenticationUtils.buildLoginResponse(user);
     }
 
 }

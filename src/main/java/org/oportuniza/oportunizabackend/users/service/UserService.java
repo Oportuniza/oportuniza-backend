@@ -6,6 +6,7 @@ import com.google.api.client.http.javanet.NetHttpTransport;
 import com.google.api.client.json.JsonFactory;
 import com.google.api.client.json.jackson2.JacksonFactory;
 import org.oportuniza.oportunizabackend.applications.model.Application;
+import org.oportuniza.oportunizabackend.authentication.dto.GoogleDTO;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
 import org.oportuniza.oportunizabackend.authentication.utils.JwtUtils;
 import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
@@ -28,6 +29,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
@@ -226,6 +229,22 @@ public class UserService implements UserDetailsService {
         user.setAuthProvider("local");
         user.setLastActivityAt(new Date());
 
+        Role role = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
+            Role newRole = new Role("ROLE_USER");
+            return roleRepository.save(newRole);
+        });
+        user.addRole(role);
+
+        return userRepository.save(user);
+    }
+
+    public User createUser(GoogleDTO registerDTO) throws URISyntaxException, MalformedURLException {
+        User user = new User();
+        user.setEmail(registerDTO.email());
+        user.setName(registerDTO.name());
+        user.setAuthProvider("google");
+        user.setLastActivityAt(new Date());
+        user.setPictureUrl(new URI(registerDTO.pictureUrl()).toURL());
         Role role = roleRepository.findByName("ROLE_USER").orElseGet(() -> {
             Role newRole = new Role("ROLE_USER");
             return roleRepository.save(newRole);
