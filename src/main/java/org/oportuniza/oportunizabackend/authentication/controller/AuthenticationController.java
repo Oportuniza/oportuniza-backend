@@ -107,13 +107,6 @@ public class AuthenticationController {
                 throw new EmailAlreadyExistsException("Email already exists with different provider");
             }
         }
-        // Authenticate the user
-        var authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(user.getEmail(), user.getPassword()));
-        if (!authentication.isAuthenticated()) {
-            throw new BadCredentialsException("Authentication failed");
-        }
-        // If authenticated, generate the JWT token
-        SecurityContextHolder.getContext().setAuthentication(authentication);
         return AuthenticationUtils.buildLoginResponse(user);
     }
 
