@@ -76,7 +76,7 @@ public class ReviewController {
             })
     })
     public ResponseEntity<ReviewDTO> updateReview(@RequestBody CreateReviewDTO updateReviewDTO) throws UserNotFoundException {
-        var reviewDTO = reviewService.updateReview(updateReviewDTO.reviewerId(), updateReviewDTO.reviewerId(), updateReviewDTO.rating());
+        var reviewDTO = reviewService.updateReview(updateReviewDTO.reviewerId(), updateReviewDTO.reviewedId(), updateReviewDTO.rating());
         var averageRating = reviewService.getUserAverageRating(updateReviewDTO.reviewedId());
         if (averageRating.isPresent()) {
             userService.updateUserRating(updateReviewDTO.reviewedId(), averageRating.getAsDouble(), false);
