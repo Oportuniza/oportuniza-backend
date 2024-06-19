@@ -162,11 +162,10 @@ public class AuthenticationController {
                 jwtToken);
     }
 
-
     @PostMapping("/google")
     public LoginResponseDTO googleAuth(@RequestBody LoginOAuth2DTO loginOAuth2DTO) throws GeneralSecurityException, IOException {
         // Validate idToken with Google OAuth2 API
-        GoogleIdToken.Payload payload = verifyIDToken(loginOAuth2DTO.token());
+        GoogleIdToken.Payload payload = verifyIDToken(loginOAuth2DTO.getIdToken());
 
         // Process the authenticated user (create session, etc.)
         String email = payload.getEmail();
@@ -177,15 +176,11 @@ public class AuthenticationController {
             String pictureUrl = (String) payload.get("picture");
 
             // Create a new user if not exists
-            RegisterDTO registerDTO = new RegisterDTO(email,
-                    null,
-                    "google",
-                    null,
-                    firstName + " " + lastName,
-                    pictureUrl,
-                    null,
-                    null);
-            userService.createUser(registerDTO);
+            User u = new User();
+            u.setAuthProvider("google");
+            u.setEmail(email);
+            u.setName(firstName + " " + lastName);
+            userService.createOrUpdateUser(u);
         }
 
         // Authenticate user (assuming you have a method to create JWT token)

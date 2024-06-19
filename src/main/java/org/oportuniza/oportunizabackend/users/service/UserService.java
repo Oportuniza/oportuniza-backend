@@ -2,8 +2,12 @@ package org.oportuniza.oportunizabackend.users.service;
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdToken;
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier;
+import com.google.api.client.http.javanet.NetHttpTransport;
+import com.google.api.client.json.JsonFactory;
+import com.google.api.client.json.jackson2.JacksonFactory;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.authentication.dto.RegisterDTO;
+import org.oportuniza.oportunizabackend.authentication.utils.JwtUtils;
 import org.oportuniza.oportunizabackend.offers.dto.OfferDTO;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
@@ -15,6 +19,7 @@ import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.repository.FavoriteOffersRepository;
 import org.oportuniza.oportunizabackend.users.repository.RoleRepository;
 import org.oportuniza.oportunizabackend.users.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -25,6 +30,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.net.URISyntaxException;
 import java.security.GeneralSecurityException;
+import java.util.Collections;
 import java.util.Date;
 
 @Service
@@ -35,33 +41,20 @@ public class UserService implements UserDetailsService {
     private final FavoriteOffersRepository favoriteOffersRepository;
     private final GoogleCloudStorageService googleCloudStorageService;
     private final GoogleIdTokenVerifier verifier;
+    private final JwtUtils jwtUtils;
 
-    public UserService(final UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, FavoriteOffersRepository favoriteOffersRepository, GoogleCloudStorageService googleCloudStorageService, GoogleIdTokenVerifier verifier) {
+    public UserService(@Value("${spring.security.oauth2.client.registration.google.client-id}") String clientId, final UserRepository userRepository, RoleRepository roleRepository, PasswordEncoder passwordEncoder, FavoriteOffersRepository favoriteOffersRepository, GoogleCloudStorageService googleCloudStorageService, JwtUtils jwtUtils) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.favoriteOffersRepository = favoriteOffersRepository;
         this.googleCloudStorageService = googleCloudStorageService;
-        this.verifier = verifier;
-    }
-
-    private UserDTO verifyIDToken(String idToken) {
-        try {
-            GoogleIdToken idTokenObj = verifier.verify(idToken);
-            if (idTokenObj == null) {
-                return null;
-            }
-            GoogleIdToken.Payload payload = idTokenObj.getPayload();
-            String firstName = (String) payload.get("given_name");
-            String lastName = (String) payload.get("family_name");
-            String email = payload.getEmail();
-            String pictureUrl = (String) payload.get("picture");
-
-            // todo :
-            // return new UserDTO(firstName, lastName, email, pictureUrl);
-        } catch (GeneralSecurityException | IOException e) {
-            return null;
-        }
+        NetHttpTransport transport = new NetHttpTransport();
+        JsonFactory jsonFactory = new JacksonFactory();
+        this.verifier = new GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                .setAudience(Collections.singletonList(clientId))
+                .build();
+        this.jwtUtils = jwtUtils;
     }
 
     public void save(User user) {
@@ -240,6 +233,16 @@ public class UserService implements UserDetailsService {
         user.addRole(role);
 
         return userRepository.save(user);
+    }
+
+    public void createOrUpdateUser(User account) {
+        User existingAccount = userRepository.findByEmail(account.getEmail()).orElse(null);
+        if (existingAccount == null) {
+            userRepository.save(account);
+        }
+        existingAccount.setName(account.getName());
+        //existingAccount.setPictureUrl(account.getPictureUrl());
+        userRepository.save(existingAccount);
     }
 
     public UserDTO convertToDTO(User user) {
