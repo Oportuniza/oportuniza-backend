@@ -15,9 +15,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.domain.Specification;
 
-import java.net.MalformedURLException;
-import java.net.URISyntaxException;
-
 @org.springframework.stereotype.Service
 public class OfferService {
     private final OfferRepository offerRepository;

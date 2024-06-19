@@ -88,7 +88,7 @@ public class JobController {
                 job.getCounty(),
                 job.getWorkingModel(),
                 job.getWorkingRegime(),
-                userService.convertToDTO(job.getUser()),
+                UserService.convertToDTO(job.getUser()),
                 "job");
     }
 
@@ -145,7 +145,7 @@ public class JobController {
         var user = userService.getUserById(userId);
         var job = jobService.createJob(jobDTO, user, image);
         userService.addOffer(userId, job);
-        return jobService.convertJobToJobDTO(job);
+        return JobService.convertJobToJobDTO(job);
     }
 
     @DeleteMapping("/{jobId}") // remove job from user's offers and users' favorites

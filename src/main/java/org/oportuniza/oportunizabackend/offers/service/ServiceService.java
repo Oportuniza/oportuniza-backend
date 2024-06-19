@@ -46,7 +46,7 @@ public class ServiceService {
         }
 
         Page<Service> services = serviceRepository.findAll(spec, PageRequest.of(page, size));
-        return services.map(this::convertServiceToServiceDTO);
+        return services.map(ServiceService::convertServiceToServiceDTO);
     }
 
     public Service getService(long serviceId) throws ServiceNotFoundException {
