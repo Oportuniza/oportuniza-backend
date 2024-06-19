@@ -1,6 +1,7 @@
 package org.oportuniza.oportunizabackend.users.service;
 
 import org.oportuniza.oportunizabackend.users.dto.ReviewDTO;
+import org.oportuniza.oportunizabackend.users.exceptions.ReviewNotFoundException;
 import org.oportuniza.oportunizabackend.users.model.Review;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.repository.ReviewRepository;
@@ -27,7 +28,13 @@ public class ReviewService {
         return convertReviewToReviewDTO(review);
     }
 
-    private ReviewDTO convertReviewToReviewDTO(Review review) {
+    public ReviewDTO getReview(long reviewerId, long reviewedId) {
+        var review = reviewRepository.findByReviewerIdAndReviewedId(reviewerId, reviewedId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewerId, reviewedId));
+        return convertReviewToReviewDTO(review);
+    }
+
+    private static ReviewDTO convertReviewToReviewDTO(Review review) {
         return new ReviewDTO(
                 review.getId(),
                 review.getReviewer().getId(),

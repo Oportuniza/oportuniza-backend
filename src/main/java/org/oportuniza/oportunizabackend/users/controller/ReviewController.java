@@ -14,10 +14,7 @@ import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.oportuniza.oportunizabackend.utils.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 
 @RestController
@@ -30,6 +27,21 @@ public class ReviewController {
     public ReviewController(ReviewService reviewService, UserService userService) {
         this.reviewService = reviewService;
         this.userService = userService;
+    }
+
+    @GetMapping("/{reviewerId}/{reviewedId}")
+    @ResponseStatus(HttpStatus.OK)
+    @Operation(summary = "Get review")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Review found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ReviewDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "Review not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
+    })
+    public ReviewDTO getReview(@PathVariable long reviewerId, @PathVariable long reviewedId) {
+        return reviewService.getReview(reviewerId, reviewedId);
     }
 
     @PostMapping
@@ -52,5 +64,4 @@ public class ReviewController {
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(reviewDTO);
     }
-
 }

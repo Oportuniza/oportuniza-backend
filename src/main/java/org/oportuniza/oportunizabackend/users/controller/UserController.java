@@ -83,7 +83,7 @@ public class UserController {
     })
     public UserDTO getUserById(
             @Parameter(description = "The ID of the user to be retrieved") @PathVariable long userId)
-            throws UserNotFoundException, MalformedURLException, URISyntaxException {
+            throws UserNotFoundException {
         return userService.getUser(userId);
     }
 
