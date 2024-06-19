@@ -39,6 +39,7 @@ public class Application {
 
     private String email;
 
+    @Column(columnDefinition = "TEXT")
     private String message;
 
     @Column(name = "phone_number")
