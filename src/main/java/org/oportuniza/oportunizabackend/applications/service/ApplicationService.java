@@ -92,32 +92,11 @@ public class ApplicationService {
         var app = getApplication(id);
         app.setStatus("Accepted");
         applicationRepository.save(app);
-
-        var offer = app.getOffer();
-        if (offer instanceof Job job) {
-            for (Application application : job.getApplications()) {
-                if (application.getId() != id) {
-                    application.setStatus("Rejected");
-                    applicationRepository.save(application);
-                }
-            }
-        }
         return app;
     }
 
     public Application rejectApplication(long id) {
         var app = getApplication(id);
-
-        if (app.getStatus().equals("Accepted")) {
-            var offer = app.getOffer();
-            for (Application application : offer.getApplications()) {
-                if (application.getId() != id) {
-                    application.setStatus("Pending");
-                    applicationRepository.save(application);
-                }
-            }
-        }
-
         app.setStatus("Rejected");
         applicationRepository.save(app);
         return app;
