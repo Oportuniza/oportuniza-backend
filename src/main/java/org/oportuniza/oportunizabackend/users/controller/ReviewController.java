@@ -60,7 +60,26 @@ public class ReviewController {
         var reviewDTO = reviewService.createReview(createReviewDTO.rating(), reviewer, reviewed);
         var averageRating = reviewService.getUserAverageRating(createReviewDTO.reviewedId());
         if (averageRating.isPresent()) {
-            userService.updateUserRating(createReviewDTO.reviewedId(), averageRating.getAsDouble());
+            userService.updateUserRating(createReviewDTO.reviewedId(), averageRating.getAsDouble(), true);
+        }
+        return ResponseEntity.status(HttpStatus.CREATED).body(reviewDTO);
+    }
+
+    @PutMapping
+    @Operation(summary = "Update review")
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Review updated", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ReviewDTO.class))
+            }),
+            @ApiResponse(responseCode = "404", description = "User not found", content = {
+                    @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
+            })
+    })
+    public ResponseEntity<ReviewDTO> updateReview(@RequestBody CreateReviewDTO updateReviewDTO) throws UserNotFoundException {
+        var reviewDTO = reviewService.updateReview(updateReviewDTO.reviewerId(), updateReviewDTO.reviewerId(), updateReviewDTO.rating());
+        var averageRating = reviewService.getUserAverageRating(updateReviewDTO.reviewedId());
+        if (averageRating.isPresent()) {
+            userService.updateUserRating(updateReviewDTO.reviewedId(), averageRating.getAsDouble(), false);
         }
         return ResponseEntity.status(HttpStatus.CREATED).body(reviewDTO);
     }

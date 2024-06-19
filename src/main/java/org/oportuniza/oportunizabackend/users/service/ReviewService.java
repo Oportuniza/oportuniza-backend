@@ -34,6 +34,14 @@ public class ReviewService {
         return convertReviewToReviewDTO(review);
     }
 
+    public ReviewDTO updateReview(long reviewerId, long reviewedId, int rating) {
+        var review = reviewRepository.findByReviewerIdAndReviewedId(reviewerId, reviewedId)
+                .orElseThrow(() -> new ReviewNotFoundException(reviewerId, reviewedId));
+        review.setRating(rating);
+        reviewRepository.save(review);
+        return convertReviewToReviewDTO(review);
+    }
+
     private static ReviewDTO convertReviewToReviewDTO(Review review) {
         return new ReviewDTO(
                 review.getId(),

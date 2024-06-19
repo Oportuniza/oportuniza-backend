@@ -206,10 +206,12 @@ public class UserService implements UserDetailsService {
         userRepository.save(user);
     }
 
-    public void updateUserRating(long userId, double averageRating) throws UserNotFoundException {
+    public void updateUserRating(long userId, double averageRating, boolean newRating) throws UserNotFoundException {
         User user = getUserById(userId);
         user.setAverageRating(averageRating);
-        user.incrementReviewCount();
+        if (newRating) {
+            user.incrementReviewCount();
+        }
         userRepository.save(user);
     }
 
