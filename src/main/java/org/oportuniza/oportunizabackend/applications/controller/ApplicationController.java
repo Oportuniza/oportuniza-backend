@@ -8,17 +8,13 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
-import org.javatuples.Pair;
-import org.javatuples.Triplet;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
-import org.oportuniza.oportunizabackend.applications.dto.GetApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFoundException;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
 import org.oportuniza.oportunizabackend.notifications.services.NotificationService;
 import org.oportuniza.oportunizabackend.offers.exceptions.OfferNotFoundException;
-import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.service.OfferService;
 import org.oportuniza.oportunizabackend.users.exceptions.UserNotFoundException;
 import org.oportuniza.oportunizabackend.users.service.UserService;
@@ -90,26 +86,10 @@ public class ApplicationController {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public GetApplicationDTO getApplicationById(
+    public ApplicationDTO getApplicationById(
             @Parameter(description = "The ID of the application to be retrieved") @PathVariable long id)
             throws ApplicationNotFoundException {
-        var app = applicationService.getApplicationById(id);
-        return new GetApplicationDTO(
-                app.getId(),
-                app.getFirstName(),
-                app.getLastName(),
-                app.getPhoneNumber(),
-                app.getEmail(),
-                app.getMessage(),
-                app.getResumeUrl(),
-                app.getResumeNameInBucket(),
-                app.getResumeFileName(),
-                app.getDocuments().stream().map(doc -> new Triplet<>(doc.getFileName(), doc.getNameInBucket(), doc.getUrl())).toList(),
-                app.getStatus(),
-                app.getCreatedAt(),
-                OfferService.convertToDTO(app.getOffer()),
-                userService.convertToDTO(app.getUser())
-        );
+        return ApplicationService.convertToDTO(applicationService.getApplicationById(id));
     }
 
     @PostMapping("/users/{userId}/offers/{offerId}")
@@ -135,7 +115,7 @@ public class ApplicationController {
         Application createdApplication = applicationService.createApplication(applicationDTO, offer, user, resume, files);
         userService.addApplication(user, createdApplication);
         offerService.addApplication(offer, createdApplication);
-        return applicationService.convertToDTO(createdApplication);
+        return ApplicationService.convertToDTO(createdApplication);
     }
 
     @PatchMapping("/{id}/accept")
@@ -154,7 +134,7 @@ public class ApplicationController {
             throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
         var app = applicationService.acceptApplication(id);
         notificationService.sendNotification("A sua candidatura ao anúncio \"" + app.getOffer().getTitle() + "\" foi aceite.", app.getUser().getId());
-        return applicationService.convertToDTO(app);
+        return ApplicationService.convertToDTO(app);
     }
 
     @PatchMapping("/{id}/reject")
@@ -173,7 +153,7 @@ public class ApplicationController {
             throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
         var app = applicationService.rejectApplication(id);
         notificationService.sendNotification("A sua candidatura ao anúncio \"" + app.getOffer().getTitle() + "\" foi rejeitada.", app.getUser().getId());
-        return applicationService.convertToDTO(app);
+        return ApplicationService.convertToDTO(app);
     }
 
     @DeleteMapping("/{id}")

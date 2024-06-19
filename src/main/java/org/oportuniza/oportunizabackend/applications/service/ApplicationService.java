@@ -1,6 +1,5 @@
 package org.oportuniza.oportunizabackend.applications.service;
 
-import org.javatuples.Pair;
 import org.javatuples.Triplet;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
@@ -10,8 +9,10 @@ import org.oportuniza.oportunizabackend.applications.model.Document;
 import org.oportuniza.oportunizabackend.applications.repository.ApplicationRepository;
 import org.oportuniza.oportunizabackend.offers.model.Job;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
+import org.oportuniza.oportunizabackend.offers.service.OfferService;
 import org.oportuniza.oportunizabackend.users.model.User;
 import org.oportuniza.oportunizabackend.users.service.GoogleCloudStorageService;
+import org.oportuniza.oportunizabackend.users.service.UserService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
@@ -35,23 +36,11 @@ public class ApplicationService {
     }
 
     public Page<ApplicationDTO> getApplicationsByUserId(long userId, int page, int size) {
-        return applicationRepository.findByUserId(userId, PageRequest.of(page, size)).map(a -> {
-            try {
-                return convertToDTO(a);
-            } catch (MalformedURLException | URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        return applicationRepository.findByUserId(userId, PageRequest.of(page, size)).map(ApplicationService::convertToDTO);
     }
 
     public Page<ApplicationDTO> getApplicationsByOfferId(long offerId, int page, int size) {
-        return applicationRepository.findByOfferId(offerId, PageRequest.of(page, size)).map(a -> {
-            try {
-                return convertToDTO(a);
-            } catch (MalformedURLException | URISyntaxException e) {
-                throw new RuntimeException(e);
-            }
-        });
+        return applicationRepository.findByOfferId(offerId, PageRequest.of(page, size)).map(ApplicationService::convertToDTO);
     }
 
     public Application getApplicationById(long id) throws ApplicationNotFoundException {
@@ -129,11 +118,9 @@ public class ApplicationService {
         applicationRepository.deleteById(id);
     }
 
-    public ApplicationDTO convertToDTO(Application application) throws MalformedURLException, URISyntaxException {
+    public static ApplicationDTO convertToDTO(Application application) {
         return new ApplicationDTO(
                 application.getId(),
-                application.getOffer().getId(),
-                application.getUser().getId(),
                 application.getFirstName(),
                 application.getLastName(),
                 application.getPhoneNumber(),
@@ -144,7 +131,9 @@ public class ApplicationService {
                 application.getResumeFileName(),
                 application.getDocuments().stream().map(doc -> new Triplet<>(doc.getFileName(), doc.getNameInBucket(), doc.getUrl())).toList(),
                 application.getStatus(),
-                application.getCreatedAt());
+                application.getCreatedAt(),
+                OfferService.convertToDTO(application.getOffer()),
+                UserService.convertToDTO(application.getUser()));
     }
 
     public Application getApplication(Long id) throws ApplicationNotFoundException {
