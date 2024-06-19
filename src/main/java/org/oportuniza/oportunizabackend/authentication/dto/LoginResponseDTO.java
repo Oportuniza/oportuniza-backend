@@ -12,6 +12,7 @@ public record LoginResponseDTO(
         String phoneNumber,
         URL resumeUrl,
         String resumeName,
+        String resumeFileName,
         URL pictureUrl,
         String pictureName,
         double averageRating,

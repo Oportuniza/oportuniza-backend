@@ -23,6 +23,7 @@ public class AuthenticationUtils {
                 user.getPhoneNumber(),
                 user.getResumeUrl(),
                 user.getResumeName(),
+                user.getResumeFileName(),
                 user.getPictureUrl(),
                 user.getPictureName(),
                 user.getAverageRating(),
