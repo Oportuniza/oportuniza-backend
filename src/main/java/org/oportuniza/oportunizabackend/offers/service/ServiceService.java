@@ -87,7 +87,7 @@ public class ServiceService {
     }
 
 
-    public ServiceDTO convertServiceToServiceDTO(Service service) {
+    public static ServiceDTO convertServiceToServiceDTO(Service service) {
         return new ServiceDTO(
                 service.getId(),
                 service.getTitle(),
@@ -131,6 +131,6 @@ public class ServiceService {
     public Page<ServiceDTO> getUserServices(long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Service> services = serviceRepository.findServicesByUserId(userId, pageable);
-        return services.map(this::convertServiceToServiceDTO);
+        return services.map(ServiceService::convertServiceToServiceDTO);
     }
 }
