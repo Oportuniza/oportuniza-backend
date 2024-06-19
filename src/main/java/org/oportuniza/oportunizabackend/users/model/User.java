@@ -2,6 +2,8 @@ package org.oportuniza.oportunizabackend.users.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 import org.oportuniza.oportunizabackend.applications.model.Application;
@@ -16,6 +18,8 @@ import java.util.*;
 @Data
 @Entity
 @Table(name = "users")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"roles", "applications", "offers", "favoritesOffers", "favoriteUsers"})
 public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

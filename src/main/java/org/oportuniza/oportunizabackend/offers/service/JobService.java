@@ -53,10 +53,10 @@ public class JobService {
         }
 
         Page<Job> jobs = jobRepository.findAll(spec, PageRequest.of(page, size));
-        return jobs.map(this::convertJobToJobDTO);
+        return jobs.map(JobService::convertJobToJobDTO);
     }
 
-    public JobDTO convertJobToJobDTO(Job job) {
+    public static JobDTO convertJobToJobDTO(Job job) {
         return new JobDTO(
                 job.getId(),
                 job.getTitle(),
@@ -148,7 +148,7 @@ public class JobService {
     public Page<JobDTO> getUserJobs(long userId, int page, int size) {
         Pageable pageable = PageRequest.of(page, size);
         Page<Job> jobs = jobRepository.findJobsByUserId(userId, pageable);
-        return jobs.map(this::convertJobToJobDTO);
+        return jobs.map(JobService::convertJobToJobDTO);
     }
 
 }

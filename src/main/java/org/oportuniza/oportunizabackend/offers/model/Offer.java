@@ -2,6 +2,8 @@ package org.oportuniza.oportunizabackend.offers.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
+import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.users.model.User;
@@ -14,6 +16,8 @@ import java.util.List;
 @Entity
 @Table(name = "offers")
 @Inheritance(strategy = InheritanceType.JOINED)
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@ToString(exclude = {"applications", "user"})
 public abstract class Offer {
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE)

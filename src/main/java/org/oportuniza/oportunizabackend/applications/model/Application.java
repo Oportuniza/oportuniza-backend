@@ -2,6 +2,7 @@ package org.oportuniza.oportunizabackend.applications.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 import lombok.ToString;
 import org.hibernate.annotations.CreationTimestamp;
 import org.oportuniza.oportunizabackend.offers.model.Offer;
@@ -15,6 +16,7 @@ import java.util.Set;
 @Data
 @Entity
 @Table(name = "applications")
+@EqualsAndHashCode(onlyExplicitlyIncluded = true)
 @ToString(exclude = {"user","offer"})
 public class Application {
     @Id

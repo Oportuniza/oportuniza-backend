@@ -88,7 +88,7 @@ public class JobController {
                 job.getCounty(),
                 job.getWorkingModel(),
                 job.getWorkingRegime(),
-                userService.convertToDTO(job.getUser()),
+                UserService.convertToDTO(job.getUser()),
                 "job");
     }
 
@@ -145,7 +145,7 @@ public class JobController {
         var user = userService.getUserById(userId);
         var job = jobService.createJob(jobDTO, user, image);
         userService.addOffer(userId, job);
-        return jobService.convertJobToJobDTO(job);
+        return JobService.convertJobToJobDTO(job);
     }
 
     @DeleteMapping("/{jobId}") // remove job from user's offers and users' favorites
@@ -163,9 +163,12 @@ public class JobController {
             @Parameter(description = "The ID of the job to be deleted") @PathVariable long jobId)
             throws JobNotFoundException {
         Job job = jobService.getJobById(jobId);
-        applicationService.removeOfferFromApplications(job);
+        for (var application : job.getApplications()) {
+            userService.removeApplication(application);
+        }
         userService.removeOffer(job);
         userService.removeOfferFromFavorites(job);
+        applicationService.removeOfferApplications(job);
         jobService.deleteJob(job);
     }
 }

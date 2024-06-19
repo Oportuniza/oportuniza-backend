@@ -87,7 +87,7 @@ public class ServiceController {
                 service.isNegotiable(),
                 service.getCreatedAt(),
                 service.getPrice(),
-                userService.convertToDTO(service.getUser()),
+                UserService.convertToDTO(service.getUser()),
                 "service");
     }
 
@@ -144,7 +144,7 @@ public class ServiceController {
         var user = userService.getUserById(userId);
         var service = serviceService.createService(serviceDTO, user, image);
         userService.addOffer(userId, service);
-        return serviceService.convertServiceToServiceDTO(service);
+        return ServiceService.convertServiceToServiceDTO(service);
     }
 
     @DeleteMapping("/{serviceId}") // remove service from user's offers and users' favorites
@@ -162,9 +162,12 @@ public class ServiceController {
             @Parameter(description = "The ID of the service to be deleted") @PathVariable long serviceId)
             throws ServiceNotFoundException {
         Service service = serviceService.getServiceById(serviceId);
-        applicationService.removeOfferFromApplications(service);
+        for (var application : service.getApplications()) {
+            userService.removeApplication(application);
+        }
         userService.removeOffer(service);
         userService.removeOfferFromFavorites(service);
+        applicationService.removeOfferApplications(service);
         serviceService.deleteService(serviceId);
     }
 }

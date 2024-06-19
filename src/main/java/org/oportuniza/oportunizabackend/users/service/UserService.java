@@ -124,7 +124,7 @@ public class UserService implements UserDetailsService {
     }
 
     public Page<UserDTO> getFavoriteUsers(long userId, int page, int size) {
-        return userRepository.findFavoriteUsersByUserId(userId, PageRequest.of(page, size)).map(this::convertToDTO);
+        return userRepository.findFavoriteUsersByUserId(userId, PageRequest.of(page, size)).map(UserService::convertToDTO);
     }
 
     public Page<OfferDTO> getFavoriteOffers(long userId, int page, int size) {
@@ -244,8 +244,8 @@ public class UserService implements UserDetailsService {
         //existingAccount.setPictureUrl(account.getPictureUrl());
         userRepository.save(existingAccount);
     }
-
-    public UserDTO convertToDTO(User user) {
+    
+    public static UserDTO convertToDTO(User user) {
         return new UserDTO(
                 user.getId(),
                 user.getEmail(),
