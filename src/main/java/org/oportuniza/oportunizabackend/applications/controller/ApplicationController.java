@@ -150,7 +150,7 @@ public class ApplicationController {
     })
     public ApplicationDTO acceptApplication(
             @Parameter(description = "The ID of the application to be updated") @PathVariable long id)
-            throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
+            throws ApplicationNotFoundException {
         var app = applicationService.acceptApplication(id);
         notificationService.sendNotification("A sua candidatura ao anúncio \"" + app.getOffer().getTitle() + "\" foi aceite.", app.getUser().getId());
         return ApplicationService.convertToDTO(app);
@@ -169,7 +169,7 @@ public class ApplicationController {
     })
     public ApplicationDTO rejectApplication(
             @Parameter(description = "The ID of the application to be updated") @PathVariable long id)
-            throws ApplicationNotFoundException, MalformedURLException, URISyntaxException {
+            throws ApplicationNotFoundException {
         var app = applicationService.rejectApplication(id);
         notificationService.sendNotification("A sua candidatura ao anúncio \"" + app.getOffer().getTitle() + "\" foi rejeitada.", app.getUser().getId());
         return ApplicationService.convertToDTO(app);
