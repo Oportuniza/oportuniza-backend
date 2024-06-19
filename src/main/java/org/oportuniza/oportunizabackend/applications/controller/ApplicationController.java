@@ -8,8 +8,10 @@ import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import jakarta.validation.Valid;
+import org.javatuples.Triplet;
 import org.oportuniza.oportunizabackend.applications.dto.ApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.dto.CreateApplicationDTO;
+import org.oportuniza.oportunizabackend.applications.dto.GetApplicationDTO;
 import org.oportuniza.oportunizabackend.applications.exceptions.ApplicationNotFoundException;
 import org.oportuniza.oportunizabackend.applications.model.Application;
 import org.oportuniza.oportunizabackend.applications.service.ApplicationService;
@@ -86,10 +88,27 @@ public class ApplicationController {
                     @Content(mediaType = "application/json;charset=UTF-8", schema = @Schema(implementation = ErrorResponse.class))
             })
     })
-    public ApplicationDTO getApplicationById(
+    public GetApplicationDTO getApplicationById(
             @Parameter(description = "The ID of the application to be retrieved") @PathVariable long id)
             throws ApplicationNotFoundException {
-        return ApplicationService.convertToDTO(applicationService.getApplicationById(id));
+        var app = applicationService.getApplicationById(id);
+        return new GetApplicationDTO(
+                app.getId(),
+                app.getFirstName(),
+                app.getLastName(),
+                app.getPhoneNumber(),
+                app.getEmail(),
+                app.getMessage(),
+                app.getResumeUrl(),
+                app.getResumeNameInBucket(),
+                app.getResumeFileName(),
+                app.getDocuments().stream().map(doc -> new Triplet<>(doc.getFileName(), doc.getNameInBucket(), doc.getUrl())).toList(),
+                app.getStatus(),
+                app.getCreatedAt(),
+                OfferService.convertToDTO(app.getOffer()),
+                UserService.convertToDTO(app.getUser()),
+                UserService.convertToDTO(app.getOffer().getUser())
+        );
     }
 
     @PostMapping("/users/{userId}/offers/{offerId}")
